@@ -15,6 +15,7 @@
         <destDirectory>${project.basedir}/dest</destDirectory>
         <docsDirectory>${project.basedir}/doc</docsDirectory>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
+        <dataDirectory>${project.basedir}/data</dataDirectory>
         <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
     </properties>
 
@@ -46,12 +47,26 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <directory>${buildDirectory}</directory>
         <sourceDirectory>${sourceDirectory}</sourceDirectory>
         <testSourceDirectory>${testSourceDirectory}</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>${dataDirectory}</directory>
+            </resource>
+            <resource>
+                <directory>${sourceDirectory}/cz/vutfit/umlapp/view</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
