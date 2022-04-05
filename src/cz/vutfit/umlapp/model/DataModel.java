@@ -29,6 +29,7 @@ public class DataModel {
      * Undo the last command
      */
     public void undo() {
+        if (commandHistory.isEmpty()) return;
         ICommand command = commandHistory.remove(commandHistory.size() - 1);
         command.undo(data);
     }

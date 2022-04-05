@@ -1,20 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            xmlns="http://javafx.com/javafx"
-            fx:controller="cz.vutfit.umlapp.view.main.MainController"
-            prefHeight="400.0" prefWidth="600.0">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           xmlns="http://javafx.com/javafx"
+           fx:controller="cz.vutfit.umlapp.view.main.MainController"
+           prefHeight="600.0" prefWidth="1000.0">
 
-    <VBox>
-        <Label fx:id="label"/>
-        <TextField fx:id="textField"/>
-        <Button text="Save" onAction="#handleSave"/>
-        <Button text="Close" onAction="#handleClose"/>
-    </VBox>
+    <SplitPane dividerPositions="0.3">
+        <VBox>
+            <HBox styleClass="box-actions">
+                <Button fx:id="closeButton" styleClass="icon-button" onAction="#handleClose">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@ic_twotone-home.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Home (close file)"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="saveButton" styleClass="icon-button" onAction="#handleSave">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@ic_twotone-save.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Save"/>
+                    </tooltip>
+                </Button>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button fx:id="undoButton" styleClass="icon-button" onAction="#handleUndo">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@ic_baseline-undo.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Undo"/>
+                    </tooltip>
+                </Button>
+            </HBox>
+            <HBox styleClass="box-heading">
+                <Label fx:id="label"/>
+            </HBox>
+        </VBox>
+        <VBox>
+            <TextArea fx:id="textArea" styleClass="textArea" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </SplitPane>
 
-</AnchorPane>
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+</StackPane>

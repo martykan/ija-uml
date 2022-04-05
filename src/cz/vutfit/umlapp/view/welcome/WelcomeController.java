@@ -31,6 +31,7 @@ public class WelcomeController implements IController {
         FileChooser fileChooser = new FileChooser();
         try {
             File selectedFile = fileChooser.showOpenDialog(new Stage());
+            if (selectedFile == null) return;
             dataModel.openFile(selectedFile);
             this.viewHandler.openView("Main");
         } catch (Exception exception) {
@@ -40,8 +41,9 @@ public class WelcomeController implements IController {
 
     public void handleNewFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        File selectedFile = fileChooser.showSaveDialog(new Stage());
         try {
+            File selectedFile = fileChooser.showSaveDialog(new Stage());
+            if (selectedFile == null) return;
             dataModel.newFile(selectedFile);
             this.viewHandler.openView("Main");
         } catch (Exception exception) {

@@ -38,3 +38,8 @@
     -fx-min-width: 300px;
     -fx-border-radius: 4px;
 }
+
+.button-primary:hover,
+.button-secondary:hover {
+    -fx-opacity: 0.8;
+}
