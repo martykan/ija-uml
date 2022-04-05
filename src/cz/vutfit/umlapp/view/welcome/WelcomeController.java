@@ -24,8 +24,7 @@ public class WelcomeController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
 
-        this.viewHandler.setTitle("IJA UML App - Welcome");
-        this.label.setText("Select an option");
+        this.viewHandler.setTitle("IJA UML App");
     }
 
     public void handleOpenFile(ActionEvent actionEvent) {
