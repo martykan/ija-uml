@@ -1,7 +1,6 @@
 package cz.vutfit.umlapp.view;
 
-import cz.vutfit.umlapp.view.welcome.WelcomeController;
-import cz.vutfit.umlapp.viewmodel.ViewModelFactory;
+import cz.vutfit.umlapp.model.ModelFactory;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,11 +10,11 @@ import java.io.IOException;
 
 public class ViewHandler {
     private final Stage stage;
-    private final ViewModelFactory viewModelFactory;
+    private final ModelFactory modelFactory;
 
-    public ViewHandler(Stage stage, ViewModelFactory viewModelFactory) {
+    public ViewHandler(Stage stage, ModelFactory modelFactory) {
         this.stage = stage;
-        this.viewModelFactory = viewModelFactory;
+        this.modelFactory = modelFactory;
     }
 
     public void start() throws Exception {
@@ -27,14 +26,15 @@ public class ViewHandler {
         loader.setLocation(getClass().getResource("/" + name.toLowerCase() + "/" + name + "View.fxml"));
         Parent root = loader.load();
 
-        if ("Welcome".equals(name)) {
-            WelcomeController view = loader.getController();
-            view.init(this.viewModelFactory.getWelcomeViewModel());
-            this.stage.setTitle("IJA UML App - Welcome");
-        }
+        IController controller = loader.getController();
+        controller.init(this.modelFactory, this);
 
         Scene scene = new Scene(root);
         this.stage.setScene(scene);
         this.stage.show();
+    }
+
+    public void setTitle(String title) {
+        this.stage.setTitle(title);
     }
 }

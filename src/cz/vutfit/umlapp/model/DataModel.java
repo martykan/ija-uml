@@ -73,4 +73,8 @@ public class DataModel {
     public UMLFileData getData() {
         return data;
     }
+
+    public String getFileName() {
+        return this.file.getName();
+    }
 }
