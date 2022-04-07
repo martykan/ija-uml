@@ -47,6 +47,7 @@
             <HBox styleClass="box-heading">
                 <Label fx:id="label"/>
             </HBox>
+            <Button text="Add Class" onAction="#handleAddClass"/>
         </VBox>
         <VBox>
             <TextArea fx:id="textArea" styleClass="textArea" VBox.vgrow="ALWAYS"/>

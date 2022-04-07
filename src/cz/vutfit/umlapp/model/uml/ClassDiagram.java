@@ -1,22 +1,45 @@
 package cz.vutfit.umlapp.model.uml;
 
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateAttributeNameException;
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateLinkedSequenceDiagramIDException;
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
+
 import java.util.ArrayList;
 
 public class ClassDiagram {
-    public int id;
+    public Integer id;
     public String name;
     public ArrayList<Attributes> attribs;
     public ArrayList<Methods> methods;
     public ArrayList<ClassDiagramSequences> seqdigs;
 
+    public ClassDiagram() {
+    }
+
+    public ClassDiagram(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+        this.attribs = new ArrayList<>();
+        this.methods = new ArrayList<>();
+        this.seqdigs = new ArrayList<>();
+    }
+
     // getters
-    public int getID() { return this.id; }
+    public int getID() {
+        return this.id;
+    }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
-    public ArrayList<Attributes> getAttribs() { return this.attribs; }
+    public ArrayList<Attributes> getAttribs() {
+        return this.attribs;
+    }
 
-    public ArrayList<Methods> getMethods() { return this.methods; }
+    public ArrayList<Methods> getMethods() {
+        return this.methods;
+    }
 
     public ArrayList<ClassDiagramSequences> getSeqdigs() { return this.seqdigs; }
 
@@ -32,14 +55,13 @@ public class ClassDiagram {
         return null;
     }
 
-    public void addAttribute(String name, attrib_visibility visibility) {
+    public void addAttribute(String name, EAttribVisibility visibility) throws DuplicateAttributeNameException {
         Attributes x = new Attributes();
         x.setAttribute(name, visibility);
 
         for (Attributes a : this.attribs) { // do not allow duplicates - same "name"'s
             if (a.getName().equals(x.getName())) {
-                throw new Exception("DuplicateAttributeName"); // TODO -> not sure what to do
-                return;
+                throw new DuplicateAttributeNameException();
             }
         }
 
@@ -65,14 +87,13 @@ public class ClassDiagram {
         return null;
     }
 
-    public void addMethod(String name, attrib_visibility visibility) {
+    public void addMethod(String name, EAttribVisibility visibility) throws DuplicateMethodNameException {
         Methods x = new Methods();
         x.setMethod(name, visibility);
 
         for (Methods a : this.methods) { // do not allow duplicates - same "name"'s
             if (a.getName().equals(x.getName())) {
-                throw new Exception("DuplicateMethodName"); // TODO -> not sure what to do
-                return;
+                throw new DuplicateMethodNameException();
             }
         }
 
@@ -98,14 +119,13 @@ public class ClassDiagram {
         return null;
     }
 
-    public void addLinkedSequence(int id) {
+    public void addLinkedSequence(int id) throws DuplicateLinkedSequenceDiagramIDException {
         ClassDiagramSequences x = new ClassDiagramSequences();
         x.setID(id);
 
         for (ClassDiagramSequences a : this.seqdigs) { // do not allow duplicates - same "id"'s
             if (a.getID() == id) {
-                throw new Exception("DuplicateLinkedSequenceDiagramID"); // TODO -> not sure what to do
-                return;
+                throw new DuplicateLinkedSequenceDiagramIDException();
             }
         }
 
@@ -121,14 +141,4 @@ public class ClassDiagram {
         }
         return false;
     }
-
-    // other
-    public void classInit(int id, String name) {
-        this.id = id;
-        this.name = name;
-        this.attribs = new ArrayList<Attributes>();
-        this.methods = new ArrayList<Methods>();
-        this.seqdigs = new ArrayList<ClassDiagramSequences>();
-    }
-
 }

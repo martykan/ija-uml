@@ -3,22 +3,30 @@ package cz.vutfit.umlapp.model.uml;
 import java.util.ArrayList;
 
 public class UMLFileData {
-    public ArrayList<ClassDiagram> class_diagram;
-    public ArrayList<SequenceDiagram> sequence_diagram;
-    public ArrayList<Relationships> relationships;
+    public final ArrayList<ClassDiagram> classDiagram = new ArrayList<>();
+    public final ArrayList<SequenceDiagram> sequenceDiagrams = new ArrayList<>();
+    public final ArrayList<Relationships> relationships = new ArrayList<>();
 
     // getters -> vraci listy
-    public ArrayList<ClassDiagram> getClasses() { return this.class_diagram; }
+    public ArrayList<ClassDiagram> getClasses() {
+        return this.classDiagram;
+    }
 
-    public ArrayList<SequenceDiagram> getSequenceDiagrams() { return this.sequence_diagram; }
+    public ArrayList<SequenceDiagram> getSequenceDiagrams() {
+        return this.sequenceDiagrams;
+    }
 
-    public ArrayList<Relationships> getRelationships() { return this.relationships; }
+    public ArrayList<Relationships> getRelationships() {
+        return this.relationships;
+    }
 
     // prace s listem trid v class diagramu
-    public ClassDiagram getClassByIndex(int index) { return (this.class_diagram).get(index); }
+    public ClassDiagram getClassByIndex(int index) {
+        return (this.classDiagram).get(index);
+    }
 
     public ClassDiagram getClassByID(int id) {
-        for (ClassDiagram c : this.class_diagram) {
+        for (ClassDiagram c : this.classDiagram) {
             if (c.getID() == id) {
                 return c;
             }
@@ -26,29 +34,29 @@ public class UMLFileData {
         return null;
     }
 
-    public void addClass(String name) {
+    public int addClass(String name) {
         int id = 0;
-        if (id != (this.class_diagram).size()) { // there are classes in list
+        if (id != (this.classDiagram).size()) { // there are classes in list
             int i = 0;
-            for (ClassDiagram c : this.class_diagram) {  // check if classes ID's are sorted, linear, start with 0, end with size-1
+            for (ClassDiagram c : this.classDiagram) {  // check if classes ID's are sorted, linear, start with 0, end with size-1
                 if (i != c.getID()) { // condition up is not true
                     id = i;
                     break;
                 }
                 i++;
             }
-            if (id == 0) id = (this.class_diagram).size(); // all sorted
+            if (id == 0) id = (this.classDiagram).size(); // all sorted
         }
 
-        ClassDiagram x = new ClassDiagram();
-        x.classInit(id, name);
-        (this.class_diagram).add(id, x);
+        ClassDiagram x = new ClassDiagram(id, name);
+        (this.classDiagram).add(id, x);
+        return id;
     }
 
     public boolean removeClass(int id) {
-        for (ClassDiagram c : this.class_diagram) {
+        for (ClassDiagram c : this.classDiagram) {
             if (c.getID() == id) {
-                (this.class_diagram).remove(id);
+                (this.classDiagram).remove(id);
                 return true;
             }
         }
@@ -56,10 +64,12 @@ public class UMLFileData {
     }
 
     // prace s listem sekvencich diagramu !! TODO !!
-    public SequenceDiagram getSequenceByIndex(int index) { return (this.sequence_diagram).get(index); }
+    public SequenceDiagram getSequenceByIndex(int index) {
+        return (this.sequenceDiagrams).get(index);
+    }
 
     public SequenceDiagram getSequenceByID(int id) {
-        for (SequenceDiagram c : this.sequence_diagram) {
+        for (SequenceDiagram c : this.sequenceDiagrams) {
             if (c.getID() == id) {
                 return c;
             }
@@ -69,27 +79,26 @@ public class UMLFileData {
 
     public void addSequence(String name) {
         int id = 0;
-        if (id != (this.sequence_diagram).size()) {
+        if (id != (this.sequenceDiagrams).size()) {
             int i = 0;
-            for (SequenceDiagram c : this.sequence_diagram) {
+            for (SequenceDiagram c : this.sequenceDiagrams) {
                 if (i != c.getID()) {
                     id = i;
                     break;
                 }
                 i++;
             }
-            if (id == 0) id = (this.sequence_diagram).size();
+            if (id == 0) id = (this.sequenceDiagrams).size();
         }
 
-        SequenceDiagram x = new SequenceDiagram();
-        x.sequenceInit(id, name);
-        (this.sequence_diagram).add(id, x);
+        SequenceDiagram x = new SequenceDiagram(id, name);
+        (this.sequenceDiagrams).add(id, x);
     }
 
     public boolean removeSequence(int id) {
-        for (SequenceDiagram c : this.sequence_diagram) {
+        for (SequenceDiagram c : this.sequenceDiagrams) {
             if (c.getID() == id) {
-                (this.sequence_diagram).remove(id);
+                (this.sequenceDiagrams).remove(id);
                 return true;
             }
         }
@@ -109,7 +118,7 @@ public class UMLFileData {
         return null;
     }
 
-    public void addRelation(int from_id, int to_id, relation_type type) {
+    public void addRelation(int fromId, int toId, ERelationType type) {
         int id = 0;
         if (id != (this.relationships).size()) {
             int i = 0;
@@ -123,8 +132,7 @@ public class UMLFileData {
             if (id == 0) id = (this.relationships).size();
         }
 
-        Relationships x = new Relationships();
-        x.relationshipInit(id, from_id, to_id, type);
+        Relationships x = new Relationships(id, fromId, toId, type);
         (this.relationships).add(id, x);
     }
 
@@ -136,11 +144,6 @@ public class UMLFileData {
             }
         }
         return false;
-    }
-
-    // needed for random test ... remove later!
-    public String getSomeData() {
-        return (this.relationships).get(0).getFromDesc();
     }
 }
 

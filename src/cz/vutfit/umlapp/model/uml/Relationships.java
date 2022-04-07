@@ -1,7 +1,6 @@
 package cz.vutfit.umlapp.model.uml;
-import java.util.ArrayList;
 
-enum relation_type {
+enum ERelationType {
     ASSOCIATION,
     AGGREGATION,
     COMPOSITION,
@@ -9,30 +8,40 @@ enum relation_type {
 }
 
 public class Relationships {
-    public int id;
-    public int from_id;
-    public int to_id;
-    public relation_type relationship;
-    public String from_desc;
-    public String to_desc;
+    public Integer id;
+    public Integer fromId;
+    public Integer toId;
+    public ERelationType relationship;
+    public String fromDesc;
+    public String toDesc;
 
-    // getters
-    public int getID () { return this.id; }
-
-    public String getFromDesc() { return this.from_desc; }
-
-
-    // other
-    public void relationshipInit(int id, int from_id, int to_id, relation_type type) {
-        this.id = id;
-        this.from_id = from_id;
-        this.to_id = to_id;
-        this.relationship = type;
-        this.from_desc = null;
-        this.to_desc = null;
+    // constructor
+    public Relationships() {
     }
 
-    public void setFromDesc(String text) { this.from_desc = text; }
+    public Relationships(Integer id, Integer fromId, Integer toId, ERelationType type) {
+        this.id = id;
+        this.fromId = fromId;
+        this.toId = toId;
+        this.relationship = type;
+        this.fromDesc = null;
+        this.toDesc = null;
+    }
 
-    public void setToDesc(String text) { this.to_desc = text; }
+    // getters
+    public int getID() {
+        return this.id;
+    }
+
+    public String getFromDesc() {
+        return this.fromDesc;
+    }
+
+    public void setFromDesc(String text) {
+        this.fromDesc = text;
+    }
+
+    public void setToDesc(String text) {
+        this.toDesc = text;
+    }
 }
