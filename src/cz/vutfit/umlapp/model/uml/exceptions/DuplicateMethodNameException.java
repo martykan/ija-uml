@@ -1,8 +1,7 @@
 package cz.vutfit.umlapp.model.uml.exceptions;
 
-public class DuplicateMethodNameException extends Throwable {
-    @Override
-    public String getMessage() {
-        return "Duplicate method name";
+public class DuplicateMethodNameException extends Exception {
+    public DuplicateMethodNameException() {
+        super("Duplicate method name");
     }
 }

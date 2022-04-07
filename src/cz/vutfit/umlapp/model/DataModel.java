@@ -19,7 +19,7 @@ public class DataModel {
      *
      * @param command Command to be executed
      */
-    public void executeCommand(ICommand command) {
+    public void executeCommand(ICommand command) throws Exception {
         if (data == null) return;
         command.execute(data);
         commandHistory.add(command);
@@ -28,7 +28,7 @@ public class DataModel {
     /**
      * Undo the last command
      */
-    public void undo() {
+    public void undo() throws Exception {
         if (commandHistory.isEmpty()) return;
         ICommand command = commandHistory.remove(commandHistory.size() - 1);
         command.undo(data);

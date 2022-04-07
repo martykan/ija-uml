@@ -75,7 +75,7 @@ public class ClassDiagram {
                 return true;
             }
         }
-        return false;
+        return false; // TODO maybe this should throw instead?
     }
 
     // working with method list

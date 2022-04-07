@@ -44,10 +44,16 @@
                     </tooltip>
                 </Button>
             </HBox>
-            <HBox styleClass="box-heading">
-                <Label fx:id="label"/>
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Classes"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
             </HBox>
-            <Button text="Add Class" onAction="#handleAddClass"/>
+            <TreeView fx:id="treeView" maxHeight="300"/>
+            <HBox fx:id="boxClassOptions" visible="false">
+                <Button text="Delete Class"/>
+                <Button text="Add Class Method" onAction="#handleAddClassMethod"/>
+            </HBox>
         </VBox>
         <VBox>
             <TextArea fx:id="textArea" styleClass="textArea" VBox.vgrow="ALWAYS"/>

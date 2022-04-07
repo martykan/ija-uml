@@ -1,8 +1,7 @@
 package cz.vutfit.umlapp.model.uml.exceptions;
 
-public class DuplicateAttributeNameException extends Throwable {
-    @Override
-    public String getMessage() {
-        return "Duplicate attribute name";
+public class DuplicateAttributeNameException extends Exception {
+    public DuplicateAttributeNameException() {
+        super("Duplicate attribute name");
     }
 }

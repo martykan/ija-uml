@@ -1,12 +1,5 @@
 package cz.vutfit.umlapp.model.uml;
 
-enum EAttribVisibility {
-    PUBLIC,     // +
-    PRIVATE,    // -
-    PROTECTED,  // #
-    PACKAGE     // ~
-}
-
 public class Attributes {
     public String name;
     public EAttribVisibility visibility;
@@ -18,6 +11,10 @@ public class Attributes {
 
     public EAttribVisibility getVisibility() {
         return this.visibility;
+    }
+
+    public String getNameWithPrefix() {
+        return this.getVisibility().getPrefix() + this.getName();
     }
 
     // setters
