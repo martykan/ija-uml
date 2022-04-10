@@ -55,9 +55,10 @@
                 <Button text="Add Class Method" onAction="#handleAddClassMethod"/>
             </HBox>
         </VBox>
-        <VBox>
-            <TextArea fx:id="textArea" styleClass="textArea" VBox.vgrow="ALWAYS"/>
-        </VBox>
+        <ScrollPane fx:id="scrollPane" vvalue="0.5" hvalue="0.5">
+            <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000">
+            </AnchorPane>
+        </ScrollPane>
     </SplitPane>
 
     <stylesheets>

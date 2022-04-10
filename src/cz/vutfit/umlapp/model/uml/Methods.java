@@ -13,6 +13,10 @@ public class Methods {
         return this.visibility;
     }
 
+    public String getNameWithPrefix() {
+        return this.getVisibility().getPrefix() + this.getName();
+    }
+
     // setters
     public void setName(String name) {
         this.name = name;

@@ -4,11 +4,13 @@ import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.AddClassCommand;
 import cz.vutfit.umlapp.model.commands.AddClassMethodCommand;
+import cz.vutfit.umlapp.model.commands.DragClassCommand;
 import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
+import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -17,10 +19,12 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.transform.Scale;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements IController {
     @FXML
@@ -30,11 +34,13 @@ public class MainController implements IController {
     @FXML
     public Button undoButton;
     @FXML
-    public TextArea textArea;
-    @FXML
     public TreeView<String> treeView;
     @FXML
     public HBox boxClassOptions;
+    @FXML
+    public ScrollPane scrollPane;
+    @FXML
+    public Pane anchorScrollPane;
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
@@ -68,6 +74,37 @@ public class MainController implements IController {
         }
     }
 
+    private void initDragDrop() {
+        AtomicReference<Double> totalZoom = new AtomicReference<>(1.0);
+        anchorScrollPane.setOnZoom(event -> {
+            Scale scale = new Scale();
+            scale.setPivotX(event.getX());
+            scale.setPivotY(event.getY());
+            double newZoom = totalZoom.get() * event.getZoomFactor();
+            if (newZoom <= 2 && newZoom >= 0.1) {
+                totalZoom.set(newZoom);
+                scale.setX(event.getZoomFactor());
+                scale.setY(event.getZoomFactor());
+                anchorScrollPane.getTransforms().add(scale);
+            }
+            event.consume();
+        });
+        anchorScrollPane.getChildren().clear();
+        for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
+            DraggableUMLClassView node = new DraggableUMLClassView(classDiagram, totalZoom);
+            node.setOnMouseReleased(event -> {
+                if (node.getTranslateX() == classDiagram.positionX && node.getTranslateY() == classDiagram.positionY)
+                    return;
+                try {
+                    this.dataModel.executeCommand(new DragClassCommand(classDiagram.getID(), node.getTranslateX(), node.getTranslateY()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            anchorScrollPane.getChildren().add(node);
+        }
+    }
+
     public void handleSave(ActionEvent actionEvent) {
         try {
             this.dataModel.saveFile();
@@ -98,9 +135,6 @@ public class MainController implements IController {
     private void updateView() {
         viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
-        this.textArea.setEditable(false);
-        this.textArea.setText(this.dataModel.getData().getClasses().stream().map(it -> it.name).collect(Collectors.joining("\n")));
-
         TreeItem<String> dummyRoot = new TreeItem<>();
         for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
             TreeItem<String> item = new TreeItem<>(classDiagram.getName());
@@ -111,6 +145,8 @@ public class MainController implements IController {
         }
         this.treeView.setShowRoot(false);
         this.treeView.setRoot(dummyRoot);
+
+        this.initDragDrop();
 
         boxClassOptions.setVisible(this.selectedClass != null);
     }

@@ -12,6 +12,8 @@ public class ClassDiagram {
     public ArrayList<Attributes> attribs;
     public ArrayList<Methods> methods;
     public ArrayList<ClassDiagramSequences> seqdigs;
+    public Double positionX = 5000.0;
+    public Double positionY = 5000.0;
 
     public ClassDiagram() {
     }

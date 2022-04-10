@@ -32,8 +32,41 @@
     -fx-padding: 16px;
 }
 
-.textArea {
+#anchorScrollPane {
+    -fx-background-image: url(checkerboard.png);
+}
+
+.class-box {
+    -fx-border-style: solid;
+    -fx-border-width: 2px;
+    -fx-border-color: #1A365D;
     -fx-background-color: white;
+    -fx-pref-width: 200px;
+}
+
+.class-box-title {
+    -fx-background-color: #1A365D;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+    -fx-pref-width: 200px;
+}
+
+.class-box-attribs {
+    -fx-padding: 10px;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-color: #1A365D;
+    -fx-pref-width: 200px;
+}
+
+.class-box-methods {
+    -fx-padding: 10px;
+    -fx-pref-width: 200px;
+}
+
+.class-box-empty {
+    -fx-padding: 0px;
+    -fx-pref-height: 5px;
 }
 
 /* Split pane styling */
@@ -70,7 +103,6 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0.0em;
     -fx-padding: 0.0 10.0 0.0 0.0;
-
 }
 
 .scroll-bar .increment-arrow,
