@@ -19,4 +19,18 @@ public enum EAttribVisibility {
         }
         return "";
     }
+
+    public String getVisiblityString() {
+        switch (this) {
+            case PUBLIC:
+                return "Public";
+            case PRIVATE:
+                return "Private";
+            case PROTECTED:
+                return "Protected";
+            case PACKAGE:
+                return "Package";
+        }
+        return "";
+    }
 }

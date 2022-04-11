@@ -36,6 +36,7 @@ public class WelcomeController implements IController {
             this.viewHandler.openView("Main");
         } catch (Exception exception) {
             this.showErrorMessage(exception.getLocalizedMessage());
+            System.out.println(exception.toString());
             exception.printStackTrace();
         }
     }

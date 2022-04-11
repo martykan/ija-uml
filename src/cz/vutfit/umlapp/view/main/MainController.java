@@ -20,13 +20,17 @@ import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Scale;
 
 import java.lang.reflect.Array;
@@ -55,6 +59,14 @@ public class MainController implements IController {
     public ScrollPane scrollPane;
     @FXML
     public Pane anchorScrollPane;
+    @FXML
+    public Label propertyFirst;
+    @FXML
+    public Label propertyFirstText;
+    @FXML
+    public VBox main_vbox;
+    @FXML
+    public HBox propertyFirstLine;
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
@@ -65,6 +77,7 @@ public class MainController implements IController {
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedClass = newItem.getValue();
+            handleProperties(newItem);
         } else {
             this.selectedClass = null;
         }
@@ -121,8 +134,6 @@ public class MainController implements IController {
         }
     }
 
-
-
     public void handleSave(ActionEvent actionEvent) {
         try {
             this.dataModel.saveFile();
@@ -144,7 +155,6 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
-
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);
@@ -162,6 +172,9 @@ public class MainController implements IController {
         this.classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
         this.classes.showTreeItem();
         this.classes.rootViewUpdate();
+
+        /** Properties **/
+
 
         this.initDragDrop();
 
@@ -208,7 +221,7 @@ public class MainController implements IController {
                 ArrayList<Attributes> a = myclass.getAttribs();
                 ArrayList<Methods> m = myclass.getMethods();
                 String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] x = currentOption.split("[+]", 2)[1].split("[(]", 2);
+                String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
                 if (x.length > 1 && x[1].equals(")")) {
                     for (Methods y : m) {
                         if (y.getName().equals(x[0])) {
@@ -295,5 +308,62 @@ public class MainController implements IController {
 
     public void handleAddRelation(ActionEvent actionEvent) {
         return;
+    }
+
+    public void handleProperties(TreeItem<String> selected) {
+        String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+        ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+        if (myclass == null) { // currently not selected class
+            id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+            myclass = this.dataModel.getData().getClassByName(id);
+            String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
+            String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
+            if (x.length > 1 && x[1].equals(")")) {     
+                resetProperties("Method", x[0]);
+                addPropertyLine("Class", String.valueOf(myclass.getName()));
+                addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
+            } else {
+                resetProperties("Attribute", x[0]);
+                addPropertyLine("Class", String.valueOf(myclass.getName()));
+                addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
+            }
+        } else {
+            resetProperties("Class", myclass.getName());
+            addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
+            addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
+            addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
+        }
+    }
+
+    public void addPropertyLine(String property, String text) {
+        HBox line = new HBox();
+        Label property_lab = new Label(property);
+        Label text_lab = new Label(text);
+
+        line.getStyleClass().add("box-property-line");
+        line.setId("propLine");
+        line.setAlignment(Pos.CENTER);
+
+        property_lab.getStyleClass().add("property-name");
+        property_lab.setAlignment(Pos.BASELINE_LEFT);
+        property_lab.setTextAlignment(TextAlignment.LEFT);
+        property_lab.prefWidth(135);
+        text_lab.setAlignment(Pos.TOP_RIGHT);
+        text_lab.setTextAlignment(TextAlignment.RIGHT);
+        text_lab.prefWidth(135);
+
+        line.getChildren().add(property_lab);
+        line.getChildren().add(text_lab);
+        main_vbox.getChildren().add(line);
+    }
+
+    public void resetProperties(String firstProp, String firstText) {
+        propertyFirst.setText(firstProp);
+        propertyFirstText.setText(firstText);
+        String id = main_vbox.getChildren().get(main_vbox.getChildren().size()-1).getId();
+        while (!id.equals("propertyFirstLine")) {
+            main_vbox.getChildren().remove(main_vbox.getChildren().size()-1);
+            id = main_vbox.getChildren().get(main_vbox.getChildren().size()-1).getId();
+        }
     }
 }
