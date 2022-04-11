@@ -1,13 +1,14 @@
 package cz.vutfit.umlapp.view.main;
 
-import com.sun.source.tree.Tree;
-import javafx.scene.control.*;
+import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.Methods;
-import cz.vutfit.umlapp.model.DataModel;
-import java.util.ArrayList;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class TreeViewItemModel {
     public TreeView<String> view;
@@ -70,6 +71,21 @@ public class TreeViewItemModel {
     }
 
     public void rootViewUpdate() {
+        // Remember expanded items
+        if (this.view.getRoot() != null && this.root != null) {
+            Set<String> previousExpanded = new HashSet<>();
+            this.view.getRoot().getChildren().forEach(child -> {
+                if (child.isExpanded()) {
+                    previousExpanded.add(child.getValue());
+                }
+            });
+            root.getChildren().forEach(child -> {
+                if (previousExpanded.contains(child.getValue())) {
+                    child.setExpanded(true);
+                }
+            });
+        }
+
         this.view.setShowRoot(false);
         this.view.setRoot(root);
     }
