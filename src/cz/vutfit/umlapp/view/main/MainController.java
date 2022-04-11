@@ -13,15 +13,25 @@ import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -49,8 +59,6 @@ public class MainController implements IController {
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
-    private TreeViewItemModel diagrams;
-    private TreeViewItemModel classes;
 
     private String selectedClass;
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
@@ -145,15 +153,15 @@ public class MainController implements IController {
     private void updateView() {
         viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
-        /** Diagrams menu **/
-        this.diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
-        this.diagrams.showTreeItem();
-        this.diagrams.rootViewUpdate();
+        // Diagrams menu
+        TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
+        diagrams.showTreeItem();
+        diagrams.rootViewUpdate();
 
-        /** Classes menu **/
-        this.classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
-        this.classes.showTreeItem();
-        this.classes.rootViewUpdate();
+        // Classes menu
+        TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
+        classes.showTreeItem();
+        classes.rootViewUpdate();
 
         this.initDragDrop();
 
@@ -241,7 +249,6 @@ public class MainController implements IController {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(className -> {
             try {
-                // TODO store the selected class properly in the TreeView
                 String id;
                 if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
                     id = classTreeView.getSelectionModel().getSelectedItem().getValue();
@@ -267,7 +274,6 @@ public class MainController implements IController {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(className -> {
             try {
-                // TODO store the selected class properly in the TreeView
                 String id;
                 if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
                     id = classTreeView.getSelectionModel().getSelectedItem().getValue();
@@ -314,6 +320,44 @@ public class MainController implements IController {
             propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
             propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
             propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
+        }
+    }
+
+    public void handleSnapshot(ActionEvent actionEvent) {
+        // Choose a file for output
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
+        fileChooser.setTitle("Save Snapshot");
+        File file = fileChooser.showSaveDialog(new Stage());
+        if (file != null) {
+            // Calculate used region
+            int minX = 10000, minY = 10000;
+            int maxX = 0, maxY = 0;
+            for (Node node : this.anchorScrollPane.getChildren()) {
+                if (node.getBoundsInParent().getMinX() < minX)
+                    minX = (int) node.getBoundsInParent().getMinX();
+                if (node.getBoundsInParent().getMinY() < minY)
+                    minY = (int) node.getBoundsInParent().getMinY();
+                if (node.getBoundsInParent().getMaxX() > maxX)
+                    maxX = (int) node.getBoundsInParent().getMaxX();
+                if (node.getBoundsInParent().getMaxY() > maxY)
+                    maxY = (int) node.getBoundsInParent().getMaxY();
+            }
+            // Set snapshot parameters
+            SnapshotParameters sp = new SnapshotParameters();
+            Rectangle2D rect = new Rectangle2D(minX - 50, minY - 50, maxX - minX + 100, maxY - minY + 100);
+            sp.setViewport(rect);
+            sp.setFill(Color.WHITE);
+            WritableImage wi = new WritableImage((int) rect.getWidth(), (int) rect.getHeight());
+            this.anchorScrollPane.getStyleClass().remove("checkerboard");
+            this.anchorScrollPane.snapshot(sp, wi);
+            this.anchorScrollPane.getStyleClass().add("checkerboard");
+            // Save snapshot as PNG
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(wi, null), "png", file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

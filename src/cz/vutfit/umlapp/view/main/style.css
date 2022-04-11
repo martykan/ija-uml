@@ -48,7 +48,7 @@
     -fx-padding: 10px;
 }
 
-#anchorScrollPane {
+.checkerboard {
     -fx-background-image: url(checkerboard.png);
 }
 

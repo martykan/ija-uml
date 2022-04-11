@@ -92,7 +92,7 @@ public class ClassDiagram {
                 return true;
             }
         }
-        return false; // TODO maybe this should throw instead?
+        return false;
     }
 
     // working with method list

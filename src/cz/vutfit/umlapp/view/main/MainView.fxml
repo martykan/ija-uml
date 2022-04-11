@@ -19,7 +19,7 @@
                 <Button fx:id="closeButton" styleClass="icon-button" onAction="#handleClose">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_twotone-home.png"/>
+                            <Image url="@ic_home.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -29,18 +29,28 @@
                 <Button fx:id="saveButton" styleClass="icon-button" onAction="#handleSave">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_twotone-save.png"/>
+                            <Image url="@ic_save.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Save"/>
                     </tooltip>
                 </Button>
+                <Button styleClass="icon-button" onAction="#handleSnapshot">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@ic_camera.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Save snapshot"/>
+                    </tooltip>
+                </Button>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
                 <Button fx:id="undoButton" styleClass="icon-button" onAction="#handleUndo">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_baseline-undo.png"/>
+                            <Image url="@ic_undo.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -89,7 +99,7 @@
         (Current) Diagram area
         -->
         <ScrollPane fx:id="scrollPane" vvalue="0.5" hvalue="0.5">
-            <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000">
+            <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000" styleClass="checkerboard">
             </AnchorPane>
         </ScrollPane>
     </SplitPane>

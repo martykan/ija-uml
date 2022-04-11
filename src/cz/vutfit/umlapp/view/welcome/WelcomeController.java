@@ -29,6 +29,7 @@ public class WelcomeController implements IController {
 
     public void handleOpenFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
         try {
             File selectedFile = fileChooser.showOpenDialog(new Stage());
             if (selectedFile == null) return;
@@ -36,13 +37,13 @@ public class WelcomeController implements IController {
             this.viewHandler.openView("Main");
         } catch (Exception exception) {
             this.showErrorMessage(exception.getLocalizedMessage());
-            System.out.println(exception.toString());
             exception.printStackTrace();
         }
     }
 
     public void handleNewFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
         try {
             File selectedFile = fileChooser.showSaveDialog(new Stage());
             if (selectedFile == null) return;
