@@ -173,9 +173,9 @@ public class MainController implements IController {
         this.classes.showTreeItem();
         this.classes.rootViewUpdate();
 
-        /** Properties **/
-
-
+        if (this.dataModel.getData().getClasses().size() == 0) {
+            resetProperties("nothing selected", "");
+        }
         this.initDragDrop();
 
         boxClassOptions.setVisible(this.selectedClass != null);
@@ -318,7 +318,7 @@ public class MainController implements IController {
             myclass = this.dataModel.getData().getClassByName(id);
             String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
             String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
-            if (x.length > 1 && x[1].equals(")")) {     
+            if (x.length > 1 && x[1].equals(")")) {
                 resetProperties("Method", x[0]);
                 addPropertyLine("Class", String.valueOf(myclass.getName()));
                 addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
