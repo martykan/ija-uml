@@ -4,12 +4,19 @@ import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.AddClassCommand;
 import cz.vutfit.umlapp.model.commands.AddClassMethodCommand;
+import cz.vutfit.umlapp.model.commands.AddClassAttributeCommand;
+import cz.vutfit.umlapp.model.commands.RemoveClassCommand;
+import cz.vutfit.umlapp.model.commands.RemoveClassAttributeCommand;
+import cz.vutfit.umlapp.model.commands.RemoveClassMethodCommand;
 import cz.vutfit.umlapp.model.commands.DragClassCommand;
 import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
+import cz.vutfit.umlapp.model.uml.Methods;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
+import cz.vutfit.umlapp.view.main.TreeViewItemModel;
+import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -21,6 +28,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Scale;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -34,7 +44,11 @@ public class MainController implements IController {
     @FXML
     public Button undoButton;
     @FXML
-    public TreeView<String> treeView;
+    public TextArea textArea;
+    @FXML
+    public TreeView<String> classTreeView;
+    @FXML
+    public TreeView<String> diagramTreeView;
     @FXML
     public HBox boxClassOptions;
     @FXML
@@ -44,6 +58,8 @@ public class MainController implements IController {
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
+    private TreeViewItemModel diagrams;
+    private TreeViewItemModel classes;
 
     private String selectedClass;
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
@@ -105,6 +121,8 @@ public class MainController implements IController {
         }
     }
 
+
+
     public void handleSave(ActionEvent actionEvent) {
         try {
             this.dataModel.saveFile();
@@ -125,7 +143,7 @@ public class MainController implements IController {
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
-        this.treeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
+        this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
 
         this.updateView();
 
@@ -135,16 +153,15 @@ public class MainController implements IController {
     private void updateView() {
         viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
-        TreeItem<String> dummyRoot = new TreeItem<>();
-        for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
-            TreeItem<String> item = new TreeItem<>(classDiagram.getName());
-            for (Attributes attributes : classDiagram.getAttribs()) {
-                item.getChildren().add(new TreeItem<String>(attributes.getNameWithPrefix()));
-            }
-            dummyRoot.getChildren().add(item);
-        }
-        this.treeView.setShowRoot(false);
-        this.treeView.setRoot(dummyRoot);
+        /** Diagrams menu **/
+        this.diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
+        this.diagrams.showTreeItem();
+        this.diagrams.rootViewUpdate();
+
+        /** Classes menu **/
+        this.classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
+        this.classes.showTreeItem();
+        this.classes.rootViewUpdate();
 
         this.initDragDrop();
 
@@ -176,6 +193,54 @@ public class MainController implements IController {
         });
     }
 
+    public void handleRemove(ActionEvent actionEvent) {
+        try {
+            String id;
+            if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+            } else {
+                return;
+            }
+            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+            if (myclass == null) { // currently not selected class
+                id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                myclass = this.dataModel.getData().getClassByName(id);
+                ArrayList<Attributes> a = myclass.getAttribs();
+                ArrayList<Methods> m = myclass.getMethods();
+                String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                String[] x = currentOption.split("[+]", 2)[1].split("[(]", 2);
+                if (x.length > 1 && x[1].equals(")")) {
+                    for (Methods y : m) {
+                        if (y.getName().equals(x[0])) {
+                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, x[0], y.getVisibility()));
+                            break;
+                        }
+                    }
+                    this.updateView();
+                } else {
+                    for (Attributes z : a) {
+                        if (z.getName().equals(x[0])) {
+                            this.dataModel.executeCommand(new RemoveClassAttributeCommand(myclass, x[0], z.getVisibility()));
+                            break;
+                        }
+                    }
+                    this.updateView();
+                }
+
+            } else {
+                this.dataModel.executeCommand(new RemoveClassCommand(myclass.getID()));
+                this.updateView();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // TODO: tlacitko + u Diagrams, pridava Sekvenci diagramy (=> Need TODO: model - seq. diagram)
+    public void handleAddDiagram(ActionEvent actionEvent) {
+        return;
+    }
+
     public void handleAddClassMethod(ActionEvent actionEvent) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Class Method");
@@ -185,17 +250,50 @@ public class MainController implements IController {
         result.ifPresent(className -> {
             try {
                 // TODO store the selected class properly in the TreeView
-                int selectedClassId = this.dataModel.getData().getClasses()
-                        .stream()
-                        .filter(it -> it.getName().equals(selectedClass))
-                        .map(ClassDiagram::getID)
-                        .findFirst()
-                        .orElseThrow();
-                this.dataModel.executeCommand(new AddClassMethodCommand(selectedClassId, className, EAttribVisibility.PUBLIC));
+                String id;
+                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                    id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                } else {
+                    return;
+                }
+                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                if (myclass == null) // if not selected class but some attribute/method/relationship in that class
+                    myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
+                this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
                 this.updateView();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void handleAddAttribute(ActionEvent actionEvent) {
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("New Class Attribute");
+        dialog.setHeaderText(null);
+        dialog.setContentText("New Class Attribute Name:");
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(className -> {
+            try {
+                // TODO store the selected class properly in the TreeView
+                String id;
+                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                    id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                } else {
+                    return;
+                }
+                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                if (myclass == null) // if not selected class but some attribute/method/relationship in that class
+                    myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
+                this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
+                this.updateView();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void handleAddRelation(ActionEvent actionEvent) {
+        return;
     }
 }

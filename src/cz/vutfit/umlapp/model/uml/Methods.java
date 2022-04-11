@@ -14,7 +14,7 @@ public class Methods {
     }
 
     public String getNameWithPrefix() {
-        return this.getVisibility().getPrefix() + this.getName();
+        return this.getVisibility().getPrefix() + this.getName() + "()";
     }
 
     // setters

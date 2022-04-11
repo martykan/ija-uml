@@ -26,6 +26,14 @@ public class ClassDiagram {
         this.seqdigs = new ArrayList<>();
     }
 
+    public ClassDiagram(Integer id) {
+        this.id = id;
+        this.name = "Unnamed class";
+        this.attribs = new ArrayList<>();
+        this.methods = new ArrayList<>();
+        this.seqdigs = new ArrayList<>();
+    }
+
     // getters
     public int getID() {
         return this.id;
@@ -46,6 +54,13 @@ public class ClassDiagram {
     public ArrayList<ClassDiagramSequences> getSeqdigs() { return this.seqdigs; }
 
     // setters
+    public void setAll(String name, ArrayList<Attributes> attribs, ArrayList<Methods> methods, ArrayList<ClassDiagramSequences> seqdigs) {
+        this.name = name;
+        this.attribs = attribs;
+        this.methods = methods;
+        this.seqdigs = seqdigs;
+    }
+
     public void setName(String name) { this.name = name; }
 
     // working with attributes list

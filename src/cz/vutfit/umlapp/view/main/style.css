@@ -29,7 +29,7 @@
 }
 
 .box-heading .label {
-    -fx-padding: 16px;
+    -fx-padding: 10px;
 }
 
 #anchorScrollPane {
@@ -69,6 +69,37 @@
     -fx-pref-height: 5px;
 }
 
+/* TreeView */
+.tree-view {
+
+}
+
+.tree-cell {
+    -fx-font-weight: bold ;
+}
+
+/* Buttons menu under TreeView */
+
+#boxClassOptions {
+    -fx-background-color: #DDDDDD;
+}
+
+#boxClassOptions > .button {
+  -fx-background-color: #DEDEDE;
+  -fx-border: none;
+  -fx-border-radius: 0px;
+  -fx-color: white;
+  -fx-padding: 6px 10px;
+  -fx-text-align: center;
+  -fx-text-decoration: none;
+  -fx-display: inline-block;
+  -fx-font-size: 11px;
+}
+
+#boxClassOptions > .button:hover {
+    -fx-background-color: #EEEEEE;
+}
+
 /* Split pane styling */
 
 .split-pane:horizontal > .split-pane-divider {
@@ -95,7 +126,6 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0.0em;
     -fx-padding: 0.0 0.0 10.0 0.0;
-
 }
 
 .scroll-bar:vertical .increment-button,
@@ -103,6 +133,7 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0.0em;
     -fx-padding: 0.0 10.0 0.0 0.0;
+
 }
 
 .scroll-bar .increment-arrow,

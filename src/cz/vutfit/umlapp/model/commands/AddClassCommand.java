@@ -1,6 +1,7 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.UMLFileData;
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
 
 public class AddClassCommand implements ICommand {
     private final String className;
@@ -12,7 +13,11 @@ public class AddClassCommand implements ICommand {
 
     @Override
     public void execute(UMLFileData file) {
-        classId = file.addClass(className);
+        try {
+            classId = file.addClass(className);
+        } catch (DuplicateClassNameException e) {
+            System.out.println("Duplicate Class Name - user is idiot");
+        }
     }
 
     @Override

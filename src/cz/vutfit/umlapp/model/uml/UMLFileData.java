@@ -1,6 +1,7 @@
 package cz.vutfit.umlapp.model.uml;
 
 import java.util.ArrayList;
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
 
 public class UMLFileData {
     public final ArrayList<ClassDiagram> classDiagram = new ArrayList<>();
@@ -34,29 +35,78 @@ public class UMLFileData {
         return null;
     }
 
-    public int addClass(String name) {
+    public ClassDiagram getClassByName(String name) {
+        for (ClassDiagram c : this.classDiagram) {
+            if (c.getName().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public int addClass(String name) throws DuplicateClassNameException {
+        System.out.print("addClass() - id: ");
         int id = 0;
+        boolean found = false;
         if (id != (this.classDiagram).size()) { // there are classes in list
+            //System.out.println("addClass: id != 0 (".concat(String.valueOf((this.classDiagram).size())).concat(")"));
             int i = 0;
             for (ClassDiagram c : this.classDiagram) {  // check if classes ID's are sorted, linear, start with 0, end with size-1
                 if (i != c.getID()) { // condition up is not true
+                    //System.out.println("addClass: found blbost: ".concat(String.valueOf(i).concat(" != ").concat(String.valueOf(c.getID()))));
                     id = i;
+                    found = true;
                     break;
                 }
                 i++;
             }
-            if (id == 0) id = (this.classDiagram).size(); // all sorted
+            if (id == 0 && !found) id = (this.classDiagram).size(); // all sorted
         }
 
+        // classes cannot have same name, so I need to check this too
+        if (!checkClassNameDuplicates(name))
+            throw new DuplicateClassNameException();
+
+
         ClassDiagram x = new ClassDiagram(id, name);
+        System.out.println(String.valueOf(id).concat(", name: ").concat(name));
         (this.classDiagram).add(id, x);
         return id;
     }
 
+    // support function, checks for duplicate class names in entire classes array
+    // [[ if given string (name) as first arguments, compares with that name - faster ]]
+    public boolean checkClassNameDuplicates() {
+        int counter = 0;
+        for (ClassDiagram fst : this.classDiagram) {
+            for (ClassDiagram snd : this.classDiagram) {
+                if (fst.getName().equals(snd.getName())) {
+                    counter++;
+                    if (counter > 1) {
+                        return false;
+                    }
+                }
+                counter = 0;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkClassNameDuplicates(String name) {
+        for (ClassDiagram fst : this.classDiagram) {
+            if (fst.getName().equals(name)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean removeClass(int id) {
+        System.out.print("removeClass() - id: ".concat(String.valueOf(id)).concat(", name: "));
         for (ClassDiagram c : this.classDiagram) {
             if (c.getID() == id) {
-                (this.classDiagram).remove(id);
+                (this.classDiagram).remove(c);
+                System.out.println(c.getName());
                 return true;
             }
         }

@@ -9,6 +9,9 @@
            fx:controller="cz.vutfit.umlapp.view.main.MainController"
            prefHeight="600.0" prefWidth="1000.0">
 
+    <!--
+    Main Panel
+    -->
     <SplitPane dividerPositions="0.3">
         <VBox>
             <HBox styleClass="box-actions">
@@ -44,17 +47,46 @@
                     </tooltip>
                 </Button>
             </HBox>
+
+            <!--
+             Main menu
+             -->
+
+            <!-- Diagrams -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Diagrams"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
+            </HBox>
+            <TreeView fx:id="diagramTreeView" maxHeight="150"/>
+
+            <!-- Classes -->
             <HBox styleClass="box-heading" alignment="CENTER">
                 <Label text="Classes"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemove"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
             </HBox>
-            <TreeView fx:id="treeView" maxHeight="300"/>
+            <TreeView fx:id="classTreeView" maxHeight="225"/>
+
+            <!-- Classes -> more options -->
             <HBox fx:id="boxClassOptions" visible="false">
-                <Button text="Delete Class"/>
-                <Button text="Add Class Method" onAction="#handleAddClassMethod"/>
+                <Button text="New Method" onAction="#handleAddClassMethod"/>
+                <Button text="New Attribute" onAction="#handleAddAttribute"/>
+                <Button text="New Relation" onAction="#handleAddRelation"/>
             </HBox>
+
+            <!-- Properties -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Properties"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+            <TreeView fx:id="propsTreeView" maxHeight="200"/>
         </VBox>
+
+        <!--
+        (Current) Diagram area
+        -->
         <ScrollPane fx:id="scrollPane" vvalue="0.5" hvalue="0.5">
             <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000">
             </AnchorPane>
