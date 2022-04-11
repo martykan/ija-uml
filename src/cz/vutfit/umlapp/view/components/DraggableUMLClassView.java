@@ -1,3 +1,8 @@
+/*
+ * File: DraggableUMLClassView.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view.components;
 
 import cz.vutfit.umlapp.model.uml.Attributes;

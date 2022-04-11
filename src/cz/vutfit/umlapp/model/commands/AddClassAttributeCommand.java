@@ -1,3 +1,8 @@
+/*
+ * File: AddClassAttributeCommand.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;

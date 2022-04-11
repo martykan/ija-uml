@@ -1,7 +1,13 @@
+/*
+ * File: UMLFileData.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.uml;
 
-import java.util.ArrayList;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
+
+import java.util.ArrayList;
 
 public class UMLFileData {
     public final ArrayList<ClassDiagram> classDiagram = new ArrayList<>();
@@ -86,8 +92,8 @@ public class UMLFileData {
                         return false;
                     }
                 }
-                counter = 0;
             }
+            counter = 0;
         }
         return true;
     }

@@ -1,3 +1,8 @@
+/*
+ * File: DragClassCommand.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.UMLFileData;
@@ -16,7 +21,7 @@ public class DragClassCommand implements ICommand {
     }
 
     @Override
-    public void execute(UMLFileData file) throws Exception {
+    public void execute(UMLFileData file) {
         oldPositionX = file.getClassByID(classId).positionX;
         oldPositionY = file.getClassByID(classId).positionY;
         file.getClassByID(classId).positionX = newPositionX;

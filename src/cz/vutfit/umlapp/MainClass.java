@@ -1,3 +1,8 @@
+/*
+ * File: MainClass.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp;
 
 import javafx.application.Application;

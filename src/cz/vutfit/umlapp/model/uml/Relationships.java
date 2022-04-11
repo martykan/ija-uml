@@ -1,3 +1,8 @@
+/*
+ * File: Relationships.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.uml;
 
 enum ERelationType {

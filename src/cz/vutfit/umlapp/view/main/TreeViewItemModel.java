@@ -1,3 +1,8 @@
+/*
+ * File: TreeViewItemModel.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view.main;
 
 import cz.vutfit.umlapp.model.DataModel;
@@ -19,12 +24,12 @@ public class TreeViewItemModel {
     public TreeViewItemModel(DataModel model, TreeView<String> view, EDataType itemType) {
         this.view = view;
         this.dataModel = model;
-        this.root = new TreeItem<String>();
+        this.root = new TreeItem<>();
         this.itemType = itemType;
     }
 
     public void showTreeItem() {
-        TreeItem<String> item = null;
+        TreeItem<String> item;
         switch (this.itemType) {
             case CLASS_DIAGRAM:
                 item = new TreeItem<>("Class diagram");
@@ -36,11 +41,11 @@ public class TreeViewItemModel {
                 for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
                     item = new TreeItem<>(classDiagram.getName());
                     for (Attributes attributes : classDiagram.getAttribs()) {
-                        item.getChildren().add(new TreeItem<String>(attributes.getNameWithPrefix()));
+                        item.getChildren().add(new TreeItem<>(attributes.getNameWithPrefix()));
                     }
 
                     for (Methods methods : classDiagram.getMethods()) {
-                        item.getChildren().add(new TreeItem<String>(methods.getNameWithPrefix()));
+                        item.getChildren().add(new TreeItem<>(methods.getNameWithPrefix()));
                     }
                     this.root.getChildren().add(item);
                 }

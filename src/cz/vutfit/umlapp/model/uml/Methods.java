@@ -1,3 +1,8 @@
+/*
+ * File: Methods.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.uml;
 
 public class Methods {

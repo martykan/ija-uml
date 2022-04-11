@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  ~ File: MainView.fxml
+  ~ Authors: Dominik Horký, Tomáš Martykán
+  -->
+
 <?import cz.vutfit.umlapp.view.components.PropertiesView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>

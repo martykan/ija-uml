@@ -1,3 +1,8 @@
+/*
+ * File: DataModel.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model;
 
 import com.google.gson.Gson;

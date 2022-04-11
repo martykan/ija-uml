@@ -1,3 +1,8 @@
+/*
+ * File: RemoveClassAttributeCommand.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
@@ -6,9 +11,9 @@ import cz.vutfit.umlapp.model.uml.UMLFileData;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateAttributeNameException;
 
 public class RemoveClassAttributeCommand implements ICommand {
-    private ClassDiagram myClass;
-    private String id;
-    private EAttribVisibility visibility;
+    private final ClassDiagram myClass;
+    private final String id;
+    private final EAttribVisibility visibility;
 
     public RemoveClassAttributeCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility) {
         this.myClass = myClass;

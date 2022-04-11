@@ -1,3 +1,8 @@
+/*
+ * File: EDataType.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view.main;
 
 enum EDataType {

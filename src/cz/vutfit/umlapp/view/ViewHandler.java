@@ -1,3 +1,8 @@
+/*
+ * File: ViewHandler.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view;
 
 import cz.vutfit.umlapp.model.ModelFactory;

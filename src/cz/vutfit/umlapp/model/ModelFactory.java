@@ -1,3 +1,8 @@
+/*
+ * File: ModelFactory.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model;
 
 public class ModelFactory {

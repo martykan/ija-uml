@@ -1,3 +1,8 @@
+/*
+ * File: PropertiesView.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view.components;
 
 import javafx.geometry.Pos;

@@ -1,3 +1,8 @@
+/*
+ * File: ClassDiagram.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.model.uml;
 
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateAttributeNameException;

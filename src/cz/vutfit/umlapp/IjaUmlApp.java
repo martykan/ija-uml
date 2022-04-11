@@ -1,3 +1,8 @@
+/*
+ * File: IjaUmlApp.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp;
 
 import cz.vutfit.umlapp.model.ModelFactory;

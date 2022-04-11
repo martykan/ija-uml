@@ -1,3 +1,8 @@
+/*
+ * File: WelcomeController.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
 package cz.vutfit.umlapp.view.welcome;
 
 import cz.vutfit.umlapp.model.DataModel;
