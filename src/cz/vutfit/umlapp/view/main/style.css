@@ -29,6 +29,7 @@
 
 .property-name {
     -fx-font-weight: bold;
+    -fx-padding: 0 0 0 5px;
 }
 
 .property-text {

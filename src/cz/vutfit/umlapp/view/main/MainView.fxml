@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cz.vutfit.umlapp.view.components.PropertiesView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<?import javafx.scene.control.cell.TextFieldTableCell?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
            xmlns="http://javafx.com/javafx"
            fx:controller="cz.vutfit.umlapp.view.main.MainController"
@@ -14,7 +14,7 @@
     Main Panel
     -->
     <SplitPane dividerPositions="0.3">
-        <VBox fx:id="main_vbox">
+        <VBox>
             <HBox styleClass="box-actions">
                 <Button fx:id="closeButton" styleClass="icon-button" onAction="#handleClose">
                     <graphic>
@@ -82,10 +82,7 @@
                 <Label text="Properties"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             </HBox>
-            <HBox fx:id="propertyFirstLine" styleClass="box-property-line" alignment="CENTER"> <!-- first line will be always present (shows: type & name or nothing) -->
-                <Label fx:id="propertyFirst" styleClass="property-name" text="nothing selected" alignment="BASELINE_LEFT" prefWidth="135" />
-                <Label fx:id="propertyFirstText" alignment="TOP_RIGHT" prefWidth="135" />
-            </HBox>
+            <PropertiesView fx:id="propertiesView"/>
         </VBox>
 
         <!--

@@ -2,41 +2,28 @@ package cz.vutfit.umlapp.view.main;
 
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
-import cz.vutfit.umlapp.model.commands.AddClassCommand;
-import cz.vutfit.umlapp.model.commands.AddClassMethodCommand;
-import cz.vutfit.umlapp.model.commands.AddClassAttributeCommand;
-import cz.vutfit.umlapp.model.commands.RemoveClassCommand;
-import cz.vutfit.umlapp.model.commands.RemoveClassAttributeCommand;
-import cz.vutfit.umlapp.model.commands.RemoveClassMethodCommand;
-import cz.vutfit.umlapp.model.commands.DragClassCommand;
+import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.Methods;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
-import cz.vutfit.umlapp.view.main.TreeViewItemModel;
-import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
+import cz.vutfit.umlapp.view.components.PropertiesView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Scale;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -48,8 +35,6 @@ public class MainController implements IController {
     @FXML
     public Button undoButton;
     @FXML
-    public TextArea textArea;
-    @FXML
     public TreeView<String> classTreeView;
     @FXML
     public TreeView<String> diagramTreeView;
@@ -60,13 +45,7 @@ public class MainController implements IController {
     @FXML
     public Pane anchorScrollPane;
     @FXML
-    public Label propertyFirst;
-    @FXML
-    public Label propertyFirstText;
-    @FXML
-    public VBox main_vbox;
-    @FXML
-    public HBox propertyFirstLine;
+    public PropertiesView propertiesView;
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
@@ -80,6 +59,8 @@ public class MainController implements IController {
             handleProperties(newItem);
         } else {
             this.selectedClass = null;
+            propertiesView.resetProperties();
+            propertiesView.addPropertyLine("Nothing selected", "");
         }
         boxClassOptions.setVisible(this.selectedClass != null);
     };
@@ -155,6 +136,7 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
+        propertiesView.addPropertyLine("Nothing selected", "");
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);
@@ -173,9 +155,6 @@ public class MainController implements IController {
         this.classes.showTreeItem();
         this.classes.rootViewUpdate();
 
-        if (this.dataModel.getData().getClasses().size() == 0) {
-            resetProperties("nothing selected", "");
-        }
         this.initDragDrop();
 
         boxClassOptions.setVisible(this.selectedClass != null);
@@ -319,51 +298,22 @@ public class MainController implements IController {
             String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
             String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
             if (x.length > 1 && x[1].equals(")")) {
-                resetProperties("Method", x[0]);
-                addPropertyLine("Class", String.valueOf(myclass.getName()));
-                addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
+                propertiesView.resetProperties();
+                propertiesView.addPropertyLine("Method", x[0]);
+                propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
+                propertiesView.addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
             } else {
-                resetProperties("Attribute", x[0]);
-                addPropertyLine("Class", String.valueOf(myclass.getName()));
-                addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
+                propertiesView.resetProperties();
+                propertiesView.addPropertyLine("Attribute", x[0]);
+                propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
+                propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
             }
         } else {
-            resetProperties("Class", myclass.getName());
-            addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
-            addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
-            addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
-        }
-    }
-
-    public void addPropertyLine(String property, String text) {
-        HBox line = new HBox();
-        Label property_lab = new Label(property);
-        Label text_lab = new Label(text);
-
-        line.getStyleClass().add("box-property-line");
-        line.setId("propLine");
-        line.setAlignment(Pos.CENTER);
-
-        property_lab.getStyleClass().add("property-name");
-        property_lab.setAlignment(Pos.BASELINE_LEFT);
-        property_lab.setTextAlignment(TextAlignment.LEFT);
-        property_lab.prefWidth(135);
-        text_lab.setAlignment(Pos.TOP_RIGHT);
-        text_lab.setTextAlignment(TextAlignment.RIGHT);
-        text_lab.prefWidth(135);
-
-        line.getChildren().add(property_lab);
-        line.getChildren().add(text_lab);
-        main_vbox.getChildren().add(line);
-    }
-
-    public void resetProperties(String firstProp, String firstText) {
-        propertyFirst.setText(firstProp);
-        propertyFirstText.setText(firstText);
-        String id = main_vbox.getChildren().get(main_vbox.getChildren().size()-1).getId();
-        while (!id.equals("propertyFirstLine")) {
-            main_vbox.getChildren().remove(main_vbox.getChildren().size()-1);
-            id = main_vbox.getChildren().get(main_vbox.getChildren().size()-1).getId();
+            propertiesView.resetProperties();
+            propertiesView.addPropertyLine("Class", myclass.getName());
+            propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
+            propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
+            propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
         }
     }
 }
