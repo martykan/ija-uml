@@ -42,6 +42,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Class for controller of MainView
+ */
 public class MainController implements IController {
     @FXML
     public Button closeButton;
@@ -54,7 +57,7 @@ public class MainController implements IController {
     @FXML
     public TreeView<String> diagramTreeView;
     @FXML
-    public HBox boxClassOptions;
+    public HBox boxClassOptions; /** Area for buttons that's showed after user clicks on any item in classTreeView */
     @FXML
     public ScrollPane scrollPane;
     @FXML
@@ -66,6 +69,12 @@ public class MainController implements IController {
     private ViewHandler viewHandler;
 
     private String selectedClass;
+
+    /**
+     * Listens to changes in classTreeView.
+     * Used for displaying properties of any element from classTreeView.
+     * @see #handleProperties(TreeItem)
+     */
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedClass = newItem.getValue();
@@ -128,6 +137,10 @@ public class MainController implements IController {
         }
     }
 
+    /**
+     * After clicking on save icon, this function is called. It saves changes user made into file opened.
+     * @param actionEvent
+     */
     public void handleSave(ActionEvent actionEvent) {
         try {
             this.dataModel.saveFile();
@@ -136,6 +149,10 @@ public class MainController implements IController {
         }
     }
 
+    /**
+     * Function called after clicking on home icon. View changes back to 'Welcome screen'.
+     * @param actionEvent
+     */
     public void handleClose(ActionEvent actionEvent) {
         try {
             this.viewHandler.openView("Welcome");
@@ -155,6 +172,9 @@ public class MainController implements IController {
         Platform.runLater(MainController.this::initKeyboardShortcuts);
     }
 
+    /**
+     * Updates entire View (UI).
+     */
     private void updateView() {
         viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
@@ -173,6 +193,10 @@ public class MainController implements IController {
         boxClassOptions.setVisible(this.selectedClass != null);
     }
 
+    /**
+     * After clicking on undo button, this function is called.
+     * @param actionEvent
+     */
     public void handleUndo(ActionEvent actionEvent) {
         try {
             this.dataModel.undo();
@@ -182,6 +206,10 @@ public class MainController implements IController {
         }
     }
 
+    /**
+     * Called after clicking on + button (next to Classes header in menu)
+     * @param actionEvent
+     */
     public void handleAddClass(ActionEvent actionEvent) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Class");
@@ -198,6 +226,11 @@ public class MainController implements IController {
         });
     }
 
+    /**
+     * Called after clicking on - button (next to Classes in menu).
+     * The button deletes anything that's selected in classTreeView - class, method, attribute or relationship (todo).
+     * @param actionEvent
+     */
     public void handleRemove(ActionEvent actionEvent) {
         try {
             String id;
@@ -241,11 +274,22 @@ public class MainController implements IController {
         }
     }
 
-    // TODO: tlacitko + u Diagrams, pridava Sekvenci diagramy (=> Need TODO: model - seq. diagram)
+    /**
+     * After clicking on + button (next to Diagrams in menu), this function is called.
+     * It is supposed to add new sequence diagram. Currently TODO.
+     * @param actionEvent
+     */
     public void handleAddDiagram(ActionEvent actionEvent) {
         return;
     }
 
+    /**
+     * In boxClassOptions after clicking on New Class button, this function is called.
+     * Add new method to class.
+     * If selected item in classTreeView is class, method will be added to this class.
+     * If selected item is method, attribute or relationship, new method will be added to the same class as the selected item.
+     * @param actionEvent
+     */
     public void handleAddClassMethod(ActionEvent actionEvent) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Class Method");
@@ -271,6 +315,12 @@ public class MainController implements IController {
         });
     }
 
+    /**
+     * In boxClassOptions after clicking on New Attribute, this function is called.
+     * Works same handleAddClassMethod, instead of method it adds attribute.
+     * @see #handleAddClassMethod(ActionEvent)
+     * @param actionEvent
+     */
     public void handleAddAttribute(ActionEvent actionEvent) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Class Attribute");
@@ -296,10 +346,25 @@ public class MainController implements IController {
         });
     }
 
+    /**
+     * In boxClassOptions after clicking on New Relationship button, this function is called.
+     * It is supposed to add new relationship from current class to another, works same way
+     * as handleAddClassMethod or as handleAddAttribute.
+     * Currently TODO.
+     * @param actionEvent
+     * @see #handleAddClassMethod(ActionEvent)
+     */
     public void handleAddRelation(ActionEvent actionEvent) {
         return;
     }
 
+    /**
+     * This function is called after item selection in classTreeView is changed (by user).
+     * Shows item-element properties (in Properties section in menu) depending on its type - class, method, attribute or relationship (todo).
+     * If nothing is selected, simply shows 'nothing selected'.
+     * @param selected currently selected item in classTreeView
+     * @see #handleClassSelection
+     */
     public void handleProperties(TreeItem<String> selected) {
         String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
         ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
@@ -328,6 +393,11 @@ public class MainController implements IController {
         }
     }
 
+    /**
+     * After clicking on camera button in menu, this function is called.
+     * Outputs entire diagram into PNG image.
+     * @param actionEvent
+     */
     public void handleSnapshot(ActionEvent actionEvent) {
         // Choose a file for output
         FileChooser fileChooser = new FileChooser();

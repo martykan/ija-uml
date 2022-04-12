@@ -11,7 +11,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Class for properties view (Properties section in menu)
+ */
 public class PropertiesView extends VBox {
+    /**
+     * Adds one line to the properties section.
+     * @param property name of property, data description
+     * @param text data-value (in String)
+     */
     public void addPropertyLine(String property, String text) {
         BorderPane line = new BorderPane();
         Label property_lab = new Label(property);
@@ -30,6 +38,9 @@ public class PropertiesView extends VBox {
         this.getChildren().add(line);
     }
 
+    /**
+     * Clears properties section
+     */
     public void resetProperties() {
         this.getChildren().clear();
     }

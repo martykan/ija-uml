@@ -5,11 +5,14 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+/**
+ * Class for Class diagram - Class Attributes
+ */
 public class Attributes {
     public String name;
     public EAttribVisibility visibility;
 
-    // getters
+    /** getters **/
     public String getName() {
         return this.name;
     }
@@ -22,7 +25,7 @@ public class Attributes {
         return this.getVisibility().getPrefix() + this.getName();
     }
 
-    // setters
+    /** setters **/
     public void setName(String name) {
         this.name = name;
     }
@@ -31,7 +34,11 @@ public class Attributes {
         this.visibility = value;
     }
 
-    // set all in one
+    /**
+     * Sets all values in one function
+     * @param name
+     * @param value
+     */
     public void setAttribute(String name, EAttribVisibility value) {
         this.visibility = value;
         this.name = name;

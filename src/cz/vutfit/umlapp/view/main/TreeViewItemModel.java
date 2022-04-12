@@ -15,12 +15,22 @@ import javafx.scene.control.TreeView;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Class for TreeViewItem used for working with TreeViews and its items
+ */
 public class TreeViewItemModel {
-    public TreeView<String> view;
-    public TreeItem<String> root;
-    public EDataType itemType;
+    public TreeView<String> view; /** TreeView */
+    public TreeItem<String> root; /** Root of TreeView */
+    public EDataType itemType; /** Type of the TreeItem @see EDataType */
     public DataModel dataModel;
 
+    /**
+     * Constructor
+     * @param model
+     * @param view
+     * @param itemType type of TreeItem
+     * @see EDataType
+     */
     public TreeViewItemModel(DataModel model, TreeView<String> view, EDataType itemType) {
         this.view = view;
         this.dataModel = model;
@@ -28,6 +38,9 @@ public class TreeViewItemModel {
         this.itemType = itemType;
     }
 
+    /**
+     * This method handles showing (creating and adding to rootItem) TreeItems depending on TreeItem type.
+     */
     public void showTreeItem() {
         TreeItem<String> item;
         switch (this.itemType) {
@@ -53,6 +66,11 @@ public class TreeViewItemModel {
         }
     }
 
+    /**
+     * Getter function
+     * @param name
+     * @return returns item if present in root or null
+     */
     public TreeItem<String> getTreeItem(String name) {
         for (TreeItem<String> i : this.root.getChildren()) {
             if (i.getValue().equals(name)) {
@@ -62,6 +80,11 @@ public class TreeViewItemModel {
         return null;
     }
 
+    /**
+     * Adds new treeItem (child) to another treeItem (parent)
+     * @param item
+     * @param name
+     */
     public void addTreeItemChild(TreeItem<String> item, String name) {
         TreeItem<String> child = null;
         switch (this.itemType) {
@@ -75,6 +98,9 @@ public class TreeViewItemModel {
         item.getChildren().add(child);
     }
 
+    /**
+     * Used for updating root TreeItem and TreeView to correctly display all items in view.
+     */
     public void rootViewUpdate() {
         // Remember expanded items
         if (this.view.getRoot() != null && this.root != null) {

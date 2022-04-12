@@ -11,18 +11,26 @@ import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
 
 import java.util.ArrayList;
 
+/**
+ * Class representing one class in Class diagram
+ */
 public class ClassDiagram {
     public Integer id;
     public String name;
     public ArrayList<Attributes> attribs;
     public ArrayList<Methods> methods;
-    public ArrayList<ClassDiagramSequences> seqdigs;
-    public Double positionX = 5000.0;
-    public Double positionY = 5000.0;
+    public ArrayList<ClassDiagramSequences> seqdigs; /** (TODO) list of (information about) related sequence diagrams to this class **/
+    public Double positionX = 5000.0; /** X-axis position in View **/
+    public Double positionY = 5000.0; /** Y-axis position in View **/
 
     public ClassDiagram() {
     }
 
+    /**
+     * Constructor - with name
+     * @param id
+     * @param name
+     */
     public ClassDiagram(Integer id, String name) {
         this.id = id;
         this.name = name;
@@ -31,6 +39,10 @@ public class ClassDiagram {
         this.seqdigs = new ArrayList<>();
     }
 
+    /**
+     * Constructor - unnamed class
+     * @param id
+     */
     public ClassDiagram(Integer id) {
         this.id = id;
         this.name = "Unnamed class";
@@ -39,7 +51,7 @@ public class ClassDiagram {
         this.seqdigs = new ArrayList<>();
     }
 
-    // getters
+    /** Getters **/
     public int getID() {
         return this.id;
     }
@@ -58,7 +70,7 @@ public class ClassDiagram {
 
     public ArrayList<ClassDiagramSequences> getSeqdigs() { return this.seqdigs; }
 
-    // setters
+    /** Setters **/
     public void setAll(String name, ArrayList<Attributes> attribs, ArrayList<Methods> methods, ArrayList<ClassDiagramSequences> seqdigs) {
         this.name = name;
         this.attribs = attribs;
@@ -68,7 +80,11 @@ public class ClassDiagram {
 
     public void setName(String name) { this.name = name; }
 
-    // working with attributes list
+    /**
+     * Gets one attribute from list
+     * @param name name of attribute
+     * @return attribute or null if not found by name
+     */
     public Attributes getAttribute(String name) {
         for (Attributes x : this.attribs) {
             if (x.getName().equals(name))
@@ -77,6 +93,13 @@ public class ClassDiagram {
         return null;
     }
 
+    /**
+     * Adds new attribute to list
+     * @param name
+     * @param visibility
+     * @throws DuplicateAttributeNameException if new attribute has same name as any other existing
+     * @see EAttribVisibility
+     */
     public void addAttribute(String name, EAttribVisibility visibility) throws DuplicateAttributeNameException {
         Attributes x = new Attributes();
         x.setAttribute(name, visibility);
@@ -90,6 +113,11 @@ public class ClassDiagram {
         (this.attribs).add(x);
     }
 
+    /**
+     * Removes attribute from list
+     * @param name
+     * @return true if found and removed, false if not found by name
+     */
     public boolean removeAttribute(String name) {
         for (int i = 0; i < (this.attribs).size(); i++) {
             if ((this.attribs).get(i).getName().equals(name)) {
@@ -100,7 +128,10 @@ public class ClassDiagram {
         return false;
     }
 
-    // working with method list
+    /**
+     * @param name
+     * @return method if found or null
+     */
     public Methods getMethod(String name) {
         for (Methods x : this.methods) {
             if (x.getName().equals(name))
@@ -109,6 +140,13 @@ public class ClassDiagram {
         return null;
     }
 
+    /**
+     * Adds new method to methods list.
+     * @param name
+     * @param visibility
+     * @throws DuplicateMethodNameException if new method has same name as any other existing
+     * @see EAttribVisibility
+     */
     public void addMethod(String name, EAttribVisibility visibility) throws DuplicateMethodNameException {
         Methods x = new Methods();
         x.setMethod(name, visibility);
@@ -122,6 +160,11 @@ public class ClassDiagram {
         (this.methods).add(x);
     }
 
+    /**
+     * Removes method from methods list.
+     * @param name
+     * @return true if removed or false if not found by name
+     */
     public boolean removeMethod(String name) {
         for (int i = 0; i < (this.methods).size(); i++) {
             if ((this.methods).get(i).getName().equals(name)) {
@@ -132,7 +175,11 @@ public class ClassDiagram {
         return false;
     }
 
-    // working with list of linked sequence diagrams
+    /**
+     * TODO
+     * @param id ID of linked sequence diagram in seqdigs list
+     * @return linked sequence diagram data or null
+     */
     public ClassDiagramSequences getLinkedSequence(int id) {
         for (ClassDiagramSequences x : this.seqdigs) {
             if (x.getID() == id)
@@ -141,6 +188,12 @@ public class ClassDiagram {
         return null;
     }
 
+    /**
+     * TODO
+     * Adds linked sequence diagram info to list.
+     * @param id
+     * @throws DuplicateLinkedSequenceDiagramIDException if new linked diagram ID is same as any existing
+     */
     public void addLinkedSequence(int id) throws DuplicateLinkedSequenceDiagramIDException {
         ClassDiagramSequences x = new ClassDiagramSequences();
         x.setID(id);
@@ -154,6 +207,12 @@ public class ClassDiagram {
         (this.seqdigs).add(x);
     }
 
+    /**
+     * TODO
+     * Removes linked sequence diagram from list
+     * @param id
+     * @return true if removed or false if not found by ID
+     */
     public boolean removeLinkedSequence(int id) {
         for (int i = 0; i < (this.seqdigs).size(); i++) {
             if ((this.seqdigs).get(i).getID() == id) {

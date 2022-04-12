@@ -5,6 +5,9 @@
 
 package cz.vutfit.umlapp.model;
 
+/**
+ * Class for model factory
+ */
 public class ModelFactory {
     private DataModel dataModel;
 

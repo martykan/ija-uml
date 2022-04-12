@@ -5,12 +5,19 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+/**
+ * Enumeration for attribute/method visibility in class
+ */
 public enum EAttribVisibility {
-    PUBLIC,     // +
-    PRIVATE,    // -
-    PROTECTED,  // #
-    PACKAGE;    // ~
+    PUBLIC,     /** + -> public **/
+    PRIVATE,    /** - -> private **/
+    PROTECTED,  /** # -> protected **/
+    PACKAGE;    /** ~ -> package **/
 
+    /**
+     * Converts enum value to string - prefix.
+     * @return visibility prefix
+     */
     public String getPrefix() {
         switch (this) {
             case PUBLIC:
@@ -25,6 +32,10 @@ public enum EAttribVisibility {
         return "";
     }
 
+    /**
+     * Converts enum value to string.
+     * @return visibility in string
+     */
     public String getVisiblityString() {
         switch (this) {
             case PUBLIC:

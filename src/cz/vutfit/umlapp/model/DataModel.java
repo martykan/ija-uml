@@ -14,6 +14,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for data model of app
+ */
 public class DataModel {
     private final List<ICommand> commandHistory = new ArrayList<>();
     private File file;

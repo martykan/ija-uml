@@ -14,7 +14,15 @@ import javafx.scene.layout.VBox;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * Class for draggable diagrams in MainView
+ */
 public class DraggableUMLClassView extends VBox {
+    /**
+     * Constructor - creates one new class in View
+     * @param classDiagram class from model
+     * @param totalZoom zoom
+     */
     public DraggableUMLClassView(ClassDiagram classDiagram, AtomicReference<Double> totalZoom) {
         super();
         this.getStyleClass().add("class-box");

@@ -10,23 +10,40 @@ import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
 
+/**
+ * Class for remove method from class command
+ */
 public class RemoveClassMethodCommand implements ICommand {
     public ClassDiagram myClass;
     public String id;
     public EAttribVisibility visibility;
 
+    /**
+     * Constructor
+     * @param myClass class from which method will be removed
+     * @param ID ID-name of method
+     * @param visibility visibility of removed method
+     */
     public RemoveClassMethodCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility) {
         this.myClass = myClass;
         this.id = ID;
         this.visibility = visibility;
     }
 
+    /**
+     * Execute command - remove method from class
+     * @param file
+     */
     @Override
     public void execute(UMLFileData file) {
         ClassDiagram rem = this.myClass;
         rem.removeMethod(this.id);
     }
 
+    /**
+     * Undo command - add removed method back
+     * @param file
+     */
     @Override
     public void undo(UMLFileData file) {
         if (this.myClass != null) {

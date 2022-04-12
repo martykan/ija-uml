@@ -9,29 +9,65 @@ import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
 
 import java.util.ArrayList;
 
+/**
+ * Root class for data in file.
+ * @see ClassDiagram
+ * @see SequenceDiagram
+ * @see Relationships
+ */
 public class UMLFileData {
+    /**
+     * ArrayList of classes in class diagram
+     */
     public final ArrayList<ClassDiagram> classDiagram = new ArrayList<>();
+
+    /**
+     * ArrayList of sequence diagrams
+     */
     public final ArrayList<SequenceDiagram> sequenceDiagrams = new ArrayList<>();
+
+    /**
+     * ArrayList of relationships
+     */
     public final ArrayList<Relationships> relationships = new ArrayList<>();
 
-    // getters -> vraci listy
+    /**
+     * Getter
+     * @return arrayList of classes in class diagram
+     */
     public ArrayList<ClassDiagram> getClasses() {
         return this.classDiagram;
     }
 
+    /**
+     * Getter
+     * @return arrayList of sequence diagrams
+     */
     public ArrayList<SequenceDiagram> getSequenceDiagrams() {
         return this.sequenceDiagrams;
     }
 
+    /**
+     * Getter
+     * @return arrayList of relationships between classes
+     */
     public ArrayList<Relationships> getRelationships() {
         return this.relationships;
     }
 
-    // prace s listem trid v class diagramu
+    /**
+     * @param index index of class in arrayList
+     * @return class in that index
+     * @note index can be out of bonds or classDiagram array can be completely empty / null - cases are handled by user
+     */
     public ClassDiagram getClassByIndex(int index) {
         return (this.classDiagram).get(index);
     }
 
+    /**
+     * @param id internal identification number of class
+     * @return class with this ID or null
+     */
     public ClassDiagram getClassByID(int id) {
         for (ClassDiagram c : this.classDiagram) {
             if (c.getID() == id) {
@@ -41,6 +77,10 @@ public class UMLFileData {
         return null;
     }
 
+    /**
+     * @param name name of the class
+     * @return class with that name or null
+     */
     public ClassDiagram getClassByName(String name) {
         for (ClassDiagram c : this.classDiagram) {
             if (c.getName().equals(name)) {
@@ -50,6 +90,15 @@ public class UMLFileData {
         return null;
     }
 
+    /**
+     * Adds new class to classDiagram list.
+     * Class ID is assigned automatically. Default value of ID is size of classDiagram list.
+     * If list is not sorted by ID (sorted, ascending linearly), new class ID will be N + 1, where
+     * N is last sorted class ID.
+     * @param name name of new class
+     * @return id of new class
+     * @throws DuplicateClassNameException if new class has same name as any of existing one
+     */
     public int addClass(String name) throws DuplicateClassNameException {
         System.out.print("addClass() - id: ");
         int id = 0;
@@ -80,8 +129,10 @@ public class UMLFileData {
         return id;
     }
 
-    // support function, checks for duplicate class names in entire classes array
-    // [[ if given string (name) as first arguments, compares with that name - faster ]]
+    /**
+     * Support function, checks for duplicate class names in entire classes array
+     * [[ if given string (name) as first arguments, compares with that name - faster ]]
+     */
     public boolean checkClassNameDuplicates() {
         int counter = 0;
         for (ClassDiagram fst : this.classDiagram) {
@@ -107,6 +158,11 @@ public class UMLFileData {
         return true;
     }
 
+    /**
+     * Remove class from list.
+     * @param id ID of class
+     * @return true if class with that ID was found and removed, false if class was not found
+     */
     public boolean removeClass(int id) {
         System.out.print("removeClass() - id: ".concat(String.valueOf(id)).concat(", name: "));
         for (ClassDiagram c : this.classDiagram) {
@@ -119,11 +175,21 @@ public class UMLFileData {
         return false;
     }
 
-    // prace s listem sekvencich diagramu !! TODO !!
+    /**
+     * TODO
+     * @param index index of array in sequenceDiagrams list
+     * @return sequence diagram by index
+     * @see #getClassByIndex(int)
+     */
     public SequenceDiagram getSequenceByIndex(int index) {
         return (this.sequenceDiagrams).get(index);
     }
 
+    /**
+     * TODO
+     * @param id ID of Sequence diagram
+     * @return sequence diagram with that ID or null
+     */
     public SequenceDiagram getSequenceByID(int id) {
         for (SequenceDiagram c : this.sequenceDiagrams) {
             if (c.getID() == id) {
@@ -133,6 +199,12 @@ public class UMLFileData {
         return null;
     }
 
+    /**
+     * TODO
+     * Adds sequence diagram to list.
+     * @param name name of diagram
+     * @see #addClass(String)
+     */
     public void addSequence(String name) {
         int id = 0;
         if (id != (this.sequenceDiagrams).size()) {
@@ -151,6 +223,11 @@ public class UMLFileData {
         (this.sequenceDiagrams).add(id, x);
     }
 
+    /**
+     * Deleted sequence diagram from arrayList.
+     * @param id ID of sequence diagram
+     * @return true if successfully (found by ID and) removed, false if not found
+     */
     public boolean removeSequence(int id) {
         for (SequenceDiagram c : this.sequenceDiagrams) {
             if (c.getID() == id) {
@@ -161,10 +238,17 @@ public class UMLFileData {
         return false;
     }
 
-
-    // prace s listem vztahu
+    /**
+     * @param index index of relationship in list
+     * @return relationships (ArrayList)
+     * @see #getClassByIndex(int)
+     */
     public Relationships getRelationByIndex(int index) { return (this.relationships).get(index); }
 
+    /**
+     * @param id ID of relationship
+     * @return relationship with that ID or null
+     */
     public Relationships getRelationByID(int id) {
         for (Relationships c : this.relationships) {
             if (c.getID() == id) {
@@ -174,6 +258,13 @@ public class UMLFileData {
         return null;
     }
 
+    /**
+     * Adds new relationship to relationships array.
+     * @param fromId class ID from which relationship begins
+     * @param toId class ID to which relationship goes
+     * @param type type of relationship
+     * @see ERelationType
+     */
     public void addRelation(int fromId, int toId, ERelationType type) {
         int id = 0;
         if (id != (this.relationships).size()) {
@@ -192,6 +283,11 @@ public class UMLFileData {
         (this.relationships).add(id, x);
     }
 
+    /**
+     * Removes relationship from list
+     * @param id ID of relationship
+     * @return true if removed or false if not found
+     */
     public boolean removeRelation(int id) {
         for (Relationships c : this.relationships) {
             if (c.getID() == id) {

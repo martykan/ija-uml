@@ -5,6 +5,9 @@
 
 package cz.vutfit.umlapp.model.uml.exceptions;
 
+/**
+ * Class for exception to duplicate name of class
+ */
 public class DuplicateClassNameException extends Exception {
     public DuplicateClassNameException() {
         super("Duplicate class name");

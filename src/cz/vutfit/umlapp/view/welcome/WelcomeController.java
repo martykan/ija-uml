@@ -18,13 +18,21 @@ import javafx.stage.Stage;
 
 import java.io.File;
 
+/**
+ * Class implementing Welcome screen after application launch
+ */
 public class WelcomeController implements IController {
     @FXML
-    public Label label;
+    public Label label; /** heading of window **/
 
     private DataModel dataModel;
     private ViewHandler viewHandler;
 
+    /**
+     * Constructor for class
+     * @param modelFactory
+     * @param viewHandler
+     */
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
@@ -32,6 +40,10 @@ public class WelcomeController implements IController {
         this.viewHandler.setTitle("IJA UML App");
     }
 
+    /**
+     * If user clicks on 'open existing file' button, this function is called
+     * @param actionEvent
+     */
     public void handleOpenFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
@@ -46,6 +58,10 @@ public class WelcomeController implements IController {
         }
     }
 
+    /**
+     * After clicking on 'Create new file' button, this function is called
+     * @param actionEvent
+     */
     public void handleNewFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
@@ -60,6 +76,9 @@ public class WelcomeController implements IController {
         }
     }
 
+    /**
+     * @param message
+     */
     private void showErrorMessage(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

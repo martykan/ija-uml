@@ -5,11 +5,14 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+/**
+ * Class for methods in class
+ */
 public class Methods {
     public String name;
     public EAttribVisibility visibility;
 
-    // getters
+    /** Getters **/
     public String getName() {
         return this.name;
     }
@@ -22,7 +25,7 @@ public class Methods {
         return this.getVisibility().getPrefix() + this.getName() + "()";
     }
 
-    // setters
+    /** Setters **/
     public void setName(String name) {
         this.name = name;
     }
@@ -31,7 +34,12 @@ public class Methods {
         this.visibility = value;
     }
 
-    // set all in one
+    /**
+     * Sets all values in one function
+     * @param name
+     * @param value
+     * @see EAttribVisibility
+     */
     public void setMethod(String name, EAttribVisibility value) {
         this.visibility = value;
         this.name = name;

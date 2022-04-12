@@ -8,22 +8,41 @@ package cz.vutfit.umlapp.model.commands;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
+/**
+ * Class for adding new attribute to class command
+ */
 public class AddClassAttributeCommand implements ICommand {
     private final Integer classId;
     private final String attrName;
     private final EAttribVisibility visibility;
 
+    /**
+     * Constructor
+     * @param classId ID of class
+     * @param attrName name of new attribute
+     * @param visibility visibility of attribute
+     * @see EAttribVisibility
+     */
     public AddClassAttributeCommand(Integer classId, String attrName, EAttribVisibility visibility) {
         this.classId = classId;
         this.attrName = attrName;
         this.visibility = visibility;
     }
 
+    /**
+     * Executing command - adding new attribute to class.
+     * @param file
+     * @throws Exception
+     */
     @Override
     public void execute(UMLFileData file) throws Exception {
         file.getClassByID(classId).addAttribute(attrName, visibility);
     }
 
+    /**
+     * Undo this command (remove added attribute).
+     * @param file
+     */
     @Override
     public void undo(UMLFileData file) {
         file.getClassByID(classId).removeAttribute(attrName);
