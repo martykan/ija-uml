@@ -9,10 +9,10 @@ package cz.vutfit.umlapp.model.uml;
  * Enumeration for attribute/method visibility in class
  */
 public enum EAttribVisibility {
-    PUBLIC,     /** + -> public **/
-    PRIVATE,    /** - -> private **/
-    PROTECTED,  /** # -> protected **/
-    PACKAGE;    /** ~ -> package **/
+    PUBLIC,     /** + -- public **/
+    PRIVATE,    /** - -- private **/
+    PROTECTED,  /** # -- protected **/
+    PACKAGE;    /** ~ -- package **/
 
     /**
      * Converts enum value to string - prefix.

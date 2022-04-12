@@ -56,9 +56,9 @@ public class UMLFileData {
     }
 
     /**
+     * Note: index can be out of bonds or classDiagram array can be completely empty / null - cases are handled by user
      * @param index index of class in arrayList
      * @return class in that index
-     * @note index can be out of bonds or classDiagram array can be completely empty / null - cases are handled by user
      */
     public ClassDiagram getClassByIndex(int index) {
         return (this.classDiagram).get(index);
