@@ -16,3 +16,9 @@ To build and run the JAR, use the following commands:
 mvn clean package
 java -jar ./dest/ija-app.jar
 ```
+
+To generate the documentation:
+
+```
+mvn javadoc:javadoc
+```

@@ -15,6 +15,7 @@ import cz.vutfit.umlapp.model.uml.Methods;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
+import cz.vutfit.umlapp.view.components.DraggableUMLRelationView;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -39,6 +40,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -134,6 +136,18 @@ public class MainController implements IController {
                 }
             });
             anchorScrollPane.getChildren().add(node);
+        }
+
+        // Relation testing - lines between all classes
+        List<Node> children = new ArrayList<>(anchorScrollPane.getChildren().filtered(it -> it instanceof DraggableUMLClassView));
+        for (int i = 0; i < children.size(); i++) {
+            DraggableUMLClassView node = (DraggableUMLClassView) children.get(i);
+            for (int j = i + 1; j < children.size(); j++) {
+                DraggableUMLClassView node2 = (DraggableUMLClassView) children.get(j);
+                DraggableUMLRelationView line = new DraggableUMLRelationView(node, node2, totalZoom);
+                anchorScrollPane.getChildren().add(line);
+                System.out.println("DraggableUMLRelationView " + i + " " + j);
+            }
         }
     }
 
