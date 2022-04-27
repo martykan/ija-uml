@@ -8,17 +8,17 @@ package cz.vutfit.umlapp.view.main;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.*;
-import cz.vutfit.umlapp.model.uml.Attributes;
-import cz.vutfit.umlapp.model.uml.ClassDiagram;
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.Methods;
+import cz.vutfit.umlapp.model.uml.*;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import cz.vutfit.umlapp.view.components.DraggableUMLRelationView;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,6 +35,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.layout.GridPane;
+import javafx.geometry.Insets;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -104,6 +106,7 @@ public class MainController implements IController {
                     () -> undoButton.fire()
             );
         } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -132,6 +135,7 @@ public class MainController implements IController {
                 try {
                     this.dataModel.executeCommand(new DragClassCommand(classDiagram.getID(), node.getTranslateX(), node.getTranslateY()));
                 } catch (Exception e) {
+                    this.showErrorMessage(e.getLocalizedMessage());
                     e.printStackTrace();
                 }
             });
@@ -159,6 +163,7 @@ public class MainController implements IController {
         try {
             this.dataModel.saveFile();
         } catch (IOException e) {
+            this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -171,6 +176,7 @@ public class MainController implements IController {
         try {
             this.viewHandler.openView("Welcome");
         } catch (IOException e) {
+            this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -190,21 +196,26 @@ public class MainController implements IController {
      * Updates entire View (UI).
      */
     private void updateView() {
-        viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
+        try {
+            viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
-        // Diagrams menu
-        TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
-        diagrams.showTreeItem();
-        diagrams.rootViewUpdate();
+            // Diagrams menu
+            TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
+            diagrams.showTreeItem();
+            diagrams.rootViewUpdate();
 
-        // Classes menu
-        TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
-        classes.showTreeItem();
-        classes.rootViewUpdate();
+            // Classes menu
+            TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
+            classes.showTreeItem();
+            classes.rootViewUpdate();
 
-        this.initDragDrop();
+            this.initDragDrop();
 
-        boxClassOptions.setVisible(this.selectedClass != null);
+            boxClassOptions.setVisible(this.selectedClass != null);
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -216,6 +227,7 @@ public class MainController implements IController {
             this.dataModel.undo();
             this.updateView();
         } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -225,19 +237,36 @@ public class MainController implements IController {
      * @param actionEvent
      */
     public void handleAddClass(ActionEvent actionEvent) {
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("New Class");
-        dialog.setHeaderText(null);
-        dialog.setContentText("New Class Name:");
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(className -> {
-            try {
-                this.dataModel.executeCommand(new AddClassCommand(className));
-                this.updateView();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        try {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("New Class");
+            dialog.setHeaderText(null);
+            dialog.setContentText("New Class Name:");
+
+            // disable OK button if text-input is empty
+            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                if (dialog.getEditor().getText().equals("")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }, dialog.getEditor().textProperty());
+            dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(className -> {
+                try {
+                    this.dataModel.executeCommand(new AddClassCommand(className));
+                    this.updateView();
+                } catch (Exception e) {
+                    this.showErrorMessage(e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception exception) {
+            this.showErrorMessage(exception.getLocalizedMessage());
+            exception.printStackTrace();
+        }
     }
 
     /**
@@ -259,8 +288,14 @@ public class MainController implements IController {
                 myclass = this.dataModel.getData().getClassByName(id);
                 ArrayList<Attributes> a = myclass.getAttribs();
                 ArrayList<Methods> m = myclass.getMethods();
+                ArrayList<Relationships> r = this.dataModel.getData().getRelationships();
                 String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
+                String[] x = currentOption.split("[+\\-#~]", 2);
+                boolean isAM = false;
+                if (x.length > 1) {
+                    x = x[1].split("[(]", 2);
+                    isAM = true;
+                }
                 if (x.length > 1 && x[1].equals(")")) {
                     for (Methods y : m) {
                         if (y.getName().equals(x[0])) {
@@ -269,7 +304,7 @@ public class MainController implements IController {
                         }
                     }
                     this.updateView();
-                } else {
+                } else if (isAM){
                     for (Attributes z : a) {
                         if (z.getName().equals(x[0])) {
                             this.dataModel.executeCommand(new RemoveClassAttributeCommand(myclass, x[0], z.getVisibility()));
@@ -277,14 +312,44 @@ public class MainController implements IController {
                         }
                     }
                     this.updateView();
+                } else {
+                    String currSplit = currentOption.split("[>< ]", 3)[2];
+                    if (currentOption.contains("><")) {
+                        currSplit = currSplit.split("[ ]", 2)[1];
+                        for (Relationships relation : r) {
+                            ClassDiagram nameclass = this.dataModel.getData().getClassByName(currSplit);
+                            if (nameclass == null)
+                                return;
+                            if (relation.getToClassID() == nameclass.getID() && relation.getFromClassID() == relation.getToClassID()) {
+                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
+                                break;
+                            }
+                        }
+                    } else if (currentOption.contains(">")) {
+                        for (Relationships relation : r) {
+                            if (relation.getToClassID() == this.dataModel.getData().getClassByName(currSplit).getID() && relation.getFromClassID() == this.dataModel.getData().getClassByName(id).getID()) {
+                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
+                                break;
+                            }
+                        }
+                    } else if (currentOption.contains("<")) {
+                        for (Relationships relation : r) {
+                            if (relation.getFromClassID() == this.dataModel.getData().getClassByName(currSplit).getID() && relation.getToClassID() == this.dataModel.getData().getClassByName(id).getID()) {
+                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
+                                break;
+                            }
+                        }
+                    }
+                    this.updateView();
                 }
-
             } else {
                 this.dataModel.executeCommand(new RemoveClassCommand(myclass.getID()));
                 this.updateView();
             }
         } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
+
         }
     }
 
@@ -305,28 +370,45 @@ public class MainController implements IController {
      * @param actionEvent
      */
     public void handleAddClassMethod(ActionEvent actionEvent) {
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("New Class Method");
-        dialog.setHeaderText(null);
-        dialog.setContentText("New Class Method Name:");
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(className -> {
-            try {
-                String id;
-                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                    id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+        try {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("New Class Method");
+            dialog.setHeaderText(null);
+            dialog.setContentText("New Class Method Name:");
+
+            // disable OK button if text-input is empty
+            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                if (dialog.getEditor().getText().equals("")) {
+                    return true;
                 } else {
-                    return;
+                    return false;
                 }
-                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-                if (myclass == null) // if not selected class but some attribute/method/relationship in that class
-                    myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
-                this.updateView();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            }, dialog.getEditor().textProperty());
+            dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(className -> {
+                try {
+                    String id;
+                    if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                        id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                    } else {
+                        return;
+                    }
+                    ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                    if (myclass == null) // if not selected class but some attribute/method/relationship in that class
+                        myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
+                    this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
+                    this.updateView();
+                } catch (Exception e) {
+                    this.showErrorMessage(e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -336,40 +418,137 @@ public class MainController implements IController {
      * @param actionEvent
      */
     public void handleAddAttribute(ActionEvent actionEvent) {
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("New Class Attribute");
-        dialog.setHeaderText(null);
-        dialog.setContentText("New Class Attribute Name:");
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(className -> {
-            try {
-                String id;
-                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                    id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+        try {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("New Class Attribute");
+            dialog.setHeaderText(null);
+            dialog.setContentText("New Class Attribute Name:");
+
+            // disable OK button if text-input is empty
+            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                if (dialog.getEditor().getText().equals("")) {
+                    return true;
                 } else {
-                    return;
+                    return false;
                 }
-                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-                if (myclass == null) // if not selected class but some attribute/method/relationship in that class
-                    myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
-                this.updateView();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            }, dialog.getEditor().textProperty());
+            dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(className -> {
+                try {
+                    String id;
+                    if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                        id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                    } else {
+                        return;
+                    }
+                    ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                    if (myclass == null) // if not selected class but some attribute/method/relationship in that class
+                        myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
+                    this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
+                    this.updateView();
+                } catch (Exception e) {
+                    this.showErrorMessage(e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
      * In boxClassOptions after clicking on New Relationship button, this function is called.
      * It is supposed to add new relationship from current class to another, works same way
      * as handleAddClassMethod or as handleAddAttribute.
-     * Currently TODO.
      * @param actionEvent
      * @see #handleAddClassMethod(ActionEvent)
      */
     public void handleAddRelation(ActionEvent actionEvent) {
-        return;
+        try {
+            String id;
+            if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+            } else {
+                return;
+            }
+            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+            if (myclass == null) // if not selected class but some attribute/method/relationship in that class
+                myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
+            String fromName = myclass.getName();
+
+            // Create the custom dialog.
+            Dialog<ArrayList<String>> dialog = new Dialog<>();
+            dialog.setTitle("New Relationship");
+            dialog.setHeaderText("Create a new relationship between two classes");
+
+            ButtonType createButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            ChoiceBox<String> typeBox = new ChoiceBox<>();
+            ChoiceBox<String> fromClassBox = new ChoiceBox<>();
+            ChoiceBox<String> toClassBox = new ChoiceBox<>();
+
+            for (ERelationType x : ERelationType.values()) {
+                typeBox.getItems().add(x.relationToString());
+            }
+            typeBox.getSelectionModel().selectFirst();
+
+            for (ClassDiagram c : this.dataModel.getData().getClasses()) {
+                fromClassBox.getItems().add(c.getName());
+                toClassBox.getItems().add(c.getName());
+            }
+            fromClassBox.getSelectionModel().selectFirst();
+            if (fromName != null) {
+                fromClassBox.getSelectionModel().select(fromName);
+            }
+            toClassBox.getSelectionModel().selectFirst();
+
+            grid.add(new Label("Type:"), 0, 0);
+            grid.add(typeBox, 1, 0);
+            grid.add(new Label("From:"), 0, 1);
+            grid.add(fromClassBox, 1, 1);
+            grid.add(new Label("To:"), 0, 2);
+            grid.add(toClassBox, 1, 2);
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == createButtonType) {
+                    ArrayList<String> x = new ArrayList<String>();
+                    x.add(fromClassBox.getSelectionModel().getSelectedItem());
+                    x.add(toClassBox.getSelectionModel().getSelectedItem());
+                    x.add(typeBox.getSelectionModel().getSelectedItem());
+                    return x;
+                }
+                return null;
+            });
+
+            Optional<ArrayList<String>> result = dialog.showAndWait();
+
+            result.ifPresent(returned -> {
+                try {
+                    System.out.println("New relationship: " + "From=" + returned.get(0) + ", To=" + returned.get(1) + ", Type=" + returned.get(2));
+                    Integer idFrom = this.dataModel.getData().getClassByName(returned.get(0)).getID();
+                    Integer idTo = this.dataModel.getData().getClassByName(returned.get(1)).getID();
+                    ERelationType relType = this.dataModel.getData().stringToRelation(returned.get(2));
+                    this.dataModel.executeCommand(new AddClassRelationshipCommand(idFrom, idTo, relType));
+                    this.updateView();
+                } catch (Exception e) {
+                    this.showErrorMessage(e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -380,30 +559,79 @@ public class MainController implements IController {
      * @see #handleClassSelection
      */
     public void handleProperties(TreeItem<String> selected) {
-        String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
-        ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-        if (myclass == null) { // currently not selected class
-            id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
-            myclass = this.dataModel.getData().getClassByName(id);
-            String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
-            String[] x = currentOption.split("[+\\-#~]", 2)[1].split("[(]", 2);
-            if (x.length > 1 && x[1].equals(")")) {
-                propertiesView.resetProperties();
-                propertiesView.addPropertyLine("Method", x[0]);
-                propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
-                propertiesView.addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
+        try {
+            String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+            if (myclass == null) { // currently not selected class
+                id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                myclass = this.dataModel.getData().getClassByName(id);
+                String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                String[] x = currentOption.split("[+\\-#~]", 2);
+                boolean isAM = false;
+                if (x.length > 1) {
+                    x = x[1].split("[(]", 2);
+                    isAM = true;
+                }
+                if (x.length > 1 && x[1].equals(")")) {
+                    propertiesView.resetProperties();
+                    propertiesView.addPropertyLine("Method", x[0]);
+                    propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
+                    propertiesView.addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
+                } else if (isAM) {
+                    propertiesView.resetProperties();
+                    propertiesView.addPropertyLine("Attribute", x[0]);
+                    propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
+                    propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
+                } else {
+                    String relType = "<none>";
+                    String fromString = "<none>";
+                    String toString = "<none>";
+                    String splitString = currentOption.split("[<>]", 2)[1];
+                    if (currentOption.contains("><")) {
+                        fromString = String.valueOf(myclass.getName());
+                        toString = fromString;
+                        for (Relationships y : this.dataModel.getData().getRelationships()) {
+                            if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
+                                relType = y.getType().relationToString();
+                                break;
+                            }
+                        }
+                    } else if (currentOption.contains(">")) {
+                        fromString = String.valueOf(myclass.getName());
+                        toString = splitString;
+                        for (Relationships y : this.dataModel.getData().getRelationships()) {
+                            if (fromString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
+                                relType = y.getType().relationToString();
+                                break;
+                            }
+                        }
+                    } else if (currentOption.contains("<")) {
+                        toString = String.valueOf(myclass.getName());
+                        fromString = splitString;
+                        for (Relationships y : this.dataModel.getData().getRelationships()) {
+                            if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
+                                relType = y.getType().relationToString();
+                                break;
+                            }
+                        }
+                    }
+
+                    propertiesView.resetProperties();
+                    propertiesView.addPropertyLine("Relationship", " ");
+                    propertiesView.addPropertyLine("From", fromString);
+                    propertiesView.addPropertyLine("To", toString);
+                    propertiesView.addPropertyLine("Type", relType);
+                }
             } else {
                 propertiesView.resetProperties();
-                propertiesView.addPropertyLine("Attribute", x[0]);
-                propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
-                propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
+                propertiesView.addPropertyLine("Class", myclass.getName());
+                propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
+                propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
+                propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
             }
-        } else {
-            propertiesView.resetProperties();
-            propertiesView.addPropertyLine("Class", myclass.getName());
-            propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
-            propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
-            propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
         }
     }
 
@@ -445,8 +673,17 @@ public class MainController implements IController {
             try {
                 ImageIO.write(SwingFXUtils.fromFXImage(wi, null), "png", file);
             } catch (IOException e) {
+                this.showErrorMessage(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showErrorMessage(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Exception");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

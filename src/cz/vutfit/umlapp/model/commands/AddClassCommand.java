@@ -28,12 +28,8 @@ public class AddClassCommand implements ICommand {
      * @param file
      */
     @Override
-    public void execute(UMLFileData file) {
-        try {
-            classId = file.addClass(className);
-        } catch (DuplicateClassNameException e) {
-            System.out.println("Duplicate Class Name - user is idiot");
-        }
+    public void execute(UMLFileData file) throws Exception {
+        classId = file.addClass(className);
     }
 
     /**

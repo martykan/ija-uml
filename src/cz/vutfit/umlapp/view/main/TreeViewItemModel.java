@@ -9,6 +9,7 @@ import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.Methods;
+import cz.vutfit.umlapp.model.uml.Relationships;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
@@ -51,16 +52,31 @@ public class TreeViewItemModel {
             case SEQUENCE_DIAGRAM:
                 break;
             case CLASS:
+                String relationString = null;
+                int classID = 0;
                 for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
                     item = new TreeItem<>(classDiagram.getName());
+                    classID = classDiagram.getID();
                     for (Attributes attributes : classDiagram.getAttribs()) {
                         item.getChildren().add(new TreeItem<>(attributes.getNameWithPrefix()));
                     }
-
                     for (Methods methods : classDiagram.getMethods()) {
                         item.getChildren().add(new TreeItem<>(methods.getNameWithPrefix()));
                     }
+                    for (Relationships relations : this.dataModel.getData().getRelationships()) {
+                        if (relations.getFromClassID() == classID && relations.getToClassID() == classID) {
+                            relationString = ">< " + classDiagram.getName();
+                        } else if (relations.getToClassID() == classID) {
+                            relationString = "< " + this.dataModel.getData().getClassByID(relations.getFromClassID()).getName();
+                        } else if  (relations.getFromClassID() == classID) {
+                            relationString = "> " + this.dataModel.getData().getClassByID(relations.getToClassID()).getName();
+                        }
+
+                        if (relationString != null)
+                            item.getChildren().add(new TreeItem<>(relationString));
+                    }
                     this.root.getChildren().add(item);
+                    relationString = null;
                 }
                 break;
         }
@@ -90,10 +106,9 @@ public class TreeViewItemModel {
         switch (this.itemType) {
             case METHOD:
             case ATTRIBUTE:
+            case RELATIONSHIP:
                 child = new TreeItem<>(name);
                 break;
-            case RELATIONSHIP:
-                break;  // todo
         }
         item.getChildren().add(child);
     }

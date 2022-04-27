@@ -3,21 +3,10 @@
  * Authors: Dominik Horký, Tomáš Martykán
  */
 
+
 package cz.vutfit.umlapp.model.uml;
 
 /**
- * TODO
- * Enumeration for relation type between two classes
- */
-enum ERelationType {
-    ASSOCIATION,
-    AGGREGATION,
-    COMPOSITION,
-    GENERALIZATION
-}
-
-/**
- * TODO
  * Class for relationship between two classes
  */
 public class Relationships {
@@ -63,6 +52,22 @@ public class Relationships {
         return this.fromDesc;
     }
 
+    public String getToDesc() {
+        return this.toDesc;
+    }
+
+    public ERelationType getType() {
+        return this.relationship;
+    }
+
+    public int getFromClassID() {
+        return this.fromId;
+    }
+
+    public int getToClassID() {
+        return this.toId;
+    }
+
     /** Setters **/
     public void setFromDesc(String text) {
         this.fromDesc = text;
@@ -70,5 +75,15 @@ public class Relationships {
 
     public void setToDesc(String text) {
         this.toDesc = text;
+    }
+
+    public void changeType(ERelationType newType) {
+        this.relationship = newType;
+    }
+
+    public void setAll(String fromDesc, String toDesc, ERelationType newType) {
+        this.fromDesc = fromDesc;
+        this.toDesc = toDesc;
+        this.relationship = newType;
     }
 }

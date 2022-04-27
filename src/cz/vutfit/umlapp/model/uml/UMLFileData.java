@@ -6,6 +6,7 @@
 package cz.vutfit.umlapp.model.uml;
 
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
+import cz.vutfit.umlapp.model.uml.exceptions.DuplicateRelationshipException;
 
 import java.util.ArrayList;
 
@@ -104,11 +105,9 @@ public class UMLFileData {
         int id = 0;
         boolean found = false;
         if (id != (this.classDiagram).size()) { // there are classes in list
-            //System.out.println("addClass: id != 0 (".concat(String.valueOf((this.classDiagram).size())).concat(")"));
             int i = 0;
             for (ClassDiagram c : this.classDiagram) {  // check if classes ID's are sorted, linear, start with 0, end with size-1
                 if (i != c.getID()) { // condition up is not true
-                    //System.out.println("addClass: found blbost: ".concat(String.valueOf(i).concat(" != ").concat(String.valueOf(c.getID()))));
                     id = i;
                     found = true;
                     break;
@@ -263,24 +262,48 @@ public class UMLFileData {
      * @param fromId class ID from which relationship begins
      * @param toId class ID to which relationship goes
      * @param type type of relationship
+     * @return ID of new relationship
      * @see ERelationType
      */
-    public void addRelation(int fromId, int toId, ERelationType type) {
+    public int addRelation(int fromId, int toId, ERelationType type) throws DuplicateRelationshipException {
         int id = 0;
+        boolean found = false;
         if (id != (this.relationships).size()) {
             int i = 0;
             for (Relationships c : this.relationships) {
                 if (i != c.getID()) {
                     id = i;
+                    found = true;
                     break;
                 }
                 i++;
             }
-            if (id == 0) id = (this.relationships).size();
+            if (id == 0 && !found) id = (this.relationships).size();
+        }
+
+        // relationships cannot have same fromID, toID
+        if (!checkRelationshipDuplicates(fromId, toId)) {
+            throw new DuplicateRelationshipException();
         }
 
         Relationships x = new Relationships(id, fromId, toId, type);
         (this.relationships).add(id, x);
+        return id;
+    }
+
+    /**
+     * Looks for duplicate relationships
+     * @param fromID ID of class from which relationship goes
+     * @param toID ID of class to which relationship goes
+     * @return true if no duplicates (check is OK) or false if found (check failed)
+     */
+    public boolean checkRelationshipDuplicates(int fromID, int toID) {
+        for (Relationships fst : this.relationships) {
+            if (fst.getFromClassID() == fromID && fst.getToClassID() == toID) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -291,11 +314,30 @@ public class UMLFileData {
     public boolean removeRelation(int id) {
         for (Relationships c : this.relationships) {
             if (c.getID() == id) {
-                (this.relationships).remove(id);
+                (this.relationships).remove(c);
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Converts string to enum ERelationType (compatible with relationToString() method in ERelationType)
+     * @param string valid string to be converted
+     * @return enum value of string or null if invalid
+     * @see ERelationType
+     */
+    public ERelationType stringToRelation(String string) {
+        if (string.equals("Association")) {
+            return ERelationType.ASSOCIATION;
+        } else if (string.equals("Aggregation")) {
+            return ERelationType.AGGREGATION;
+        } else if (string.equals("Composition")) {
+            return ERelationType.COMPOSITION;
+        } else if (string.equals("Generalization")) {
+            return ERelationType.GENERALIZATION;
+        }
+        return null;
     }
 }
 
