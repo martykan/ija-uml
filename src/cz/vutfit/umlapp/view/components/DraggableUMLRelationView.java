@@ -5,6 +5,7 @@
 
 package cz.vutfit.umlapp.view.components;
 
+import cz.vutfit.umlapp.model.uml.Relationships;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.AnchorPane;
@@ -20,15 +21,16 @@ public class DraggableUMLRelationView extends AnchorPane {
 
     DraggableUMLClassView node1;
     DraggableUMLClassView node2;
-    List<Point2D> midpoints = new ArrayList<>();
     AtomicReference<Double> totalZoom;
+    Relationships relationship;
 
-    public DraggableUMLRelationView(DraggableUMLClassView node1, DraggableUMLClassView node2, AtomicReference<Double> totalZoom) {
+    public DraggableUMLRelationView(DraggableUMLClassView node1, DraggableUMLClassView node2, AtomicReference<Double> totalZoom, Relationships relationship) {
         super();
 
         this.node1 = node1;
         this.node2 = node2;
         this.totalZoom = totalZoom;
+        this.relationship = relationship;
 
         this.setPrefWidth(10000);
         this.setPrefHeight(10000);
@@ -53,13 +55,15 @@ public class DraggableUMLRelationView extends AnchorPane {
         Platform.runLater(DraggableUMLRelationView.this::drawLine);
     }
 
+
     /**
      * Draw lines between classes, with midpoints
      */
     public void drawLine() {
         this.getChildren().clear();
         List<Line> lines = new ArrayList<>();
-        for (int i = 0; i <= midpoints.size(); i++) {
+
+        for (int i = 0; i <= this.relationship.lineMidpoints.size(); i++) {
             int finalI = i;
             // Line
             Line line = new Line();
@@ -67,32 +71,37 @@ public class DraggableUMLRelationView extends AnchorPane {
                 line.setStartX(this.node1.getTranslateX() + this.node1.getWidth() / 2);
                 line.setStartY(this.node1.getTranslateY() + this.node1.getHeight() / 2);
             } else {
-                line.setStartX(midpoints.get(i - 1).getX());
-                line.setStartY(midpoints.get(i - 1).getY());
+                line.setStartX(this.relationship.lineMidpoints.get(i - 1).getX());
+                line.setStartY(this.relationship.lineMidpoints.get(i - 1).getY());
             }
-            if (i == midpoints.size()) {
+            if (i == this.relationship.lineMidpoints.size()) {
                 line.setEndX(this.node2.getTranslateX() + this.node2.getWidth() / 2);
                 line.setEndY(this.node2.getTranslateY() + this.node2.getHeight() / 2);
             } else {
-                line.setEndX(midpoints.get(i).getX());
-                line.setEndY(midpoints.get(i).getY());
+                line.setEndX(this.relationship.lineMidpoints.get(i).getX());
+                line.setEndY(this.relationship.lineMidpoints.get(i).getY());
             }
             line.setStrokeWidth(2);
             line.setOnMousePressed(event -> {
-                midpoints.add(finalI, new Point2D(event.getX(), event.getY()));
+                this.relationship.lineMidpoints.add(finalI, new Point2D(event.getX(), event.getY()));
                 this.drawLine();
             });
             lines.add(line);
-            this.getChildren().add(line);
         }
+        this.getChildren().addAll(lines);
 
-        for (int i = 0; i <= midpoints.size(); i++) {
+        final UMLArrow arrowStart = new UMLArrow(this.node1, new Point2D(lines.get(0).getEndX(), lines.get(0).getEndY()), this.relationship.getType(), false);
+        final UMLArrow arrowEnd = new UMLArrow(this.node2, new Point2D(lines.get(lines.size() - 1).getStartX(), lines.get(lines.size() - 1).getStartY()), this.relationship.getType(), true);
+        this.getChildren().add(arrowStart);
+        this.getChildren().add(arrowEnd);
+
+        for (int i = 0; i <= this.relationship.lineMidpoints.size(); i++) {
             int finalI = i;
             // Midpoint indicator
-            if (i < midpoints.size()) {
+            if (i < this.relationship.lineMidpoints.size()) {
                 Circle circle = new Circle(15, Paint.valueOf("blue"));
-                circle.setTranslateX(midpoints.get(i).getX());
-                circle.setTranslateY(midpoints.get(i).getY());
+                circle.setTranslateX(this.relationship.lineMidpoints.get(i).getX());
+                circle.setTranslateY(this.relationship.lineMidpoints.get(i).getY());
                 circle.setOpacity(0);
 
                 // Draggable
@@ -117,11 +126,16 @@ public class DraggableUMLRelationView extends AnchorPane {
                     lines.get(finalI).setEndY(posY);
                     lines.get(finalI + 1).setStartX(posX);
                     lines.get(finalI + 1).setStartY(posY);
-
-                    midpoints.set(finalI, new Point2D(circle.getTranslateX(), circle.getTranslateY()));
+                    if (finalI == 0) {
+                        arrowStart.updatePosition(new Point2D(posX, posY));
+                    }
+                    if (finalI == this.relationship.lineMidpoints.size() - 1) {
+                        arrowEnd.updatePosition(new Point2D(posX, posY));
+                    }
+                    this.relationship.lineMidpoints.set(finalI, new Point2D(circle.getTranslateX(), circle.getTranslateY()));
                 });
                 circle.setOnContextMenuRequested(event -> {
-                    midpoints.remove(finalI);
+                    this.relationship.lineMidpoints.remove(finalI);
                     drawLine();
                 });
                 circle.setOnMouseEntered(event -> {

@@ -6,16 +6,40 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+import javafx.geometry.Point2D;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class for relationship between two classes
  */
 public class Relationships {
     public Integer id;
-    public Integer fromId;  /** ID of class from which relationship starts **/
-    public Integer toId;    /** ID of class to which relationship goes **/
-    public ERelationType relationship;  /** type of relationship **/
-    public String fromDesc; /** additional description of relationship in fromID part **/
-    public String toDesc;   /** additional description of relationship in toID part   **/
+    /**
+     * ID of class from which relationship starts
+     **/
+    public Integer fromId;
+    /**
+     * ID of class to which relationship goes
+     **/
+    public Integer toId;
+    /**
+     * type of relationship
+     **/
+    public ERelationType relationship;
+    /**
+     * additional description of relationship in fromID part
+     **/
+    public String fromDesc;
+    /**
+     * additional description of relationship in toID part
+     **/
+    public String toDesc;
+    /**
+     * midpoints of the relationship line
+     **/
+    public List<Point2D> lineMidpoints = new ArrayList<>();
 
     /**
      * Constructor

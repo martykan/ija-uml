@@ -42,7 +42,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -132,6 +132,7 @@ public class MainController implements IController {
             event.consume();
         });
         anchorScrollPane.getChildren().clear();
+        HashMap<Integer, DraggableUMLClassView> classNodes = new HashMap<>();
         for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
             DraggableUMLClassView node = new DraggableUMLClassView(classDiagram, totalZoom);
             node.setOnMouseReleased(event -> {
@@ -145,18 +146,14 @@ public class MainController implements IController {
                 }
             });
             anchorScrollPane.getChildren().add(node);
+            classNodes.put(classDiagram.getID(), node);
         }
 
-        // Relation testing - lines between all classes
-        List<Node> children = new ArrayList<>(anchorScrollPane.getChildren().filtered(it -> it instanceof DraggableUMLClassView));
-        for (int i = 0; i < children.size(); i++) {
-            DraggableUMLClassView node = (DraggableUMLClassView) children.get(i);
-            for (int j = i + 1; j < children.size(); j++) {
-                DraggableUMLClassView node2 = (DraggableUMLClassView) children.get(j);
-                DraggableUMLRelationView line = new DraggableUMLRelationView(node, node2, totalZoom);
-                anchorScrollPane.getChildren().add(line);
-                System.out.println("DraggableUMLRelationView " + i + " " + j);
-            }
+        for (Relationships relationship : this.dataModel.getData().getRelationships()) {
+            DraggableUMLClassView node = classNodes.get(relationship.fromId);
+            DraggableUMLClassView node2 = classNodes.get(relationship.toId);
+            DraggableUMLRelationView line = new DraggableUMLRelationView(node, node2, totalZoom, relationship);
+            anchorScrollPane.getChildren().add(line);
         }
     }
 
