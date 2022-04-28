@@ -191,7 +191,6 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
-<<<<<<< HEAD
         try {
             propertiesView.addPropertyLine("Nothing selected", "");
             propertiesView.setOnUpdated(this::updateView);
@@ -199,10 +198,6 @@ public class MainController implements IController {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
-=======
-        propertiesView.addPropertyLine("Nothing selected", "");
-        propertiesView.setOnUpdated(this::updateView);
->>>>>>> 80443efb81e7ded0ba7e9c114e4310c40570f41a
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);

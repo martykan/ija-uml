@@ -40,15 +40,12 @@ import java.util.Optional;
  * Class for properties view (Properties section in menu)
  */
 public class PropertiesView extends VBox {
-<<<<<<< HEAD
     public EPropertyType groupType = EPropertyType.EMPTY;
     public DataModel dataModel;
     public TreeView<String> classTreeView;
     public String stringID;
     public int intID;
 
-    private UpdatedCallback updatedCallback;
-
     /**
      * Set callback on updated
      *
@@ -57,18 +54,7 @@ public class PropertiesView extends VBox {
     public void setOnUpdated(UpdatedCallback updatedCallback) {
         this.updatedCallback = updatedCallback;
     }
-=======
     private UpdatedCallback updatedCallback;
-
-    /**
-     * Set callback on updated
-     *
-     * @param updatedCallback callback
-     */
-    public void setOnUpdated(UpdatedCallback updatedCallback) {
-        this.updatedCallback = updatedCallback;
-    }
->>>>>>> 80443efb81e7ded0ba7e9c114e4310c40570f41a
 
     /**
      * Adds one line to the properties section.
@@ -103,7 +89,6 @@ public class PropertiesView extends VBox {
         this.groupType = EPropertyType.EMPTY;
     }
 
-<<<<<<< HEAD
     public void setGroupType(EPropertyType type) {
         this.groupType = type;
     }
@@ -755,13 +740,4 @@ public class PropertiesView extends VBox {
     public interface UpdatedCallback {
         void onUpdated();
     }
-
-=======
-    /**
-     * Callback interface for when the data is updated
-     */
-    public interface UpdatedCallback {
-        void onUpdated();
-    }
->>>>>>> 80443efb81e7ded0ba7e9c114e4310c40570f41a
 }
