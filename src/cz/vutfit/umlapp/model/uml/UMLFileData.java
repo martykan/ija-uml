@@ -208,14 +208,16 @@ public class UMLFileData {
         int id = 0;
         if (id != (this.sequenceDiagrams).size()) {
             int i = 0;
+            boolean found = false;
             for (SequenceDiagram c : this.sequenceDiagrams) {
                 if (i != c.getID()) {
                     id = i;
+                    found = true;
                     break;
                 }
                 i++;
             }
-            if (id == 0) id = (this.sequenceDiagrams).size();
+            if (id == 0 && !found) id = (this.sequenceDiagrams).size();
         }
 
         SequenceDiagram x = new SequenceDiagram(id, name);

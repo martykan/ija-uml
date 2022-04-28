@@ -127,7 +127,8 @@ public class PropertiesView extends VBox {
             case SEQUENCE_DIAGRAM:
                 bindSequenceActions(prop, text, line);
             case EMPTY:
-                System.out.println("Warning: Executed bindPropertyActions on groupType EMPTY");
+                if (!prop.getText().equals("Nothing selected"))
+                    System.out.println("Warning: Executed bindPropertyActions on groupType EMPTY ["+prop+";"+text+"]");
                 break;
         }
     }
