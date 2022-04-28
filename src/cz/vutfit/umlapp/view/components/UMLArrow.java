@@ -23,6 +23,7 @@ public class UMLArrow extends AnchorPane {
     public UMLArrow(VBox node, Point2D startPoint, ERelationType type, boolean isEnd) {
         this.node = node;
         this.type = type;
+        this.isEnd = isEnd;
 
         this.setPickOnBounds(false);
         this.updatePosition(startPoint);
