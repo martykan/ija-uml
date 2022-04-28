@@ -163,7 +163,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 this.dataModel.executeCommand(new EditClassNameCommand(myclass.getID(), className));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new class name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -244,7 +244,7 @@ public class PropertiesView extends VBox {
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String oldAttribName = text.getText();
                                 this.dataModel.executeCommand(new EditClassAttributeNameCommand(myclass.getID(), oldAttribName, attribName));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new attribute name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -285,7 +285,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 this.dataModel.executeCommand(new EditClassNameCommand(myclass.getID(), className));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new attribute class name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -357,7 +357,7 @@ public class PropertiesView extends VBox {
                                 String attribName = this.stringID;
                                 System.out.println(attribName);
                                 this.dataModel.executeCommand(new EditClassAttributeVisibilityCommand(myclass.getID(), attribName, newVisibility));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new attribute visibility", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -405,7 +405,7 @@ public class PropertiesView extends VBox {
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String oldAttribName = this.stringID;
                                 this.dataModel.executeCommand(new EditClassMethodNameCommand(myclass.getID(), oldAttribName, attribName));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new method name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -446,7 +446,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 this.dataModel.executeCommand(new EditClassNameCommand(myclass.getID(), className));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new method class name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -517,7 +517,7 @@ public class PropertiesView extends VBox {
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String attribName = this.stringID;
                                 this.dataModel.executeCommand(new EditClassMethodVisibilityCommand(myclass.getID(), attribName, newVisibility));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new method visibility", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -592,7 +592,7 @@ public class PropertiesView extends VBox {
                                 int fromID = this.dataModel.getData().getClassByName(data.get(0)).getID();
                                 int toID = this.dataModel.getData().getClassByName(data.get(1)).getID();
                                 this.dataModel.executeCommand(new EditClassRelationshipFromToCommand(this.intID, fromID, toID));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new method visibility", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -646,7 +646,7 @@ public class PropertiesView extends VBox {
                         result.ifPresent(newType -> {
                             try {
                                 this.dataModel.executeCommand(new EditClassRelationshipTypeCommand(this.intID, newType));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new method visibility", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -680,7 +680,7 @@ public class PropertiesView extends VBox {
                         result.ifPresent(newString -> {
                             try {
                                 this.dataModel.executeCommand(new EditClassRelationshipFromDescCommand(this.intID, newString));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new attribute class name", e.getLocalizedMessage());
                                 ex.printStackTrace();
@@ -714,7 +714,7 @@ public class PropertiesView extends VBox {
                         result.ifPresent(newString -> {
                             try {
                                 this.dataModel.executeCommand(new EditClassRelationshipToDescCommand(this.intID, newString));
-                                //this.updateView();
+                                this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 //this.showErrorMessage("Unable to set new attribute class name", e.getLocalizedMessage());
                                 ex.printStackTrace();
