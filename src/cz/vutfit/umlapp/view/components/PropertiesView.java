@@ -15,10 +15,22 @@ import javafx.scene.text.TextAlignment;
  * Class for properties view (Properties section in menu)
  */
 public class PropertiesView extends VBox {
+    private UpdatedCallback updatedCallback;
+
+    /**
+     * Set callback on updated
+     *
+     * @param updatedCallback callback
+     */
+    public void setOnUpdated(UpdatedCallback updatedCallback) {
+        this.updatedCallback = updatedCallback;
+    }
+
     /**
      * Adds one line to the properties section.
+     *
      * @param property name of property, data description
-     * @param text data-value (in String)
+     * @param text     data-value (in String)
      */
     public void addPropertyLine(String property, String text) {
         BorderPane line = new BorderPane();
@@ -43,5 +55,12 @@ public class PropertiesView extends VBox {
      */
     public void resetProperties() {
         this.getChildren().clear();
+    }
+
+    /**
+     * Callback interface for when the data is updated
+     */
+    public interface UpdatedCallback {
+        void onUpdated();
     }
 }
