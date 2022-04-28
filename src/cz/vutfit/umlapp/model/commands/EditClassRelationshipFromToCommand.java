@@ -29,7 +29,7 @@ public class EditClassRelationshipFromToCommand implements ICommand {
         this.oldToID = file.getRelationByID(this.relID).getToClassID();
         if (file.checkRelationshipDuplicates(this.fromID, this.toID)) {
             file.getRelationByID(this.relID).setToClassID(this.toID);
-            file.getRelationByID(this.relID).setFromClassID(this.toID);
+            file.getRelationByID(this.relID).setFromClassID(this.fromID);
         } else {
             throw new DuplicateRelationshipException();
         }
