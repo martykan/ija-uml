@@ -13,6 +13,7 @@ import cz.vutfit.umlapp.model.uml.UMLFileData;
  */
 public class AddClassRelationshipCommand implements ICommand {
     private Integer relationID;
+    private final String name;
     private final Integer fromClassID;
     private final Integer toClassID;
     private final ERelationType type;
@@ -32,6 +33,7 @@ public class AddClassRelationshipCommand implements ICommand {
         this.type = type;
         this.fromDesc = null;
         this.toDesc = null;
+        this.name = null;
     }
 
     /**
@@ -43,12 +45,13 @@ public class AddClassRelationshipCommand implements ICommand {
      * @param toDesc description of relationship on toClassID side
      * @see ERelationType
      */
-    public AddClassRelationshipCommand(Integer fromClassID, Integer toClassID, ERelationType type, String fromDesc, String toDesc) {
+    public AddClassRelationshipCommand(Integer fromClassID, Integer toClassID, ERelationType type, String name, String fromDesc, String toDesc) {
         this.fromClassID = fromClassID;
         this.toClassID = toClassID;
         this.type = type;
         this.fromDesc = fromDesc;
         this.toDesc = toDesc;
+        this.name = name;
     }
 
     /**
@@ -62,6 +65,7 @@ public class AddClassRelationshipCommand implements ICommand {
         this.relationID = newID;
         file.getRelationByID(this.relationID).setFromDesc(this.fromDesc);
         file.getRelationByID(this.relationID).setToDesc(this.toDesc);
+        file.getRelationByID(this.relationID).setName(this.name);
     }
 
     /**

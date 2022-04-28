@@ -597,11 +597,12 @@ public class MainController implements IController {
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
                     propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
                 } else {
-                    String relType = "<none>";
-                    String fromString = "<none>";
-                    String toString = "<none>";
+                    String relType = "<empty>";
+                    String fromString = "<empty>";
+                    String toString = "<empty>";
                     String fromDesc = null;
                     String toDesc = null;
+                    String relName = "<empty>";
                     Integer ID = 0;
                     String splitString = currentOption.split("[<>]", 2)[1];
                     if (currentOption.contains("><")) {
@@ -613,6 +614,7 @@ public class MainController implements IController {
                                 fromDesc = y.getFromDesc();
                                 toDesc = y.getToDesc();
                                 ID = y.getID();
+                                relName = y.getName();
                                 break;
                             }
                         }
@@ -625,6 +627,7 @@ public class MainController implements IController {
                                 fromDesc = y.getFromDesc();
                                 toDesc = y.getToDesc();
                                 ID = y.getID();
+                                relName = y.getName();
                                 break;
                             }
                         }
@@ -637,6 +640,7 @@ public class MainController implements IController {
                                 fromDesc = y.getFromDesc();
                                 toDesc = y.getToDesc();
                                 ID = y.getID();
+                                relName = y.getName();
                                 break;
                             }
                         }
@@ -646,11 +650,13 @@ public class MainController implements IController {
                         fromDesc = "<empty>";
                     if (toDesc == null)
                         toDesc = "<empty>";
+                    if (relName == null)
+                        relName = "<unnamed>";
 
                     propertiesView.resetProperties();
                     propertiesView.setGroupType(EPropertyType.RELATIONSHIP);
                     propertiesView.setID(ID);
-                    propertiesView.addPropertyLine("Relationship", " ");
+                    propertiesView.addPropertyLine("Relationship", relName);
                     propertiesView.addPropertyLine("From", fromString);
                     propertiesView.addPropertyLine("To", toString);
                     propertiesView.addPropertyLine("Type", relType);

@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class Relationships {
     public Integer id;
+    public String name;
     /**
      * ID of class from which relationship starts
      **/
@@ -92,6 +93,8 @@ public class Relationships {
         return this.toId;
     }
 
+    public String getName() { return this.name; }
+
     /** Setters **/
     public void setFromDesc(String text) {
         this.fromDesc = text;
@@ -113,16 +116,20 @@ public class Relationships {
         this.toId = ID;
     }
 
-    public void setAll(String fromDesc, String toDesc, ERelationType newType) {
+    public void setName(String name) { this.name = name; }
+
+    public void setAll(String fromDesc, String toDesc, ERelationType newType, String name) {
         this.fromDesc = fromDesc;
         this.toDesc = toDesc;
         this.relationship = newType;
+        this.name = name;
     }
 
-    public void setAll(String fromDesc, String toDesc, ERelationType newType, int from, int to) {
+    public void setAll(String fromDesc, String toDesc, ERelationType newType, String name, int from, int to) {
         this.fromDesc = fromDesc;
         this.toDesc = toDesc;
         this.relationship = newType;
+        this.name = name;
         this.fromId = from;
         this.toId = to;
     }

@@ -15,6 +15,7 @@ import cz.vutfit.umlapp.model.commands.EditClassRelationshipToDescCommand;
 import cz.vutfit.umlapp.model.commands.EditClassRelationshipFromDescCommand;
 import cz.vutfit.umlapp.model.commands.EditClassRelationshipFromToCommand;
 import cz.vutfit.umlapp.model.commands.EditClassRelationshipTypeCommand;
+import cz.vutfit.umlapp.model.commands.EditClassRelationshipNameCommand;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.ERelationType;
@@ -535,7 +536,39 @@ public class PropertiesView extends VBox {
 
     private void bindRelationshipActions(Label prop, Label text, BorderPane line) {
         if (prop.getText().equals("Relationship")) {
-            return; // no action
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        TextInputDialog dialog = new TextInputDialog("");
+                        dialog.setTitle("Relationship name");
+                        dialog.setHeaderText("Change name of this relationship.\nOld name: " + text.getText());
+                        dialog.setContentText("New name:");
+
+                        // disable OK button if text-input is same as old
+                        BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                            if (dialog.getEditor().getText().equals(text.getText())) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }, dialog.getEditor().textProperty());
+                        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(newString -> {
+                            try {
+                                this.dataModel.executeCommand(new EditClassRelationshipNameCommand(this.intID, newString));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new name", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
         } else if (prop.getText().equals("From") || (prop.getText().equals("To"))) {
             line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if (e.getClickCount() == 2) {
