@@ -13,6 +13,7 @@ import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import cz.vutfit.umlapp.view.components.DraggableUMLRelationView;
+import cz.vutfit.umlapp.view.components.EPropertyType;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -86,7 +87,12 @@ public class MainController implements IController {
         } else {
             this.selectedClass = null;
             propertiesView.resetProperties();
-            propertiesView.addPropertyLine("Nothing selected", "");
+            try {
+                propertiesView.addPropertyLine("Nothing selected", "");
+            } catch (Exception e) {
+                this.showErrorMessage(e.getLocalizedMessage());
+                e.printStackTrace();
+            }
         }
         boxClassOptions.setVisible(this.selectedClass != null);
     };
@@ -186,7 +192,12 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
-        propertiesView.addPropertyLine("Nothing selected", "");
+        try {
+            propertiesView.addPropertyLine("Nothing selected", "");
+        } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);
@@ -195,7 +206,7 @@ public class MainController implements IController {
     /**
      * Updates entire View (UI).
      */
-    private void updateView() {
+    public void updateView() {
         try {
             viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
@@ -560,6 +571,8 @@ public class MainController implements IController {
      */
     public void handleProperties(TreeItem<String> selected) {
         try {
+            propertiesView.setDataModel(this.dataModel);
+            propertiesView.setClassTreeView(this.classTreeView);
             String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
             ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
             if (myclass == null) { // currently not selected class
@@ -574,11 +587,15 @@ public class MainController implements IController {
                 }
                 if (x.length > 1 && x[1].equals(")")) {
                     propertiesView.resetProperties();
+                    propertiesView.setGroupType(EPropertyType.METHOD);
+                    propertiesView.setID(x[0]);
                     propertiesView.addPropertyLine("Method", x[0]);
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
                     propertiesView.addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
                 } else if (isAM) {
                     propertiesView.resetProperties();
+                    propertiesView.setGroupType(EPropertyType.ATTRIBUTE);
+                    propertiesView.setID(x[0]);
                     propertiesView.addPropertyLine("Attribute", x[0]);
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
                     propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
@@ -586,6 +603,9 @@ public class MainController implements IController {
                     String relType = "<none>";
                     String fromString = "<none>";
                     String toString = "<none>";
+                    String fromDesc = null;
+                    String toDesc = null;
+                    Integer ID = 0;
                     String splitString = currentOption.split("[<>]", 2)[1];
                     if (currentOption.contains("><")) {
                         fromString = String.valueOf(myclass.getName());
@@ -593,6 +613,9 @@ public class MainController implements IController {
                         for (Relationships y : this.dataModel.getData().getRelationships()) {
                             if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
                                 relType = y.getType().relationToString();
+                                fromDesc = y.getFromDesc();
+                                toDesc = y.getToDesc();
+                                ID = y.getID();
                                 break;
                             }
                         }
@@ -602,6 +625,9 @@ public class MainController implements IController {
                         for (Relationships y : this.dataModel.getData().getRelationships()) {
                             if (fromString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
                                 relType = y.getType().relationToString();
+                                fromDesc = y.getFromDesc();
+                                toDesc = y.getToDesc();
+                                ID = y.getID();
                                 break;
                             }
                         }
@@ -611,19 +637,33 @@ public class MainController implements IController {
                         for (Relationships y : this.dataModel.getData().getRelationships()) {
                             if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
                                 relType = y.getType().relationToString();
+                                fromDesc = y.getFromDesc();
+                                toDesc = y.getToDesc();
+                                ID = y.getID();
                                 break;
                             }
                         }
                     }
 
+                    if (fromDesc == null)
+                        fromDesc = "<empty>";
+                    if (toDesc == null)
+                        toDesc = "<empty>";
+
                     propertiesView.resetProperties();
+                    propertiesView.setGroupType(EPropertyType.RELATIONSHIP);
+                    propertiesView.setID(ID);
                     propertiesView.addPropertyLine("Relationship", " ");
                     propertiesView.addPropertyLine("From", fromString);
                     propertiesView.addPropertyLine("To", toString);
                     propertiesView.addPropertyLine("Type", relType);
+                    propertiesView.addPropertyLine("FromDesc", fromDesc);
+                    propertiesView.addPropertyLine("ToDesc", toDesc);
                 }
             } else {
                 propertiesView.resetProperties();
+                propertiesView.setGroupType(EPropertyType.CLASS);
+                propertiesView.setID(myclass.getID());
                 propertiesView.addPropertyLine("Class", myclass.getName());
                 propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
                 propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));

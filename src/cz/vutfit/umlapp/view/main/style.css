@@ -37,8 +37,8 @@
     -fx-padding: 0 0 0 5px;
 }
 
-.property-text {
-
+.property-text:hover {
+    -fx-underline: true;
 }
 
 .box-heading {

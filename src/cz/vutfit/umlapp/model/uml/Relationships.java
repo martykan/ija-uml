@@ -77,13 +77,29 @@ public class Relationships {
         this.toDesc = text;
     }
 
-    public void changeType(ERelationType newType) {
+    public void setType(ERelationType newType) {
         this.relationship = newType;
+    }
+
+    public void setFromClassID(Integer ID) {
+        this.fromId = ID;
+    }
+
+    public void setToClassID(Integer ID) {
+        this.toId = ID;
     }
 
     public void setAll(String fromDesc, String toDesc, ERelationType newType) {
         this.fromDesc = fromDesc;
         this.toDesc = toDesc;
         this.relationship = newType;
+    }
+
+    public void setAll(String fromDesc, String toDesc, ERelationType newType, int from, int to) {
+        this.fromDesc = fromDesc;
+        this.toDesc = toDesc;
+        this.relationship = newType;
+        this.fromId = from;
+        this.toId = to;
     }
 }
