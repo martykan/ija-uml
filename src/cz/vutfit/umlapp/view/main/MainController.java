@@ -19,10 +19,10 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
@@ -30,14 +30,13 @@ import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.layout.GridPane;
-import javafx.geometry.Insets;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -192,12 +191,18 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
+<<<<<<< HEAD
         try {
             propertiesView.addPropertyLine("Nothing selected", "");
+            propertiesView.setOnUpdated(this::updateView);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
+=======
+        propertiesView.addPropertyLine("Nothing selected", "");
+        propertiesView.setOnUpdated(this::updateView);
+>>>>>>> 80443efb81e7ded0ba7e9c114e4310c40570f41a
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);
