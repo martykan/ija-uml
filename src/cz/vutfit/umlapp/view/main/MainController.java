@@ -227,7 +227,7 @@ public class MainController implements IController {
             this.dataModel.undo();
             this.updateView();
         } catch (Exception e) {
-            this.showErrorMessage(e.getLocalizedMessage());
+            this.showErrorMessage("Unable to undo operation", e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
@@ -259,7 +259,7 @@ public class MainController implements IController {
                     this.dataModel.executeCommand(new AddClassCommand(className));
                     this.updateView();
                 } catch (Exception e) {
-                    this.showErrorMessage(e.getLocalizedMessage());
+                    this.showErrorMessage("Unable to add new class",e.getLocalizedMessage());
                     e.printStackTrace();
                 }
             });
@@ -401,7 +401,7 @@ public class MainController implements IController {
                     this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
                     this.updateView();
                 } catch (Exception e) {
-                    this.showErrorMessage(e.getLocalizedMessage());
+                    this.showErrorMessage("Unable to add new method",e.getLocalizedMessage());
                     e.printStackTrace();
                 }
             });
@@ -449,7 +449,7 @@ public class MainController implements IController {
                     this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
                     this.updateView();
                 } catch (Exception e) {
-                    this.showErrorMessage(e.getLocalizedMessage());
+                    this.showErrorMessage("Unable to add new attribute", e.getLocalizedMessage());
                     e.printStackTrace();
                 }
             });
@@ -541,7 +541,7 @@ public class MainController implements IController {
                     this.dataModel.executeCommand(new AddClassRelationshipCommand(idFrom, idTo, relType));
                     this.updateView();
                 } catch (Exception e) {
-                    this.showErrorMessage(e.getLocalizedMessage());
+                    this.showErrorMessage("Unable to add new relationship", e.getLocalizedMessage());
                     e.printStackTrace();
                 }
             });
@@ -673,16 +673,24 @@ public class MainController implements IController {
             try {
                 ImageIO.write(SwingFXUtils.fromFXImage(wi, null), "png", file);
             } catch (IOException e) {
-                this.showErrorMessage(e.getLocalizedMessage());
+                this.showErrorMessage("Error when saving snapshot", e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
     }
 
+    private void showErrorMessage(String header, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void showErrorMessage(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
-        alert.setHeaderText("Exception");
+        alert.setHeaderText("Internal error (exception)");
         alert.setContentText(message);
         alert.showAndWait();
     }

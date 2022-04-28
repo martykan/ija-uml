@@ -10,6 +10,6 @@ package cz.vutfit.umlapp.model.uml.exceptions;
  */
 public class DuplicateRelationshipException extends Exception {
     public DuplicateRelationshipException() {
-        super("Duplicate relationship (relationship with 'from class' and 'to class' already exists)");
+        super("Relationship with same 'from class' and 'to class' already exists");
     }
 }
