@@ -46,6 +46,7 @@ public class ViewHandler {
      */
     public void openView(String name) throws IOException {
         FXMLLoader loader = new FXMLLoader();
+        System.out.println("/" + name.toLowerCase() + "/" + name + "View.fxml");
         loader.setLocation(getClass().getResource("/" + name.toLowerCase() + "/" + name + "View.fxml"));
         Parent root = loader.load();
 

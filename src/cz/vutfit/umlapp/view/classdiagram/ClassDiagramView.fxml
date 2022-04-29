@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ File: ClassDiagramView.fxml
+  ~ Authors: Dominik Horký, Tomáš Martykán
+  -->
+
+<!--
+  ~ File: ClassDiagram.fxml
+  ~ Authors: Dominik Horký, Tomáš Martykán
+  -->
+
+<?import cz.vutfit.umlapp.view.components.PropertiesView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           xmlns="http://javafx.com/javafx"
+           fx:controller="cz.vutfit.umlapp.view.classdiagram.ClassDiagramController"
+           prefHeight="600.0" prefWidth="1000.0">
+
+    <!--
+    Main Panel
+    -->
+    <SplitPane dividerPositions="0.3">
+        <VBox>
+            <HBox styleClass="box-actions">
+                <Button fx:id="closeButton" styleClass="icon-button" onAction="#handleClose">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@../main/ic_home.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Home (close file)"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="saveButton" styleClass="icon-button" onAction="#handleSave">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@../main/ic_save.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Save"/>
+                    </tooltip>
+                </Button>
+                <Button styleClass="icon-button" onAction="#handleSnapshot">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@../main/ic_camera.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Save snapshot"/>
+                    </tooltip>
+                </Button>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button fx:id="undoButton" styleClass="icon-button" onAction="#handleUndo">
+                    <graphic>
+                        <ImageView fitWidth="24" fitHeight="24">
+                            <Image url="@../main/ic_undo.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Undo"/>
+                    </tooltip>
+                </Button>
+            </HBox>
+
+            <!--
+             Main menu
+             -->
+
+            <!-- Diagrams -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Diagrams"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
+            </HBox>
+            <TreeView fx:id="diagramTreeView" maxHeight="150"/>
+
+            <!-- Classes -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Classes"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemove"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
+            </HBox>
+            <TreeView fx:id="classTreeView" maxHeight="225"/>
+
+            <!-- Classes -> more options -->
+            <HBox fx:id="boxClassOptions" visible="false">
+                <Button text="New Method" onAction="#handleAddClassMethod"/>
+                <Button text="New Attribute" onAction="#handleAddAttribute"/>
+                <Button text="New Relation" onAction="#handleAddRelation"/>
+            </HBox>
+
+            <!-- Properties -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Properties"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+            <PropertiesView fx:id="propertiesView"/>
+        </VBox>
+
+        <!--
+        (Current) Diagram area
+        -->
+        <ScrollPane fx:id="scrollPane" vvalue="0.5" hvalue="0.5">
+            <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000" styleClass="checkerboard">
+            </AnchorPane>
+        </ScrollPane>
+    </SplitPane>
+
+    <stylesheets>
+        <URL value="@../main/style.css"/>
+    </stylesheets>
+</StackPane>

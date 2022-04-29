@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ File: MainView.fxml
+  ~ File: SequenceDiagramView.fxml
   ~ Authors: Dominik Horký, Tomáš Martykán
   -->
 
-<?import cz.vutfit.umlapp.view.components.PropertiesView?>
+<!--
+  ~ File: ClassDiagram.fxml
+  ~ Authors: Dominik Horký, Tomáš Martykán
+  -->
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
            xmlns="http://javafx.com/javafx"
-           fx:controller="cz.vutfit.umlapp.view.main.MainController"
+           fx:controller="cz.vutfit.umlapp.view.sequencediagram.SequenceDiagramController"
            prefHeight="600.0" prefWidth="1000.0">
 
     <!--
@@ -24,7 +28,7 @@
                 <Button fx:id="closeButton" styleClass="icon-button" onAction="#handleClose">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_home.png"/>
+                            <Image url="@../main/ic_home.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -34,7 +38,7 @@
                 <Button fx:id="saveButton" styleClass="icon-button" onAction="#handleSave">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_save.png"/>
+                            <Image url="@../main/ic_save.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -44,7 +48,7 @@
                 <Button styleClass="icon-button" onAction="#handleSnapshot">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_camera.png"/>
+                            <Image url="@../main/ic_camera.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -55,7 +59,7 @@
                 <Button fx:id="undoButton" styleClass="icon-button" onAction="#handleUndo">
                     <graphic>
                         <ImageView fitWidth="24" fitHeight="24">
-                            <Image url="@ic_undo.png"/>
+                            <Image url="@../main/ic_undo.png"/>
                         </ImageView>
                     </graphic>
                     <tooltip>
@@ -75,29 +79,6 @@
                 <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
             </HBox>
             <TreeView fx:id="diagramTreeView" maxHeight="150"/>
-
-            <!-- Classes -->
-            <HBox styleClass="box-heading" alignment="CENTER">
-                <Label text="Classes"/>
-                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-                <Button text="-" styleClass="icon-button" onAction="#handleRemove"/>
-                <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
-            </HBox>
-            <TreeView fx:id="classTreeView" maxHeight="225"/>
-
-            <!-- Classes -> more options -->
-            <HBox fx:id="boxClassOptions" visible="false">
-                <Button text="New Method" onAction="#handleAddClassMethod"/>
-                <Button text="New Attribute" onAction="#handleAddAttribute"/>
-                <Button text="New Relation" onAction="#handleAddRelation"/>
-            </HBox>
-
-            <!-- Properties -->
-            <HBox styleClass="box-heading" alignment="CENTER">
-                <Label text="Properties"/>
-                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            </HBox>
-            <PropertiesView fx:id="propertiesView"/>
         </VBox>
 
         <!--
@@ -110,6 +91,6 @@
     </SplitPane>
 
     <stylesheets>
-        <URL value="@style.css"/>
+        <URL value="@../main/style.css"/>
     </stylesheets>
 </StackPane>

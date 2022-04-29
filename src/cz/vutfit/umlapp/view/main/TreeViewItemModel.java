@@ -6,10 +6,7 @@
 package cz.vutfit.umlapp.view.main;
 
 import cz.vutfit.umlapp.model.DataModel;
-import cz.vutfit.umlapp.model.uml.Attributes;
-import cz.vutfit.umlapp.model.uml.ClassDiagram;
-import cz.vutfit.umlapp.model.uml.Methods;
-import cz.vutfit.umlapp.model.uml.Relationships;
+import cz.vutfit.umlapp.model.uml.*;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
@@ -48,6 +45,10 @@ public class TreeViewItemModel {
             case CLASS_DIAGRAM:
                 item = new TreeItem<>("Class diagram");
                 this.root.getChildren().add(item);
+                for (SequenceDiagram diagram : this.dataModel.getData().getSequenceDiagrams()) {
+                    item = new TreeItem<>(diagram.getName());
+                    this.root.getChildren().add(item);
+                }
                 break;
             case SEQUENCE_DIAGRAM:
                 break;

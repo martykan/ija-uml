@@ -21,6 +21,7 @@ public class DataModel {
     private final List<ICommand> commandHistory = new ArrayList<>();
     private File file;
     private UMLFileData data;
+    private String activeDiagram;
 
     /**
      * Execute the given command and save it to history
@@ -85,5 +86,13 @@ public class DataModel {
 
     public String getFileName() {
         return this.file.getName();
+    }
+
+    public String getActiveDiagram() {
+        return activeDiagram;
+    }
+
+    public void setActiveDiagram(String activeDiagram) {
+        this.activeDiagram = activeDiagram;
     }
 }

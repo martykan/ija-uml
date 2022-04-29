@@ -201,10 +201,11 @@ public class UMLFileData {
     /**
      * TODO
      * Adds sequence diagram to list.
+     *
      * @param name name of diagram
      * @see #addClass(String)
      */
-    public void addSequence(String name) {
+    public int addSequence(String name) {
         int id = 0;
         if (id != (this.sequenceDiagrams).size()) {
             int i = 0;
@@ -222,6 +223,7 @@ public class UMLFileData {
 
         SequenceDiagram x = new SequenceDiagram(id, name);
         (this.sequenceDiagrams).add(id, x);
+        return id;
     }
 
     /**

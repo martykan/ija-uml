@@ -7,9 +7,10 @@ package cz.vutfit.umlapp.view.main;
 
 /**
  * Enumeration for determining, which data we will be working with in TreeView.
+ *
  * @see TreeViewItemModel
  */
-enum EDataType {
+public enum EDataType {
     CLASS_DIAGRAM,
     SEQUENCE_DIAGRAM,
     CLASS,

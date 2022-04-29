@@ -51,7 +51,7 @@ public class WelcomeController implements IController {
             File selectedFile = fileChooser.showOpenDialog(new Stage());
             if (selectedFile == null) return;
             dataModel.openFile(selectedFile);
-            this.viewHandler.openView("Main");
+            this.viewHandler.openView("ClassDiagram");
         } catch (Exception exception) {
             this.showErrorMessage(exception.getLocalizedMessage());
             exception.printStackTrace();
@@ -69,7 +69,7 @@ public class WelcomeController implements IController {
             File selectedFile = fileChooser.showSaveDialog(new Stage());
             if (selectedFile == null) return;
             dataModel.newFile(selectedFile);
-            this.viewHandler.openView("Main");
+            this.viewHandler.openView("ClassDiagram");
         } catch (Exception exception) {
             this.showErrorMessage(exception.getLocalizedMessage());
             exception.printStackTrace();
