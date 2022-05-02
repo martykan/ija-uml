@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.input.MouseButton;
 import cz.vutfit.umlapp.view.components.EPropertyType;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -823,8 +824,8 @@ public class PropertiesView extends VBox {
                         String current = "From class '" + mymessage.getSender() + "' to class '" + mymessage.getReceiver() + "'";
 
                         for (SequenceObjects c : this.dataModel.getData().getSequenceByID(this.parentIntID).getObjects()) {
-                            fromClassBox.getItems().add(c.getName());
-                            toClassBox.getItems().add(c.getName());
+                            fromClassBox.getItems().add(c.getClassName() + ":" + c.getObjectName());
+                            toClassBox.getItems().add(c.getClassName() + ":" + c.getObjectName());
                         }
                         fromClassBox.getSelectionModel().selectFirst();
                         toClassBox.getSelectionModel().selectFirst();
@@ -850,7 +851,9 @@ public class PropertiesView extends VBox {
                         Optional<ArrayList<String>> result = dialog.showAndWait();
                         result.ifPresent(data -> {
                             try {
-                                this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, data.get(0), data.get(1)));
+                                Pair<String, String> newSender = new Pair<>(data.get(0).split(":", 2)[0], data.get(0).split(":", 2)[1]);
+                                Pair<String, String> newReceiver = new Pair<>(data.get(1).split(":", 2)[0], data.get(1).split(":", 2)[1]);
+                                this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 this.showErrorMessage("Unable to set new participants for selected message", ex.getLocalizedMessage());

@@ -8,6 +8,7 @@ package cz.vutfit.umlapp.model.commands;
 import cz.vutfit.umlapp.model.uml.EMessageType;
 import cz.vutfit.umlapp.model.uml.SequenceMessages;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
+import javafx.util.Pair;
 
 public class RemoveSequenceDiagramMessageCommand implements ICommand {
     private final int sequenceID;
@@ -15,8 +16,8 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
     private int msgID;
     private String content;
     private EMessageType type;
-    private String senderName;
-    private String receiverName;
+    private Pair<String, String> senderName;
+    private Pair<String, String> receiverName;
 
     public RemoveSequenceDiagramMessageCommand(int sequenceID, int messageIndex) {
         this.sequenceID = sequenceID;

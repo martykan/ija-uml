@@ -6,6 +6,7 @@
 package cz.vutfit.umlapp.model.uml;
 
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateObjectException;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 
@@ -55,22 +56,42 @@ public class SequenceDiagram {
     }
 
     /** Working with object list **/
-    public void addObject(String name) throws DuplicateObjectException {
-        SequenceObjects x = new SequenceObjects(name);
-
+    public void addObject(String className, String objectName) throws DuplicateObjectException {
+        SequenceObjects x = new SequenceObjects(className, objectName);
         for (SequenceObjects a : this.objects) { // do not allow duplicates - same "name"'s
-            if (a.getName().equals(x.getName())) {
+            if (a.getClassName().equals(x.getClassName()) && a.getObjectName().equals(x.getObjectName())) {
                 throw new DuplicateObjectException();
             }
         }
+        (this.objects).add(x);
+    }
 
+    public void addObject(Pair<String, String> classObjectName) throws DuplicateObjectException {
+        SequenceObjects x = new SequenceObjects(classObjectName);
+        for (SequenceObjects a : this.objects) { // do not allow duplicates - same "name"'s
+            if (a.getClassName().equals(x.getClassName()) && a.getObjectName().equals(x.getObjectName())) {
+                throw new DuplicateObjectException();
+            }
+        }
         (this.objects).add(x);
     }
 
     // returns true if removed, false if not found
-    public boolean removeObject(String name) {
+    public boolean removeObject(String className, String objectName) {
         for (int i = 0; i < (this.objects).size(); i++) {
-            if ((this.objects).get(i).getName().equals(name)) {
+            if ((this.objects).get(i).getClassName().equals(className) && (this.objects).get(i).getObjectName().equals(objectName)) {
+                (this.objects).remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeObject(Pair<String, String> classObjectName) {
+        String className = classObjectName.getKey();
+        String objectName = classObjectName.getValue();
+        for (int i = 0; i < (this.objects).size(); i++) {
+            if ((this.objects).get(i).getClassName().equals(className) && (this.objects).get(i).getObjectName().equals(objectName)) {
                 (this.objects).remove(i);
                 return true;
             }
@@ -79,9 +100,17 @@ public class SequenceDiagram {
     }
 
     // returns object or null
-    public SequenceObjects getObject(String name) {
+    public SequenceObjects getObject(Pair<String, String> classObjectName) {
         for (SequenceObjects x : this.objects) {
-            if (x.getName().equals(name))
+            if (x.getClassName().equals(classObjectName.getKey()) && x.getObjectName().equals(classObjectName.getValue()))
+                return x;
+        }
+        return null;
+    }
+
+    public SequenceObjects getObject(String className, String objectName) {
+        for (SequenceObjects x : this.objects) {
+            if (x.getClassName().equals(className) && x.getObjectName().equals(objectName))
                 return x;
         }
         return null;

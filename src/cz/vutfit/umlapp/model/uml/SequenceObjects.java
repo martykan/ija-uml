@@ -5,22 +5,36 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+import javafx.util.Pair;
+
 public class SequenceObjects {
-    public String name;
+    public String className;
+    public String objectName;
     public boolean active;
 
-    public SequenceObjects (String name) {
-        this.name = name;
+    public SequenceObjects (String className, String objectName) {
+        this.className = className;
+        this.objectName = objectName;
         this.active = false;
     }
 
-    public String getName() { return this.name; }
+    public SequenceObjects (Pair<String, String> classObjectName) {
+        this.className = classObjectName.getKey();
+        this.objectName = classObjectName.getValue();
+        this.active = false;
+    }
+
+    public String getClassName() { return this.className; }
+
+    public String getObjectName() { return this.objectName; }
 
     public boolean getActiveStatus() { return this.active; }
 
     public void setActiveStatus(boolean status) { this.active = status; }
 
-    public void setName(String name) { this.name = name; }
+    public void setClassName(String name) { this.className = name; }
+
+    public void setObjectName(String name) { this.objectName = name; }
 
     public String getActiveStatusString() {
         if (this.active)

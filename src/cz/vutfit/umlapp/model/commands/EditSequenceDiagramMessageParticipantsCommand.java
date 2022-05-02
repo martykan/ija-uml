@@ -6,16 +6,17 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.UMLFileData;
+import javafx.util.Pair;
 
 public class EditSequenceDiagramMessageParticipantsCommand implements ICommand {
     private final int sequenceID;
     private final int messageID;
-    private String oldSender;
-    private String oldReceiver;
-    private final String newSender;
-    private final String newReceiver;
+    private Pair<String, String> oldSender;
+    private Pair<String, String> oldReceiver;
+    private final Pair<String, String> newSender;
+    private final Pair<String, String> newReceiver;
 
-    public EditSequenceDiagramMessageParticipantsCommand(Integer sequenceID, Integer messageID, String newSender, String newReceiver) {
+    public EditSequenceDiagramMessageParticipantsCommand(Integer sequenceID, Integer messageID, Pair<String, String> newSender, Pair<String, String> newReceiver) {
         this.sequenceID = sequenceID;
         this.messageID = messageID;
         this.newSender = newSender;

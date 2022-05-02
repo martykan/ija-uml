@@ -7,17 +7,18 @@ package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.EMessageType;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
+import javafx.util.Pair;
 
 public class AddSequenceDiagramMessageCommand implements ICommand {
     private final int sequenceID;
     private final String content;
     private int messageID;
-    private final String senderName;
-    private final String receiverName;
+    private final Pair<String, String> senderName;
+    private final Pair<String, String> receiverName;
     private final EMessageType type;
 
 
-    public AddSequenceDiagramMessageCommand(int sequenceID, String content, String senderName, String receiverName, EMessageType type) {
+    public AddSequenceDiagramMessageCommand(int sequenceID, String content, Pair<String, String> senderName, Pair<String, String> receiverName, EMessageType type) {
         this.sequenceID = sequenceID;
         this.content = content;
         this.senderName = senderName;

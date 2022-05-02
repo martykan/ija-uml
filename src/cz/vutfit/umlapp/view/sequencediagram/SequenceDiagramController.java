@@ -27,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -51,6 +52,8 @@ public class SequenceDiagramController extends MainController {
     ChangeListener<TreeItem<String>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedDiagram = newItem.getValue();
+            this.classTreeView.getSelectionModel().clearSelection();
+            this.messageTreeView.getSelectionModel().clearSelection();
             handleProperties(newItem);
         } else {
             this.selectedDiagram = null;
@@ -191,8 +194,8 @@ public class SequenceDiagramController extends MainController {
                 return;
 
             try {
-                String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), objectName));
+                String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue(); // TODO: split by :
+                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), objectName, objectName));
                 this.updateView();
             } catch (Exception ex) {
                 this.showErrorMessage("Unable to remove object from sequence diagram", ex.getLocalizedMessage());
@@ -207,7 +210,7 @@ public class SequenceDiagramController extends MainController {
     public void handleAddClass (ActionEvent actionEvent) {
         try {
             // Create the custom dialog.
-            Dialog<String> dialog = new Dialog<>();
+            Dialog<ArrayList<String>> dialog = new Dialog<>();
             dialog.setTitle("Add new object");
             dialog.setHeaderText("Add new object to this sequence diagram");
 
@@ -235,43 +238,50 @@ public class SequenceDiagramController extends MainController {
             }
             classBox.getSelectionModel().selectFirst();
 
+            TextField nameBox = new TextField();
+
             if (classBox.getItems().size() != 0) { // can add at least 1 class
-                grid.add(new Label("Objects in sequence diagrams must be existing classes from class diagram."), 0, 0);
-                grid.add(new Label("Select class: "), 0, 1);
+                grid.add(new Label("Objects in sequence diagrams must be from existing class instances from class diagram."), 0, 0);
+                grid.add(new Label("Select class instance: "), 0, 1);
                 grid.add(classBox, 1, 1);
+                grid.add(new Label("Object name: "), 0, 2);
+                grid.add(nameBox, 1, 2);
                 dialog.getDialogPane().setContent(grid);
 
                 dialog.setResultConverter(dialogButton -> {
                     if (dialogButton == createButtonType) {
-                        return classBox.getSelectionModel().getSelectedItem();
+                        ArrayList<String> x = new ArrayList<>();
+                        x.add(classBox.getSelectionModel().getSelectedItem());
+                        x.add(nameBox.getText());
+                        return x;
                     }
                     return null;
                 });
 
-                Optional<String> result = dialog.showAndWait();
-                result.ifPresent(selectedClass -> {
+                Optional<ArrayList<String>> result = dialog.showAndWait();
+                result.ifPresent(returned -> {
                     try {
                         int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
-                        this.dataModel.executeCommand(new AddSequenceDiagramObjectCommand(seqID, selectedClass));
+                        this.dataModel.executeCommand(new AddSequenceDiagramObjectCommand(seqID, returned.get(0), returned.get(1)));
                         this.updateView();
                     } catch (Exception ex) {
                         this.showErrorMessage("Unable to add new object to sequence diagram", ex.getLocalizedMessage());
                         ex.printStackTrace();
                     }
                 });
-            } else { // all classes present in sequence diagram
-                grid.add(new Label("Every class from class diagram is already present as object in this sequence diagram."), 0, 0);
+            } else { // no class in class diagram
+                grid.add(new Label("There are no classes in Class Diagram."), 0, 0);
                 grid.add(new Label("Create new class?"), 0, 1);
                 dialog.getDialogPane().setContent(grid);
 
                 dialog.setResultConverter(dialogButton -> {
                     if (dialogButton == createButtonType) {
-                        return "placeholder";
+                        return new ArrayList<String>();
                     }
                     return null;
                 });
 
-                Optional<String> result = dialog.showAndWait();
+                Optional<ArrayList<String>> result = dialog.showAndWait();
                 result.ifPresent(resulted -> {
                     try {
                         this.addClassToClassDiagram();
@@ -292,7 +302,7 @@ public class SequenceDiagramController extends MainController {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("New Class");
             dialog.setHeaderText("Add new class to Class diagram and to this Sequence diagram");
-            dialog.setContentText("New Class/Object Name:");
+            dialog.setContentText("New Class Name:");
 
             // disable OK button if text-input is empty
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
@@ -310,7 +320,7 @@ public class SequenceDiagramController extends MainController {
                     this.dataModel.executeCommand(new AddClassCommand(className));
                     try {
                         int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
-                        this.dataModel.executeCommand(new AddSequenceDiagramObjectCommand(seqID, className));
+                        this.dataModel.executeCommand(new AddSequenceDiagramObjectCommand(seqID, className, "New Object"));
                     } catch (Exception e) {
                         this.showErrorMessage("Unable to add new object", e.getLocalizedMessage());
                         e.printStackTrace();
@@ -378,12 +388,12 @@ public class SequenceDiagramController extends MainController {
                 msgType.getSelectionModel().selectFirst();
 
                 for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
-                    sender.getItems().add(obj.getName());
+                    sender.getItems().add(obj.getObjectName() + " in " + obj.getClassName());
                 }
                 sender.getSelectionModel().selectFirst();
 
                 for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
-                    receiver.getItems().add(obj.getName());
+                    receiver.getItems().add(obj.getObjectName() + " in " + obj.getClassName());
                 }
                 receiver.getSelectionModel().selectFirst();
 
@@ -416,8 +426,8 @@ public class SequenceDiagramController extends MainController {
                 result.ifPresent(returned -> {
                     try {
                         int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
-                        String senderStr = returned.get(2);
-                        String receiverStr = returned.get(3);
+                        Pair<String, String> senderStr = new Pair<>(returned.get(2).split(":", 2)[0], returned.get(2).split(":", 2)[1]);
+                        Pair<String, String> receiverStr = new Pair<>(returned.get(3).split(":", 2)[0], returned.get(3).split(":", 2)[1]);
                         EMessageType retType = stringToEMessageType(returned.get(1));
                         this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), senderStr, receiverStr, retType));
                         this.updateView();
@@ -476,25 +486,27 @@ public class SequenceDiagramController extends MainController {
             propertiesView.setMessagesTreeView(this.messageTreeView);
             SequenceDiagram current = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
-                SequenceObjects object = current.getObject(this.selectedClass);
+                String className = this.selectedClass.split(":", 2)[0];
+                String objectName = this.selectedClass.split(":", 2)[1];
+                SequenceObjects object = current.getObject(className, objectName);
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
                 propertiesView.setParentID(current.getID());
-                propertiesView.setID(object.getName());
+                propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
                 propertiesView.addPropertyLine("Object", this.selectedClass);
                 propertiesView.addPropertyLine("Status", object.getActiveStatusString());
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());
-                String fromObject = message.getSender();
-                String toObject = message.getReceiver();
+                Pair<String, String> fromObject = message.getSender();
+                Pair<String, String> toObject = message.getReceiver();
 
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_MESSAGE);
                 propertiesView.setParentID(current.getID());
                 propertiesView.setID(message.getID());
                 propertiesView.addPropertyLine("Message", this.selectedMessage);
-                propertiesView.addPropertyLine("From", fromObject);
-                propertiesView.addPropertyLine("To", toObject);
+                propertiesView.addPropertyLine("From", fromObject.getKey() + ":" + toObject.getValue());
+                propertiesView.addPropertyLine("To", toObject.getKey() + ":" + toObject.getValue());
                 propertiesView.addPropertyLine("Type", message.getType().typeToString());
             } else {
                 propertiesView.resetProperties();

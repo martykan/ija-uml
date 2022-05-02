@@ -16,7 +16,8 @@ public class SequenceMessages {
      *  1st:    LEFT    (from/sender)
      *  2nd:    RIGHT   (to/receiver)
      */
-    public Pair<String, String> fromToPair;
+    public Pair<String, String> fromObject;
+    public Pair<String, String> toObject;
     public EMessageType type;
 
     /**
@@ -31,7 +32,8 @@ public class SequenceMessages {
     public SequenceMessages (int ID, String content) {
         this.ID = ID;
         this.content = content;
-        this.fromToPair = new Pair<String, String>(null, null);
+        this.fromObject = new Pair<String, String>(null, null);
+        this.toObject = new Pair<String, String>(null, null);
         this.type = EMessageType.SYNC;
     }
 
@@ -39,16 +41,17 @@ public class SequenceMessages {
 
     public String getContent() { return this.content; }
 
-    public Pair<String, String> getParticipants() { return this.fromToPair; }
-    public String getSender() { return this.fromToPair.getKey(); }
-    public String getReceiver() { return this.fromToPair.getValue(); }
+    public Pair<String, String> getSender() { return this.fromObject; }
+    public Pair<String, String> getReceiver() { return this.toObject; }
 
     public EMessageType getType() { return this.type; }
 
     public void setContent(String x) { this.content = x; }
 
-    public void setParticipants(String from, String to) { this.fromToPair = new Pair<String, String>(from, to); }
-    public void setParticipants(Pair<String, String> fromToPair) { this.fromToPair = fromToPair; }
+    public void setParticipants(Pair<String, String> objectFrom, Pair<String, String> objectTo) {
+        this.fromObject = objectFrom;
+        this.toObject = objectTo;
+    }
 
     public void setType(EMessageType x) { this.type = x; }
 }

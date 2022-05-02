@@ -81,7 +81,7 @@ public class TreeViewItemModel {
                 break;
             case SEQ_OBJECTS:
                 for (SequenceObjects o : this.selectedSequence.getObjects()) {
-                    item = new TreeItem<>(o.getName());
+                    item = new TreeItem<>(o.getClassName() + ":" + o.getObjectName());
                     this.root.getChildren().add(item);
                 }
                 break;
