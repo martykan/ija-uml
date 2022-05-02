@@ -13,6 +13,7 @@ public enum EPropertyType {
     RELATIONSHIP,
 
     SEQ_MESSAGE,
+    SEQ_OBJECT,
 
     EMPTY
 }

@@ -123,6 +123,9 @@ public class PropertiesView extends VBox {
             case SEQ_MESSAGE:
                 bindSequenceMessageActions(prop, text, line);
                 break;
+            case SEQ_OBJECT:
+                bindSequenceObjectActions(prop, text, line);
+                break;
             case EMPTY:
                 if (!prop.getText().equals("Nothing selected"))
                     System.out.println("Warning: Executed bindPropertyActions on groupType EMPTY ["+prop+";"+text+"]");
@@ -915,6 +918,16 @@ public class PropertiesView extends VBox {
             });
         } else {
             System.out.println("Warning: bindSequenceMessageActions did not recognize following propertyText: " + prop.getText());
+        }
+    }
+
+    private void bindSequenceObjectActions(Label prop, Label text, BorderPane line) {
+        if (prop.getText().equals("Object")) {
+            return;
+        } else if (prop.getText().equals("Status")) {
+            return;
+        } else {
+            System.out.println("Warning: bindSequenceObjectActions did not recognize following propertyText: " + prop.getText());
         }
     }
 

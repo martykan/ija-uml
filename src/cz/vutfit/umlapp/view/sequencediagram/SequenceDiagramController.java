@@ -483,7 +483,11 @@ public class SequenceDiagramController extends MainController {
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceObjects object = current.getObject(this.selectedClass);
                 propertiesView.resetProperties();
+                propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
+                propertiesView.setParentID(current.getID());
+                propertiesView.setID(object.getName());
                 propertiesView.addPropertyLine("Object", this.selectedClass);
+                propertiesView.addPropertyLine("Status", object.getActiveStatusString());
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());
                 String fromObject = message.getSender();
