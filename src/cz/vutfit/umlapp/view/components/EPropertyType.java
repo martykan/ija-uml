@@ -7,11 +7,12 @@ package cz.vutfit.umlapp.view.components;
 
 public enum EPropertyType {
     CLASS,
-    SEQUENCE_DIAGRAM,
 
     ATTRIBUTE,
     METHOD,
     RELATIONSHIP,
+
+    SEQ_MESSAGE,
 
     EMPTY
 }

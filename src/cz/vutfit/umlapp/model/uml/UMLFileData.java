@@ -350,6 +350,21 @@ public class UMLFileData {
         }
         return null;
     }
+
+    public EMessageType stringToMessageType(String string) {
+        if (string.equals("Synchronized")) {
+            return EMessageType.SYNC;
+        } else if (string.equals("Asynchronous")) {
+            return EMessageType.ASYNC;
+        } else if (string.equals("Return message")) {
+            return EMessageType.RETURN;
+        } else if (string.equals("Object creation")) {
+            return EMessageType.NEW_OBJECT;
+        } else if (string.equals("Object release")) {
+            return EMessageType.RELEASE_OBJECT;
+        }
+        return null;
+    }
 }
 
 

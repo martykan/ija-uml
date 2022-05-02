@@ -5,16 +5,18 @@
 
 package cz.vutfit.umlapp.model.uml;
 
+import javafx.util.Pair;
+
 public class SequenceMessages {
     public int ID;
     public String content;
 
     /**
-     * message direction
-     *  true: A -> B;
-     *  false: A <- B;
+     * message participant objects
+     *  1st:    LEFT    (from/sender)
+     *  2nd:    RIGHT   (to/receiver)
      */
-    public boolean direction;
+    public Pair<String, String> fromToPair;
     public EMessageType type;
 
     /**
@@ -29,35 +31,24 @@ public class SequenceMessages {
     public SequenceMessages (int ID, String content) {
         this.ID = ID;
         this.content = content;
-        this.direction = true;
+        this.fromToPair = new Pair<String, String>(null, null);
         this.type = EMessageType.SYNC;
-    }
-
-    public SequenceMessages (int ID, String content, boolean direction) {
-        this.ID = ID;
-        this.content = content;
-        this.direction = direction;
-        this.type = EMessageType.SYNC;
-    }
-
-    public SequenceMessages (int ID, String content, boolean direction, EMessageType type) {
-        this.ID = ID;
-        this.content = content;
-        this.direction = direction;
-        this.type = type;
     }
 
     public int getID() { return this.ID; }
 
     public String getContent() { return this.content; }
 
-    public boolean getDirection() { return this.direction; }
+    public Pair<String, String> getParticipants() { return this.fromToPair; }
+    public String getSender() { return this.fromToPair.getKey(); }
+    public String getReceiver() { return this.fromToPair.getValue(); }
 
     public EMessageType getType() { return this.type; }
 
     public void setContent(String x) { this.content = x; }
 
-    public void setDirection(boolean x) { this.direction = x; }
+    public void setParticipants(String from, String to) { this.fromToPair = new Pair<String, String>(from, to); }
+    public void setParticipants(Pair<String, String> fromToPair) { this.fromToPair = fromToPair; }
 
     public void setType(EMessageType x) { this.type = x; }
 }

@@ -6,20 +6,8 @@
 package cz.vutfit.umlapp.view.components;
 
 import cz.vutfit.umlapp.model.DataModel;
-import cz.vutfit.umlapp.model.commands.EditClassAttributeVisibilityCommand;
-import cz.vutfit.umlapp.model.commands.EditClassNameCommand;
-import cz.vutfit.umlapp.model.commands.EditClassAttributeNameCommand;
-import cz.vutfit.umlapp.model.commands.EditClassMethodNameCommand;
-import cz.vutfit.umlapp.model.commands.EditClassMethodVisibilityCommand;
-import cz.vutfit.umlapp.model.commands.EditClassRelationshipToDescCommand;
-import cz.vutfit.umlapp.model.commands.EditClassRelationshipFromDescCommand;
-import cz.vutfit.umlapp.model.commands.EditClassRelationshipFromToCommand;
-import cz.vutfit.umlapp.model.commands.EditClassRelationshipTypeCommand;
-import cz.vutfit.umlapp.model.commands.EditClassRelationshipNameCommand;
-import cz.vutfit.umlapp.model.uml.ClassDiagram;
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.ERelationType;
-import cz.vutfit.umlapp.model.uml.Relationships;
+import cz.vutfit.umlapp.model.commands.*;
+import cz.vutfit.umlapp.model.uml.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.EventHandler;
@@ -47,6 +35,7 @@ public class PropertiesView extends VBox {
     public TreeView<String> messagesTreeView;
     public String stringID;
     public int intID;
+    public int parentIntID;
 
     /**
      * Set callback on updated
@@ -115,6 +104,8 @@ public class PropertiesView extends VBox {
         this.stringID = ID;
     }
 
+    public void setParentID(int ID) { this.parentIntID = ID; }
+
     private void bindPropertyActions(BorderPane line, Label prop, Label text) throws Exception {
         switch (this.groupType) {
             case CLASS:
@@ -129,8 +120,9 @@ public class PropertiesView extends VBox {
             case RELATIONSHIP:
                 bindRelationshipActions(prop, text, line);
                 break;
-            case SEQUENCE_DIAGRAM:
-                bindSequenceActions(prop, text, line);
+            case SEQ_MESSAGE:
+                bindSequenceMessageActions(prop, text, line);
+                break;
             case EMPTY:
                 if (!prop.getText().equals("Nothing selected"))
                     System.out.println("Warning: Executed bindPropertyActions on groupType EMPTY ["+prop+";"+text+"]");
@@ -769,8 +761,161 @@ public class PropertiesView extends VBox {
         }
     }
 
-    private void bindSequenceActions(Label prop, Label text, BorderPane line) {
-        System.out.println("bindSequenceActions: TODO");
+    private void bindSequenceMessageActions(Label prop, Label text, BorderPane line) {
+        if (prop.getText().equals("Message")) {
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        TextInputDialog dialog = new TextInputDialog("");
+                        dialog.setTitle("Message content");
+                        dialog.setHeaderText("Change content of this message.\nOld content: " + text.getText());
+                        dialog.setContentText("New content:");
+
+                        // disable OK button if text-input is same as old
+                        BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                            if (dialog.getEditor().getText().equals(text.getText())) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }, dialog.getEditor().textProperty());
+                        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(newString -> {
+                            try {
+                                this.dataModel.executeCommand(new EditSequenceDiagramMessageContentCommand(this.parentIntID, this.intID, newString));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new message content", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        } else if (prop.getText().equals("From") || (prop.getText().equals("To"))) {
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        // Create the custom dialog.
+                        Dialog<ArrayList<String>> dialog = new Dialog<>();
+                        dialog.setTitle("Message direction");
+                        dialog.setHeaderText("Change direction of message.\nYou can change class-object, who sends and who receives this message.");
+
+                        ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+                        GridPane grid = new GridPane();
+                        grid.setHgap(10);
+                        grid.setVgap(10);
+                        grid.setPadding(new Insets(20, 150, 10, 10));
+
+
+                        ChoiceBox<String> fromClassBox = new ChoiceBox<>();
+                        ChoiceBox<String> toClassBox = new ChoiceBox<>();
+                        SequenceMessages mymessage = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID);
+                        String current = "From class '" + mymessage.getSender() + "' to class '" + mymessage.getReceiver() + "'";
+
+                        for (SequenceObjects c : this.dataModel.getData().getSequenceByID(this.parentIntID).getObjects()) {
+                            fromClassBox.getItems().add(c.getName());
+                            toClassBox.getItems().add(c.getName());
+                        }
+                        fromClassBox.getSelectionModel().selectFirst();
+                        toClassBox.getSelectionModel().selectFirst();
+
+                        grid.add(new Label("Current participants: "), 0, 0);
+                        grid.add(new Label(current), 1, 0);
+                        grid.add(new Label("From: "), 0, 1);
+                        grid.add(fromClassBox, 1, 1);
+                        grid.add(new Label("To: "), 0, 2);
+                        grid.add(toClassBox, 1, 2);
+                        dialog.getDialogPane().setContent(grid);
+
+                        dialog.setResultConverter(dialogButton -> {
+                            if (dialogButton == createButtonType) {
+                                ArrayList<String> x = new ArrayList<>();
+                                x.add(fromClassBox.getSelectionModel().getSelectedItem());
+                                x.add(toClassBox.getSelectionModel().getSelectedItem());
+                                return x;
+                            }
+                            return null;
+                        });
+
+                        Optional<ArrayList<String>> result = dialog.showAndWait();
+                        result.ifPresent(data -> {
+                            try {
+                                this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, data.get(0), data.get(1)));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new participants for selected message", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        } else if (prop.getText().equals("Type")) {
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        // Create the custom dialog.
+                        Dialog<EMessageType> dialog = new Dialog<>();
+                        dialog.setTitle("Message type");
+                        dialog.setHeaderText("Change current type of this message");
+
+                        ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+                        GridPane grid = new GridPane();
+                        grid.setHgap(10);
+                        grid.setVgap(10);
+                        grid.setPadding(new Insets(20, 150, 10, 10));
+
+                        Label currType = new Label(text.getText());
+
+                        ChoiceBox<String> typeBox = new ChoiceBox<>();
+                        for (EMessageType x : EMessageType.values()) {
+                            typeBox.getItems().add(x.typeToString());
+                        }
+                        typeBox.getSelectionModel().selectFirst();
+
+                        grid.add(new Label("Current type: "), 0, 0);
+                        grid.add(currType, 1, 0);
+                        grid.add(new Label("New type: "), 0, 1);
+                        grid.add(typeBox, 1, 1);
+                        dialog.getDialogPane().setContent(grid);
+
+                        dialog.setResultConverter(dialogButton -> {
+                            if (dialogButton == createButtonType) {
+                                String x = typeBox.getSelectionModel().getSelectedItem();
+                                return this.dataModel.getData().stringToMessageType(x);
+                            }
+                            return null;
+                        });
+
+                        Optional<EMessageType> result = dialog.showAndWait();
+                        result.ifPresent(newType -> {
+                            try {
+                                this.dataModel.executeCommand(new EditSequenceDiagramMessageTypeCommand(this.parentIntID, this.intID, newType));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new type of message", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        } else {
+            System.out.println("Warning: bindSequenceMessageActions did not recognize following propertyText: " + prop.getText());
+        }
     }
 
     /**

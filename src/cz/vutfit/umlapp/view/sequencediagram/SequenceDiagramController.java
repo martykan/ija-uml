@@ -14,6 +14,7 @@ import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.*;
 import cz.vutfit.umlapp.view.ViewHandler;
+import cz.vutfit.umlapp.view.components.EPropertyType;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.main.MainController;
@@ -66,7 +67,7 @@ public class SequenceDiagramController extends MainController {
 
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
-            this.selectedClass = newItem.getValue().split("\\.", 2)[1];
+            this.selectedClass = newItem.getValue();
             this.messageTreeView.getSelectionModel().clearSelection();
             handleProperties(newItem);
         } else {
@@ -84,7 +85,7 @@ public class SequenceDiagramController extends MainController {
 
     ChangeListener<TreeItem<String>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
-            this.selectedMessage = newItem.getValue();
+            this.selectedMessage = newItem.getValue().split("\\.", 2)[1];
             this.classTreeView.getSelectionModel().clearSelection();
             handleProperties(newItem);
         } else {
@@ -358,68 +359,100 @@ public class SequenceDiagramController extends MainController {
 
     public void handleAddMessage (ActionEvent actionEvent) {
         try {
-            // Create the custom dialog.
-            Dialog<ArrayList<String>> dialog = new Dialog<>();
-            dialog.setTitle("Add new message");
-            dialog.setHeaderText("Add new message to this sequence diagram");
+            if (this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects().size() != 0) {
+                // Create the custom dialog.
+                Dialog<ArrayList<String>> dialog = new Dialog<>();
+                dialog.setTitle("Add new message");
+                dialog.setHeaderText("Add new message to this sequence diagram");
 
-            ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+                ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
 
-            GridPane grid = new GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-            grid.setPadding(new Insets(20, 150, 10, 10));
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
 
 
-            ChoiceBox<String> msgType = new ChoiceBox<>();
-            ChoiceBox<String> direction = new ChoiceBox<>();
-            for (EMessageType type : EMessageType.values()) {
-                msgType.getItems().add(type.typeToString());
+                ChoiceBox<String> msgType = new ChoiceBox<>();
+                ChoiceBox<String> sender = new ChoiceBox<>();
+                ChoiceBox<String> receiver = new ChoiceBox<>();
+                for (EMessageType type : EMessageType.values()) {
+                    msgType.getItems().add(type.typeToString());
+                }
+                msgType.getSelectionModel().selectFirst();
+
+                for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
+                    sender.getItems().add(obj.getName());
+                }
+                sender.getSelectionModel().selectFirst();
+
+                for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
+                    receiver.getItems().add(obj.getName());
+                }
+                receiver.getSelectionModel().selectFirst();
+
+                TextField contentBox = new TextField();
+
+                grid.add(new Label("Message content: "), 0, 0);
+                grid.add(contentBox, 1, 0);
+                grid.add(new Label("Message type: "), 0, 1);
+                grid.add(msgType, 1, 1);
+                grid.add(new Label("Sender: "), 0, 2);
+                grid.add(sender, 1, 2);
+                grid.add(new Label("Receiver: "), 0, 3);
+                grid.add(receiver, 1, 3);
+
+                dialog.getDialogPane().setContent(grid);
+
+                dialog.setResultConverter(dialogButton -> {
+                    if (dialogButton == createButtonType) {
+                        ArrayList<String> x = new ArrayList<>();
+                        x.add(contentBox.getText());
+                        x.add(msgType.getSelectionModel().getSelectedItem());
+                        x.add(sender.getSelectionModel().getSelectedItem());
+                        x.add(receiver.getSelectionModel().getSelectedItem());
+                        return x;
+                    }
+                    return null;
+                });
+
+                Optional<ArrayList<String>> result = dialog.showAndWait();
+                result.ifPresent(returned -> {
+                    try {
+                        int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
+                        String senderStr = returned.get(2);
+                        String receiverStr = returned.get(3);
+                        EMessageType retType = stringToEMessageType(returned.get(1));
+                        this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), senderStr, receiverStr, retType));
+                        this.updateView();
+                    } catch (Exception ex) {
+                        this.showErrorMessage("Unable to add new message to sequence diagram", ex.getLocalizedMessage());
+                        ex.printStackTrace();
+                    }
+                });
+            } else {
+                String id;
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("No object found");
+                alert.setContentText("There are no objects to communicate with, therefore you can not add new message.\nAdd new object to sequence diagram?");
+                alert.setHeaderText("Missing objects in " + this.selectedDiagram);
+                ButtonType okButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+                ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
+                alert.getButtonTypes().setAll(okButton, noButton);
+                alert.showAndWait().ifPresent(type -> {
+                    if (type.getButtonData() == ButtonBar.ButtonData.YES) {
+                        try {
+                            handleAddClass(null);
+                        } catch (Exception e) {
+                            this.showErrorMessage(e.getLocalizedMessage());
+                            e.printStackTrace();
+                        }
+                    } else if (type.getButtonData() == ButtonBar.ButtonData.NO) {
+                        return;
+                    }
+                });
             }
-            msgType.getSelectionModel().selectFirst();
-
-            String toRightString = "To Right (Object 1 -> Object 2)";
-            String toLeftString = "To Left  (Object 1 <- Object 2)";
-            direction.getItems().add(toRightString);    // direction == true
-            direction.getItems().add(toLeftString);    // direction == false
-            direction.getSelectionModel().selectFirst();
-
-            TextField contentBox = new TextField();
-
-            grid.add(new Label("Message content: "), 0, 0);
-            grid.add(contentBox, 1, 0);
-            grid.add(new Label("Message type: "), 0, 1);
-            grid.add(msgType, 1, 1);
-            grid.add(new Label("Direction: "), 0, 2);
-            grid.add(direction, 1, 2);
-
-            dialog.getDialogPane().setContent(grid);
-
-            dialog.setResultConverter(dialogButton -> {
-                if (dialogButton == createButtonType) {
-                    ArrayList <String> x = new ArrayList<>();
-                    x.add(contentBox.getText());
-                    x.add(msgType.getSelectionModel().getSelectedItem());
-                    x.add(direction.getSelectionModel().getSelectedItem());
-                    return x;
-                }
-                return null;
-            });
-
-            Optional<ArrayList<String>> result = dialog.showAndWait();
-            result.ifPresent(returned -> {
-                try {
-                    int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
-                    boolean retDirection = (returned.get(1).equals(toRightString));
-                    EMessageType retType = stringToEMessageType(returned.get(2));
-                    this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), retDirection, retType));
-                    this.updateView();
-                } catch (Exception ex) {
-                    this.showErrorMessage("Unable to add new message to sequence diagram", ex.getLocalizedMessage());
-                    ex.printStackTrace();
-                }
-            });
         } catch (Exception ex) {
             this.showErrorMessage("Unable to add new message", ex.getLocalizedMessage());
             ex.printStackTrace();
@@ -446,12 +479,24 @@ public class SequenceDiagramController extends MainController {
             propertiesView.setDataModel(this.dataModel);
             propertiesView.setClassTreeView(this.classTreeView);
             propertiesView.setMessagesTreeView(this.messageTreeView);
+            SequenceDiagram current = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
+                SequenceObjects object = current.getObject(this.selectedClass);
                 propertiesView.resetProperties();
-                propertiesView.addPropertyLine("Object selected", this.selectedClass);
+                propertiesView.addPropertyLine("Object", this.selectedClass);
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
+                SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());
+                String fromObject = message.getSender();
+                String toObject = message.getReceiver();
+
                 propertiesView.resetProperties();
-                propertiesView.addPropertyLine("Message selected", this.selectedMessage);
+                propertiesView.setGroupType(EPropertyType.SEQ_MESSAGE);
+                propertiesView.setParentID(current.getID());
+                propertiesView.setID(message.getID());
+                propertiesView.addPropertyLine("Message", this.selectedMessage);
+                propertiesView.addPropertyLine("From", fromObject);
+                propertiesView.addPropertyLine("To", toObject);
+                propertiesView.addPropertyLine("Type", message.getType().typeToString());
             } else {
                 propertiesView.resetProperties();
                 propertiesView.addPropertyLine("Nothing selected", "");

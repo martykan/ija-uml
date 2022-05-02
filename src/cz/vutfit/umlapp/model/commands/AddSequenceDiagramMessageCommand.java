@@ -12,14 +12,16 @@ public class AddSequenceDiagramMessageCommand implements ICommand {
     private final int sequenceID;
     private final String content;
     private int messageID;
-    private final boolean direction;
+    private final String senderName;
+    private final String receiverName;
     private final EMessageType type;
 
 
-    public AddSequenceDiagramMessageCommand(int sequenceID, String content, boolean direction, EMessageType type) {
+    public AddSequenceDiagramMessageCommand(int sequenceID, String content, String senderName, String receiverName, EMessageType type) {
         this.sequenceID = sequenceID;
         this.content = content;
-        this.direction = direction;
+        this.senderName = senderName;
+        this.receiverName = receiverName;
         this.type = type;
     }
 
@@ -27,7 +29,7 @@ public class AddSequenceDiagramMessageCommand implements ICommand {
     public void execute(UMLFileData file) throws Exception {
         this.messageID = file.getSequenceByID(this.sequenceID).addMessage(this.content);
         file.getSequenceByID(this.sequenceID).getMessageByID(this.messageID).setType(this.type);
-        file.getSequenceByID(this.sequenceID).getMessageByID(this.messageID).setDirection(this.direction);
+        file.getSequenceByID(this.sequenceID).getMessageByID(this.messageID).setParticipants(senderName, receiverName);
     }
 
     @Override

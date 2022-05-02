@@ -14,7 +14,8 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
     private int msgID;
     private String content;
     private EMessageType type;
-    private boolean direction;
+    private String senderName;
+    private String receiverName;
 
     public RemoveSequenceDiagramMessageCommand(int sequenceID, int messageIndex) {
         this.sequenceID = sequenceID;
@@ -26,7 +27,8 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
         this.msgID = file.getSequenceByID(this.sequenceID).getMessageByIndex(this.msgIndex - 1).getID();
         this.content = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getContent();
         this.type = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getType();
-        this.direction = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getDirection();
+        this.senderName = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getSender();
+        this.receiverName = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getReceiver();
         file.getSequenceByID(this.sequenceID).removeMessage(msgID);
     }
 
@@ -35,6 +37,6 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
         int newID = file.getSequenceByID(this.sequenceID).addMessage(content);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setContent(this.content);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setType(this.type);
-        file.getSequenceByID(this.sequenceID).getMessageByID(newID).setDirection(this.direction);
+        file.getSequenceByID(this.sequenceID).getMessageByID(newID).setParticipants(this.senderName, this.receiverName);
     }
 }
