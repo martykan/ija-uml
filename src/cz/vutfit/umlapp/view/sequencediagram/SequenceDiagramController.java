@@ -35,9 +35,6 @@ import java.util.Optional;
 
 public class SequenceDiagramController extends MainController {
     @FXML
-    public TreeView<String> diagramTreeView;
-
-    @FXML
     public TreeView<String> classTreeView;
 
     @FXML
@@ -52,25 +49,6 @@ public class SequenceDiagramController extends MainController {
     private String selectedDiagram;
     private String selectedClass;
     private String selectedMessage;
-
-    ChangeListener<TreeItem<String>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
-        if (newItem != null) {
-            this.selectedDiagram = newItem.getValue();
-            this.classTreeView.getSelectionModel().clearSelection();
-            this.messageTreeView.getSelectionModel().clearSelection();
-            handleProperties(newItem);
-        } else {
-            this.selectedDiagram = null;
-            propertiesView.resetProperties();
-            try {
-                propertiesView.addPropertyLine("Nothing selected", "");
-            } catch (Exception e) {
-                this.showErrorMessage(e.getLocalizedMessage());
-                e.printStackTrace();
-            }
-        }
-        //boxClassOptions.setVisible(this.selectedClass != null);
-    };
 
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
@@ -111,7 +89,6 @@ public class SequenceDiagramController extends MainController {
     @Override
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         super.init(modelFactory, viewHandler);
-        this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
         this.messageTreeView.getSelectionModel().selectedItemProperty().addListener(handleMessageSelection);
         try {

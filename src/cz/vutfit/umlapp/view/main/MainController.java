@@ -8,7 +8,6 @@ package cz.vutfit.umlapp.view.main;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.AddSequenceDiagramCommand;
-import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import javafx.application.Platform;
@@ -81,7 +80,6 @@ public class MainController implements IController {
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
-        this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
 
         this.updateView();
 
@@ -99,6 +97,16 @@ public class MainController implements IController {
             TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
             diagrams.showTreeItem();
             diagrams.rootViewUpdate();
+
+            // Highlight active diagram
+            this.diagramTreeView.getSelectionModel().selectedItemProperty().removeListener(handleDiagramSelection);
+            if (this.dataModel.getActiveDiagram() == null) {
+                this.diagramTreeView.getSelectionModel().selectFirst();
+            } else {
+                int selectedId = this.diagramTreeView.getRoot().getChildren().indexOf(diagrams.getTreeItem(this.dataModel.getActiveDiagram()));
+                this.diagramTreeView.getSelectionModel().clearAndSelect(selectedId);
+            }
+            this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
