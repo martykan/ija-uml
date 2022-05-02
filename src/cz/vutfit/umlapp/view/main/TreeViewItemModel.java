@@ -21,6 +21,7 @@ public class TreeViewItemModel {
     public TreeItem<String> root; /** Root of TreeView */
     public EDataType itemType; /** Type of the TreeItem @see EDataType */
     public DataModel dataModel;
+    public SequenceDiagram selectedSequence;
 
     /**
      * Constructor
@@ -42,15 +43,13 @@ public class TreeViewItemModel {
     public void showTreeItem() {
         TreeItem<String> item;
         switch (this.itemType) {
-            case CLASS_DIAGRAM:
+            case DIAGRAM:
                 item = new TreeItem<>("Class diagram");
                 this.root.getChildren().add(item);
                 for (SequenceDiagram diagram : this.dataModel.getData().getSequenceDiagrams()) {
                     item = new TreeItem<>(diagram.getName());
                     this.root.getChildren().add(item);
                 }
-                break;
-            case SEQUENCE_DIAGRAM:
                 break;
             case CLASS:
                 String relationString = null;
@@ -80,7 +79,25 @@ public class TreeViewItemModel {
                     relationString = null;
                 }
                 break;
+            case SEQ_OBJECTS:
+                for (SequenceObjects o : this.selectedSequence.getObjects()) {
+                    item = new TreeItem<>(o.getName());
+                    this.root.getChildren().add(item);
+                }
+                break;
+            case SEQ_MESSAGES:
+                int i = 1;
+                for (SequenceMessages m : this.selectedSequence.getMessages()) {
+                    item = new TreeItem<>(i + ". " + m.getContent());
+                    this.root.getChildren().add(item);
+                    i++;
+                }
+                break;
         }
+    }
+
+    public void setSelectedSequence(String ID) {
+        this.selectedSequence = this.dataModel.getData().getSequenceByName(ID);
     }
 
     /**

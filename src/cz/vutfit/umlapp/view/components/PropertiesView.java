@@ -44,6 +44,7 @@ public class PropertiesView extends VBox {
     public EPropertyType groupType = EPropertyType.EMPTY;
     public DataModel dataModel;
     public TreeView<String> classTreeView;
+    public TreeView<String> messagesTreeView;
     public String stringID;
     public int intID;
 
@@ -100,6 +101,10 @@ public class PropertiesView extends VBox {
 
     public void setClassTreeView(TreeView<String> x) {
         this.classTreeView = x;
+    }
+
+    public void setMessagesTreeView(TreeView<String> x) {
+        this.messagesTreeView = x;
     }
 
     public void setID(int ID) {

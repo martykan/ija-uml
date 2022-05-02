@@ -11,10 +11,13 @@ package cz.vutfit.umlapp.view.main;
  * @see TreeViewItemModel
  */
 public enum EDataType {
-    CLASS_DIAGRAM,
-    SEQUENCE_DIAGRAM,
+    DIAGRAM,
+
     CLASS,
     METHOD,
     ATTRIBUTE,
-    RELATIONSHIP
+    RELATIONSHIP,
+
+    SEQ_OBJECTS,
+    SEQ_MESSAGES
 }

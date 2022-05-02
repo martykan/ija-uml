@@ -10,6 +10,7 @@
   ~ Authors: Dominik Horký, Tomáš Martykán
   -->
 
+<?import cz.vutfit.umlapp.view.components.PropertiesView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -76,9 +77,49 @@
             <HBox styleClass="box-heading" alignment="CENTER">
                 <Label text="Diagrams"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemoveDiagram"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
             </HBox>
             <TreeView fx:id="diagramTreeView" maxHeight="150"/>
+
+            <!-- Classes -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Classes"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemoveClass"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
+            </HBox>
+            <TreeView fx:id="classTreeView" maxHeight="225"/>
+
+            <!-- Classes -> more options -->
+            <!-- not needed now
+            <HBox fx:id="boxClassOptions" visible="false">
+                <Button text="X" onAction="#handleX"/>
+            </HBox>
+            -->
+
+            <!-- Messages -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Messages"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemoveMessage"/>
+                <Button text="+" styleClass="icon-button" onAction="#handleAddMessage"/>
+            </HBox>
+            <TreeView fx:id="messageTreeView" maxHeight="225"/>
+
+            <!-- Messages -> more options -->
+            <!-- not needed now
+            <HBox fx:id="boxClassOptions" visible="false">
+                <Button text="X" onAction="#handleX"/>
+            </HBox>
+            -->
+
+            <!-- Properties -->
+            <HBox styleClass="box-heading" alignment="CENTER">
+                <Label text="Properties"/>
+                <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+            <PropertiesView fx:id="propertiesView"/>
         </VBox>
 
         <!--

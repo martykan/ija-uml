@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class SequenceDiagram {
     public int id;
     public String name;
-    public ArrayList<SequenceObjects> objects;
-    public ArrayList<SequenceMessages> messages;
+    public ArrayList<SequenceObjects> objects = new ArrayList<>();
+    public ArrayList<SequenceMessages> messages = new ArrayList<>();
 
     /** Constructor **/
     public SequenceDiagram() {
@@ -48,6 +48,11 @@ public class SequenceDiagram {
 
     /** Setters **/
     public void setName(String x) { this.name = x; }
+
+    public void setAll(ArrayList<SequenceObjects> objects, ArrayList<SequenceMessages> messages) {
+        this.objects = objects;
+        this.messages = messages;
+    }
 
     /** Working with object list **/
     public void addObject(String name) throws DuplicateObjectException {
@@ -83,7 +88,7 @@ public class SequenceDiagram {
     }
 
     /** Working with message list **/
-    public void addMessage(String content) {
+    public int addMessage(String content) {
         int id = 0;
         if (id != (this.messages).size()) {
             int i = 0;
@@ -98,8 +103,10 @@ public class SequenceDiagram {
             }
             if (id == 0 && !found) id = (this.messages).size();
         }
+
         SequenceMessages x = new SequenceMessages(id, content);
         (this.messages).add(x);
+        return id;
     }
 
     // returns true if removed or false if not found

@@ -77,6 +77,7 @@
             <HBox styleClass="box-heading" alignment="CENTER">
                 <Label text="Diagrams"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemoveDiagram"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
             </HBox>
             <TreeView fx:id="diagramTreeView" maxHeight="150"/>

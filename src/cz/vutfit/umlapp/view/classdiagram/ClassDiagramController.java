@@ -448,7 +448,6 @@ public class ClassDiagramController extends MainController {
 
             result.ifPresent(returned -> {
                 try {
-                    System.out.println("New relationship: " + "From=" + returned.get(0) + ", To=" + returned.get(1) + ", Type=" + returned.get(2));
                     Integer idFrom = this.dataModel.getData().getClassByName(returned.get(0)).getID();
                     Integer idTo = this.dataModel.getData().getClassByName(returned.get(1)).getID();
                     ERelationType relType = this.dataModel.getData().stringToRelation(returned.get(2));
@@ -580,6 +579,35 @@ public class ClassDiagramController extends MainController {
                 propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
             }
         } catch (Exception e) {
+            this.showErrorMessage(e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void handleRemoveDiagram(ActionEvent actionEvent) {
+        try {
+            String id;
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Remove Class Diagram");
+            alert.setContentText("This action will remove all classes and related sequence diagrams. Proceed?");
+            alert.setHeaderText("Remove everything and start over");
+            ButtonType okButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+            ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
+            alert.getButtonTypes().setAll(okButton, noButton);
+            alert.showAndWait().ifPresent(type -> {
+                if (type.getButtonData() == ButtonBar.ButtonData.YES) {
+                    try {
+                        this.dataModel.executeCommand(new FileResetCommand(this.dataModel.getData()));
+                        this.updateView();
+                    } catch (Exception e) {
+                        this.showErrorMessage(e.getLocalizedMessage());
+                        e.printStackTrace();
+                    }
+                } else if (type.getButtonData() == ButtonBar.ButtonData.NO) {
+                    return;
+                }
+            });
+        } catch(Exception e){
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }

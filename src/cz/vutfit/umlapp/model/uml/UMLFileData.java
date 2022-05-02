@@ -185,7 +185,6 @@ public class UMLFileData {
     }
 
     /**
-     * TODO
      * @param id ID of Sequence diagram
      * @return sequence diagram with that ID or null
      */
@@ -194,6 +193,14 @@ public class UMLFileData {
             if (c.getID() == id) {
                 return c;
             }
+        }
+        return null;
+    }
+
+    public SequenceDiagram getSequenceByName(String name) {
+        for (SequenceDiagram c : this.sequenceDiagrams) {
+            if (c.getName().equals(name))
+                return c;
         }
         return null;
     }

@@ -6,6 +6,25 @@
 package cz.vutfit.umlapp.model.uml;
 
 public enum EMessageType {
-    NORMAL,
-    RETURN_MESSAGE
+    SYNC,
+    ASYNC,
+    RETURN,
+    NEW_OBJECT,
+    RELEASE_OBJECT;
+
+    public String typeToString() {
+        switch (this) {
+            case SYNC:
+                return "Synchronized";
+            case ASYNC:
+                return "Asynchronous";
+            case RETURN:
+                return "Return message";
+            case NEW_OBJECT:
+                return "Object creation";
+            case RELEASE_OBJECT:
+                return "Object release";
+        }
+        return null;
+    }
 }

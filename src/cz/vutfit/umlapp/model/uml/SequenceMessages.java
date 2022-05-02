@@ -30,14 +30,14 @@ public class SequenceMessages {
         this.ID = ID;
         this.content = content;
         this.direction = true;
-        this.type = EMessageType.NORMAL;
+        this.type = EMessageType.SYNC;
     }
 
     public SequenceMessages (int ID, String content, boolean direction) {
         this.ID = ID;
         this.content = content;
         this.direction = direction;
-        this.type = EMessageType.NORMAL;
+        this.type = EMessageType.SYNC;
     }
 
     public SequenceMessages (int ID, String content, boolean direction, EMessageType type) {

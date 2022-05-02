@@ -8,6 +8,7 @@ package cz.vutfit.umlapp.view.main;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.AddSequenceDiagramCommand;
+import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import javafx.application.Platform;
@@ -93,7 +94,7 @@ public class MainController implements IController {
             viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
 
             // Diagrams menu
-            TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.CLASS_DIAGRAM);
+            TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
             diagrams.showTreeItem();
             diagrams.rootViewUpdate();
         } catch (Exception e) {
