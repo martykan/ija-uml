@@ -130,8 +130,7 @@ public class SequenceDiagramController extends MainController {
             // Classes (objects) menu
             TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.SEQ_OBJECTS);
 
-            // TODO -> not working selection in TreeView
-            this.selectedDiagram = "exSeq1";
+            this.selectedDiagram = this.dataModel.getActiveDiagram();
 
             classes.setSelectedSequence(this.selectedDiagram);
             classes.showTreeItem();
