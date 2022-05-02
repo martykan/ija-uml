@@ -165,10 +165,6 @@ public class SequenceDiagramController extends MainController {
                 if (type.getButtonData() == ButtonBar.ButtonData.YES) {
                     try {
                         SequenceDiagram seqDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
-
-                        // TODO -> this should not happen (selection in Diagrams treeView doesnt work now!)
-                        if (seqDiagram == null) seqDiagram = this.dataModel.getData().getSequenceByName("exSeq1");
-
                         this.dataModel.executeCommand(new RemoveSequenceDiagramCommand(seqDiagram.getID()));
                         this.updateView();
                     } catch (Exception e) {
