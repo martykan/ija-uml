@@ -116,6 +116,10 @@ public class SequenceDiagram {
         return null;
     }
 
+    public SequenceObjects getObjectByIndex(int index) {
+        return this.getObjects().get(index);
+    }
+
     /** Working with message list **/
     public int addMessage(String content) {
         int id = 0;

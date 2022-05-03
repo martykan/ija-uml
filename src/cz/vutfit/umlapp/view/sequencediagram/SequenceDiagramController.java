@@ -54,6 +54,9 @@ public class SequenceDiagramController extends MainController {
     @FXML
     public HBox boxMessageOptions;
 
+    @FXML
+    public HBox boxClassOptions;
+
     private String selectedDiagram;
     private String selectedClass;
     private String selectedMessage;
@@ -73,7 +76,7 @@ public class SequenceDiagramController extends MainController {
                 e.printStackTrace();
             }
         }
-        //boxClassOptions.setVisible(this.selectedClass != null);
+        boxClassOptions.setVisible(this.selectedClass != null);
     };
 
     ChangeListener<TreeItem<String>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
@@ -137,6 +140,7 @@ public class SequenceDiagramController extends MainController {
             this.initDiagram();
 
             boxMessageOptions.setVisible(this.selectedMessage != null);
+            boxClassOptions.setVisible(this.selectedClass != null);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -285,14 +289,12 @@ public class SequenceDiagramController extends MainController {
                 return;
 
             try {
-                if (this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue() != null) { // selected object
-                    String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
-                    this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
-                } else { // selected class instance
-                    String instanceName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                    this.dataModel.executeCommand(new RemoveSequenceDiagramClassInstanceCommand(currentSequence.getID(), instanceName));
-                }
+                String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+                String splitValue[] = selectedValue.split(":");
+                String className = splitValue[0];
+                String objectName = splitValue[1];
+                System.out.println(className + ":" + objectName);
+                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
                 this.updateView();
             } catch (Exception ex) {
                 this.showErrorMessage("Unable to remove object from sequence diagram", ex.getLocalizedMessage());
@@ -630,6 +632,44 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
+    public void handleObjectForward(ActionEvent actionEvent) {
+        Integer selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
+        SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+        SequenceObjects current = thisDiagram.getObjectByIndex(selectedIndex);
+        Integer objCount = thisDiagram.getObjects().size();
+
+        if (selectedIndex < objCount-1) {
+            try {
+                this.dataModel.executeCommand(new EditSequenceDiagramObjectIndexCommand(thisDiagram.getID(), selectedIndex, ++selectedIndex));
+                this.updateView();
+            } catch (Exception e) {
+                showErrorMessage("Unable to move object forward", e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("not enough objects");
+            return;
+        }
+    }
+
+    public void handleObjectBackward(ActionEvent actionEvent) {
+        Integer selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
+        SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+
+        if (selectedIndex > 0) {
+            try {
+                this.dataModel.executeCommand(new EditSequenceDiagramObjectIndexCommand(thisDiagram.getID(), selectedIndex, --selectedIndex));
+                this.updateView();
+            } catch (Exception e) {
+                showErrorMessage("Unable to move object backward", e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("not enough objects");
+            return;
+        }
+    }
+
     public void handleProperties(TreeItem<String> selected) {
         try {
             propertiesView.setDataModel(this.dataModel);
@@ -639,20 +679,16 @@ public class SequenceDiagramController extends MainController {
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
-                if (this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue() == null) { // class instance selected
-                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                    propertiesView.addPropertyLine("Class instance", this.selectedClass);
-                } else { // object selected
-                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
-                    String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-
-                    SequenceObjects object = current.getObject(className, objectName);
-                    propertiesView.setParentID(current.getID());
-                    propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
-                    propertiesView.addPropertyLine("Object", objectName);
-                    propertiesView.addPropertyLine("Class instance", className);
-                    propertiesView.addPropertyLine("Status", object.getActiveStatusString());
-                }
+                String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+                String splitValue[] = selectedValue.split(":");
+                String className = splitValue[0];
+                String objectName = splitValue[1];
+                SequenceObjects object = current.getObject(className, objectName);
+                propertiesView.setParentID(current.getID());
+                propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
+                propertiesView.addPropertyLine("Object", objectName);
+                propertiesView.addPropertyLine("Class instance", className);
+                propertiesView.addPropertyLine("Status", object.getActiveStatusString());
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());
                 Pair<String, String> fromObject = message.getSender();

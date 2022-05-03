@@ -91,12 +91,13 @@
             </HBox>
             <TreeView fx:id="classTreeView" maxHeight="225"/>
 
-            <!-- Classes -> more options -->
-            <!-- not needed now
+            <!-- Objects -> more options -->
+
             <HBox fx:id="boxClassOptions" visible="false">
-                <Button text="X" onAction="#handleX"/>
+                <Button text="Forward" onAction="#handleObjectForward"/>
+                <Button text="Backward" onAction="#handleObjectBackward"/>
             </HBox>
-            -->
+
 
             <!-- Messages -->
             <HBox styleClass="box-heading" alignment="CENTER">

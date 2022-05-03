@@ -85,19 +85,8 @@ public class TreeViewItemModel {
                     return;
                 ArrayList<String> usedClassName = new ArrayList<>();
                 for (SequenceObjects o : this.selectedSequence.getObjects()) {
-                    if (!usedClassName.contains(o.getClassName())) {
-                        item = new TreeItem<>(o.getClassName());
-                        item.getChildren().add(new TreeItem<>(o.getObjectName()));
-                        usedClassName.add(o.getClassName());
-                        this.root.getChildren().add(item);
-                    } else {
-                        for (TreeItem<String> i : this.root.getChildren()) {
-                            if (i.getValue().equals(o.getClassName())) {
-                                i.getChildren().add(new TreeItem<>(o.getObjectName()));
-                                break;
-                            }
-                        }
-                    }
+                    item = new TreeItem<>(o.getClassName() + ":" + o.getObjectName());
+                    this.root.getChildren().add(item);
                 }
                 break;
             case SEQ_MESSAGES:
