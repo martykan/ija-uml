@@ -277,6 +277,7 @@ public class SequenceDiagramController extends MainController {
                     }
                 });
             } else { // no class in class diagram
+                nameBox.setText("New Object");
                 grid.add(new Label("There are no classes in Class Diagram."), 0, 0);
                 grid.add(new Label("Create new class?"), 0, 1);
                 dialog.getDialogPane().setContent(grid);
