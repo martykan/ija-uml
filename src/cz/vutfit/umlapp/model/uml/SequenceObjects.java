@@ -51,4 +51,8 @@ public class SequenceObjects {
         else
             System.out.println("Error: Unknown String in setActiveStatusString");
     }
+
+    public String getObjectClassName() {
+        return this.objectName + ":" + this.className;
+    }
 }

@@ -14,8 +14,10 @@ import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.*;
 import cz.vutfit.umlapp.view.ViewHandler;
+import cz.vutfit.umlapp.view.components.ArrowHead;
 import cz.vutfit.umlapp.view.components.EPropertyType;
 import cz.vutfit.umlapp.view.components.PropertiesView;
+import cz.vutfit.umlapp.view.components.UMLSequenceObjectView;
 import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.main.MainController;
 import cz.vutfit.umlapp.view.main.TreeViewItemModel;
@@ -25,12 +27,18 @@ import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.layout.HBox;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SequenceDiagramController extends MainController {
@@ -126,12 +134,113 @@ public class SequenceDiagramController extends MainController {
             messages.showTreeItem();
             messages.rootViewUpdate();
 
-            //this.initDragDrop();
+            this.initDiagram();
 
             boxMessageOptions.setVisible(this.selectedMessage != null);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void initDiagram() {
+        anchorScrollPane.getChildren().clear();
+        HashMap<String, UMLSequenceObjectView> objectsViewMap = new HashMap<>();
+        SequenceDiagram diagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+
+        double currentX = 10;
+        double currentY = 100;
+
+        double cardWidth = 200;
+        double spaceWidth = 250;
+        double spaceHeight = 40;
+
+        for (SequenceObjects sequenceObject : diagram.getObjects()) {
+            // Is created or destroyed at some point?
+            int activatedAt = -1;
+            int destroyedAt = -1;
+            ArrayList<SequenceMessages> messages = diagram.getMessages();
+            for (int i = 0; i < messages.size(); i++) {
+                SequenceMessages sequenceMessage = messages.get(i);
+                if (Objects.equals(sequenceMessage.toObject.getValue() + ":" + sequenceMessage.toObject.getKey(), sequenceObject.getObjectClassName())) {
+                    if (activatedAt == -1 && sequenceMessage.type == EMessageType.NEW_OBJECT) {
+                        activatedAt = i;
+                    }
+                    if (sequenceMessage.type == EMessageType.RELEASE_OBJECT) {
+                        destroyedAt = i;
+                    }
+                }
+            }
+
+            // Lifeline
+            double startPos = 10;
+            if (activatedAt >= 0) {
+                startPos += activatedAt * spaceHeight;
+            }
+            double endPos = 200 + diagram.getMessages().size() * spaceHeight;
+            if (destroyedAt >= 0) {
+                endPos = 100 + destroyedAt * spaceHeight;
+            }
+            Line line = new Line();
+            line.setStartX(10 + cardWidth / 2 + currentX);
+            line.setStartY(startPos);
+            line.setEndX(10 + cardWidth / 2 + currentX);
+            line.setEndY(endPos);
+            line.setStrokeWidth(2);
+            line.setStroke(Paint.valueOf("#aaaaaa"));
+            line.getStrokeDashArray().addAll(2.0, 4.0);
+            anchorScrollPane.getChildren().add(line);
+
+            // Object
+            UMLSequenceObjectView node = new UMLSequenceObjectView(sequenceObject);
+            node.setTranslateX(10 + currentX);
+            node.setTranslateY(startPos);
+            anchorScrollPane.getChildren().add(node);
+            objectsViewMap.put(sequenceObject.getObjectClassName(), node);
+            currentX += spaceWidth;
+        }
+        for (SequenceMessages sequenceMessage : diagram.getMessages()) {
+            UMLSequenceObjectView fromObject = objectsViewMap.get(sequenceMessage.fromObject.getValue() + ":" + sequenceMessage.fromObject.getKey());
+            UMLSequenceObjectView toObject = objectsViewMap.get(sequenceMessage.toObject.getValue() + ":" + sequenceMessage.toObject.getKey());
+            if (fromObject == null || toObject == null) continue;
+
+            Line line = new Line();
+            line.setStartX(fromObject.getTranslateX() + cardWidth / 2);
+            line.setStartY(currentY);
+            line.setEndX(toObject.getTranslateX() + cardWidth / 2);
+            line.setEndY(currentY);
+            line.setStrokeWidth(2);
+            if (sequenceMessage.type == EMessageType.RETURN) {
+                line.getStrokeDashArray().addAll(2.0, 4.0);
+            }
+            anchorScrollPane.getChildren().add(line);
+            ArrowHead.EArrowType arrowType = ArrowHead.EArrowType.BASIC;
+            if (sequenceMessage.type == EMessageType.SYNC) {
+                arrowType = ArrowHead.EArrowType.TRIANGLE_FILLED;
+            } else if (sequenceMessage.type == EMessageType.RELEASE_OBJECT) {
+                arrowType = ArrowHead.EArrowType.CROSS;
+            }
+            ArrowHead arrow = new ArrowHead(arrowType);
+            arrow.setTranslateY(currentY);
+            if (fromObject.getTranslateX() > toObject.getTranslateX()) {
+                arrow.setTranslateX(toObject.getTranslateX() + cardWidth / 2);
+                arrow.setAngle(315);
+            } else {
+                arrow.setTranslateX(toObject.getTranslateX() + cardWidth / 2);
+                arrow.setAngle(135);
+            }
+            anchorScrollPane.getChildren().add(arrow);
+
+            Label label = new Label();
+            label.setText(sequenceMessage.content);
+            label.setTextAlignment(TextAlignment.CENTER);
+            label.setAlignment(Pos.CENTER);
+            label.setTranslateX(Math.min(fromObject.getTranslateX(), toObject.getTranslateX()) + cardWidth / 2);
+            label.setTranslateY(currentY - 20);
+            label.setPrefWidth(spaceWidth);
+            anchorScrollPane.getChildren().add(label);
+
+            currentY += spaceHeight;
         }
     }
 

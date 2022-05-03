@@ -7,31 +7,37 @@ package cz.vutfit.umlapp.view.components;
 
 import cz.vutfit.umlapp.model.uml.ERelationType;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Rotate;
 
-public class UMLArrow extends AnchorPane {
+public class UMLRelationArrow extends ArrowHead {
     VBox node;
     ERelationType type;
     boolean isEnd;
 
-    public UMLArrow(VBox node, Point2D startPoint, ERelationType type, boolean isEnd) {
+    public UMLRelationArrow(VBox node, Point2D startPoint, ERelationType type, boolean isEnd) {
+        super();
         this.node = node;
         this.type = type;
         this.isEnd = isEnd;
 
-        this.setPickOnBounds(false);
+        EArrowType arrowType;
+        if (type == ERelationType.GENERALIZATION && !isEnd) {
+            arrowType = EArrowType.TRIANGLE;
+        } else if (type == ERelationType.COMPOSITION && !isEnd) {
+            arrowType = EArrowType.SQUARE_FILLED;
+        } else if (type == ERelationType.AGGREGATION && !isEnd) {
+            arrowType = EArrowType.SQUARE;
+        } else {
+            return;
+        }
+        this.setArrowType(arrowType);
         this.updatePosition(startPoint);
+        this.show();
     }
 
     /**
      * Line intersection algorithm
-     * Based on https://stackoverflow.com/questions/1585525/how-to-find-the-intersection-point-between-a-line-and-a-rectangle
+     * Based on https://stackoverflow.c¨om/questions/1585525/how-to-find-the-intersection-point-between-a-line-and-a-rectangle
      *
      * @param width  rectangle width
      * @param height rectangle height
@@ -67,24 +73,6 @@ public class UMLArrow extends AnchorPane {
     }
 
     void updatePosition(Point2D startPoint) {
-        Node arrow;
-        if (type == ERelationType.GENERALIZATION && !isEnd) {
-            Polygon polygon = new Polygon(0, 0, 0, 16, 16, 0);
-            polygon.setFill(Paint.valueOf("white"));
-            polygon.setStroke(Paint.valueOf("black"));
-            polygon.setStrokeWidth(2);
-            arrow = polygon;
-        } else if (type == ERelationType.COMPOSITION && !isEnd) {
-            arrow = new Rectangle(16, 16, Paint.valueOf("black"));
-        } else if (type == ERelationType.AGGREGATION && !isEnd) {
-            Rectangle rectangle = new Rectangle(16, 16, Paint.valueOf("white"));
-            rectangle.setStroke(Paint.valueOf("black"));
-            rectangle.setStrokeWidth(2);
-            arrow = rectangle;
-        } else {
-            return;
-        }
-
         Point2D center = new Point2D(
                 node.getTranslateX() + node.getWidth() / 2,
                 node.getTranslateY() + node.getHeight() / 2
@@ -101,13 +89,6 @@ public class UMLArrow extends AnchorPane {
         arrow.setTranslateX(intersect.getX());
         arrow.setTranslateY(intersect.getY());
 
-        Rotate rotate = new Rotate();
-        rotate.setAngle((angle - 45));
-        rotate.setPivotX(0);
-        rotate.setPivotY(0);
-        arrow.getTransforms().add(rotate);
-
-        this.getChildren().clear();
-        this.getChildren().add(arrow);
+        setAngle(angle - 45);
     }
 }

@@ -90,8 +90,8 @@ public class DraggableUMLRelationView extends AnchorPane {
         }
         this.getChildren().addAll(lines);
 
-        final UMLArrow arrowStart = new UMLArrow(this.node1, new Point2D(lines.get(0).getEndX(), lines.get(0).getEndY()), this.relationship.getType(), false);
-        final UMLArrow arrowEnd = new UMLArrow(this.node2, new Point2D(lines.get(lines.size() - 1).getStartX(), lines.get(lines.size() - 1).getStartY()), this.relationship.getType(), true);
+        final UMLRelationArrow arrowStart = new UMLRelationArrow(this.node1, new Point2D(lines.get(0).getEndX(), lines.get(0).getEndY()), this.relationship.getType(), false);
+        final UMLRelationArrow arrowEnd = new UMLRelationArrow(this.node2, new Point2D(lines.get(lines.size() - 1).getStartX(), lines.get(lines.size() - 1).getStartY()), this.relationship.getType(), true);
         this.getChildren().add(arrowStart);
         this.getChildren().add(arrowEnd);
 

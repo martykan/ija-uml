@@ -124,7 +124,7 @@
         <!--
         (Current) Diagram area
         -->
-        <ScrollPane fx:id="scrollPane" vvalue="0.5" hvalue="0.5">
+        <ScrollPane fx:id="scrollPane">
             <AnchorPane fx:id="anchorScrollPane" prefWidth="10000" prefHeight="10000" styleClass="checkerboard">
             </AnchorPane>
         </ScrollPane>
