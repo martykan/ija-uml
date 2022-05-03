@@ -508,7 +508,7 @@ public class ClassDiagramController extends MainController {
                     String toString = "<empty>";
                     String fromDesc = null;
                     String toDesc = null;
-                    String relName = "<empty>";
+                    String relName = null;
                     Integer ID = 0;
                     String splitString = currentOption.split("[<>]", 2)[1];
                     if (currentOption.contains("><")) {
@@ -541,7 +541,7 @@ public class ClassDiagramController extends MainController {
                         toString = String.valueOf(myclass.getName());
                         fromString = splitString;
                         for (Relationships y : this.dataModel.getData().getRelationships()) {
-                            if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
+                            if (toString.equals(this.dataModel.getData().getClassByID(y.getToClassID()).getName())) {
                                 relType = y.getType().relationToString();
                                 fromDesc = y.getFromDesc();
                                 toDesc = y.getToDesc();
@@ -576,7 +576,6 @@ public class ClassDiagramController extends MainController {
                 propertiesView.addPropertyLine("Class", myclass.getName());
                 propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
                 propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
-                propertiesView.addPropertyLine("Linked seq. diagrams", String.valueOf(myclass.getSeqdigs().size()));
             }
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
