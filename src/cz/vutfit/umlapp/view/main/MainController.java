@@ -183,7 +183,7 @@ public class MainController implements IController {
     public void handleUndo(ActionEvent actionEvent) {
         try {
             if (this.dataModel.isCommandHistoryEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "You have not performed any command or you have already\nused undo command once. Nothing happened.", ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "You have not performed any command or you have already\nundo-ed all operations. Nothing happened.", ButtonType.OK);
                 alert.setTitle("Undo operation");
                 alert.setHeaderText("Command history is empty");
                 alert.showAndWait();
