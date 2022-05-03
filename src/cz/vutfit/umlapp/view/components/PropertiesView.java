@@ -135,7 +135,6 @@ public class PropertiesView extends VBox {
     }
 
     private void bindClassActions(Label prop, Label text, BorderPane line) {
-        System.out.println(text.getText());
         if (prop.getText().equals("Class")) {
             line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if (e.getClickCount() == 2) {
@@ -358,7 +357,6 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String attribName = this.stringID;
-                                System.out.println(attribName);
                                 this.dataModel.executeCommand(new EditClassAttributeVisibilityCommand(myclass.getID(), attribName, newVisibility));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
@@ -857,7 +855,6 @@ public class PropertiesView extends VBox {
                             try {
                                 Pair<String, String> newSender = data.get(0);
                                 Pair<String, String> newReceiver = data.get(1);
-                                System.out.println(newSender);
                                 this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {

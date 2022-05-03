@@ -10,7 +10,7 @@
 
 package cz.vutfit.umlapp.view.sequencediagram;
 
-import cz.vutfit.umlapp.model.ModelFactory;
+import cz.vutfit.umlapp.model.*;
 import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.*;
 import cz.vutfit.umlapp.view.ViewHandler;
@@ -136,6 +136,9 @@ public class SequenceDiagramController extends MainController {
             messages.setSelectedSequence(this.selectedDiagram);
             messages.showTreeItem();
             messages.rootViewUpdate();
+
+            // Handle inconsistencies
+            diagramCheck();
 
             this.initDiagram();
 
@@ -293,7 +296,6 @@ public class SequenceDiagramController extends MainController {
                 String splitValue[] = selectedValue.split(":");
                 String className = splitValue[0];
                 String objectName = splitValue[1];
-                System.out.println(className + ":" + objectName);
                 this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
                 this.updateView();
             } catch (Exception ex) {
@@ -647,7 +649,7 @@ public class SequenceDiagramController extends MainController {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("not enough objects");
+            //System.out.println("not enough objects");
             return;
         }
     }
@@ -665,7 +667,7 @@ public class SequenceDiagramController extends MainController {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("not enough objects");
+            //System.out.println("not enough objects");
             return;
         }
     }
@@ -710,5 +712,60 @@ public class SequenceDiagramController extends MainController {
             this.showErrorMessage("Unable to show properties menu", e.getLocalizedMessage());
             e.printStackTrace();
         }
+    }
+
+    // checks all inconsitencies of sequence diagram
+    // if there is inconsitency, sets check result to false!
+    public void diagramCheck() {
+        SequenceDiagram currentDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+        ArrayList<SequenceMessages> allMessages = currentDiagram.getMessages();
+        ArrayList<SequenceObjects> allObjects = currentDiagram.getObjects();
+        ErrorCheckClass errorClass = this.dataModel.getErrorClass();
+        ErrorCheckSequenceItem error = null;
+        ESequenceCheckError errorType = null;
+        String errorContent = null;
+
+        // clear all errors
+        errorClass.solveSequenceErrors();
+
+        // Messages: type=return only opposite direction of other (last) messages
+        // + must be response to something (atleast 1 message was received)
+        int index = 0;
+        for (SequenceMessages msg : allMessages) {
+            if (msg.getType() == EMessageType.RETURN) {
+                boolean returnOk = false;
+                if (index != 0) {
+                    for (SequenceMessages msg2 : allMessages) {
+                        if (msg2.getReceiver().equals(msg.getSender()) && msg2.getSender().equals(msg.getReceiver()) && msg2.getType() != EMessageType.RETURN) {
+                            returnOk = true;
+                            break;
+                        }
+                    }
+                    if (!returnOk) {
+                        errorType = ESequenceCheckError.MSG_RET_DIRECTION;
+                        errorContent = errorClass.generateErrorContent(currentDiagram.getName(), EElementType.SEQ_MESSAGE, msg.getID());
+                        error = new ErrorCheckSequenceItem(errorType, errorContent);
+                        errorClass.addSequenceError(error);
+                    }
+                }
+            }
+            index++;
+        }
+
+        // Messages: non return type can be only send from current object to another (?)
+        // (not response)
+        /**
+        int index = 0;
+        for (SequenceMessages msg : allMessages) {
+            if (msg.getType() != EMessageType.RETURN) { // TODO
+                errorType = ESequenceCheckError.MSG_NONRET_DIRECTION;
+                errorContent = errorClass.generateErrorContent(currentDiagram.getName(), EElementType.SEQ_MESSAGE, msg.getID());
+                error = new ErrorCheckSequenceItem(errorType, errorContent);
+                errorClass.addSequenceError(error);
+            }
+            index++;
+        } **/
+
+        this.dataModel.getErrorClass().printSequenceErrors();
     }
 }

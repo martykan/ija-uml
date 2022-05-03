@@ -43,6 +43,7 @@ public class SequenceMessages {
 
     public Pair<String, String> getSender() { return this.fromObject; }
     public Pair<String, String> getReceiver() { return this.toObject; }
+    public Pair<Pair<String, String>, Pair<String, String>> getParticipants() { return new Pair<>(this.fromObject, this.toObject); }
 
     public EMessageType getType() { return this.type; }
 

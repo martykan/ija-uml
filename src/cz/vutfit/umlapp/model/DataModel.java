@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import cz.vutfit.umlapp.model.commands.ICommand;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
+import javafx.util.Pair;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,7 +23,9 @@ public class DataModel {
     private File file;
     private UMLFileData data;
     private String activeDiagram;
-    public boolean savedFile = false;
+
+    private boolean savedFile = false;
+    private ErrorCheckClass error;
 
     /**
      * Execute the given command and save it to history
@@ -59,6 +62,7 @@ public class DataModel {
         this.data = new Gson().fromJson(reader, UMLFileData.class);
         this.commandHistory.clear();
         this.fileSaved();
+        this.error = new ErrorCheckClass();
     }
 
     /**
@@ -71,6 +75,7 @@ public class DataModel {
         this.data = new UMLFileData();
         this.commandHistory.clear();
         this.fileUnsaved();
+        this.error = new ErrorCheckClass();
     }
 
     /**
@@ -106,4 +111,6 @@ public class DataModel {
     public void setActiveDiagram(String activeDiagram) {
         this.activeDiagram = activeDiagram;
     }
+
+    public ErrorCheckClass getErrorClass() { return this.error; }
 }

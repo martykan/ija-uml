@@ -141,6 +141,9 @@ public class ClassDiagramController extends MainController {
             classes.showTreeItem();
             classes.rootViewUpdate();
 
+            // Handle inconsistencies
+            diagramCheck();
+
             this.initDragDrop();
 
             boxClassOptions.setVisible(this.selectedClass != null);
@@ -610,5 +613,11 @@ public class ClassDiagramController extends MainController {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
+    }
+
+    // checks all inconsitencies of class diagram
+    // if there is inconsitency, sets check result to false!
+    public void diagramCheck() {
+        this.dataModel.getErrorClass().printClassErrors();
     }
 }
