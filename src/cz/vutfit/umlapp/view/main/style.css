@@ -121,6 +121,26 @@
     -fx-background-color: #EEEEEE;
 }
 
+#boxMessageOptions {
+    -fx-background-color: #DDDDDD;
+}
+
+#boxMessageOptions > .button {
+  -fx-background-color: #DEDEDE;
+  -fx-border: none;
+  -fx-border-radius: 0px;
+  -fx-color: white;
+  -fx-padding: 6px 10px;
+  -fx-text-align: center;
+  -fx-text-decoration: none;
+  -fx-display: inline-block;
+  -fx-font-size: 11px;
+}
+
+#boxMessageOptions > .button:hover {
+    -fx-background-color: #EEEEEE;
+}
+
 /* Split pane styling */
 
 .split-pane:horizontal > .split-pane-divider {

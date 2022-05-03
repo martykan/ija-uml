@@ -108,11 +108,10 @@
             <TreeView fx:id="messageTreeView" maxHeight="225"/>
 
             <!-- Messages -> more options -->
-            <!-- not needed now
-            <HBox fx:id="boxClassOptions" visible="false">
-                <Button text="X" onAction="#handleX"/>
+            <HBox fx:id="boxMessageOptions" visible="false">
+                <Button text="Forward" onAction="#handleMessageForward"/>
+                <Button text="Backward" onAction="#handleMessageBackward"/>
             </HBox>
-            -->
 
             <!-- Properties -->
             <HBox styleClass="box-heading" alignment="CENTER">

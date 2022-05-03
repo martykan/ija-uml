@@ -27,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -44,6 +45,9 @@ public class SequenceDiagramController extends MainController {
 
     @FXML
     public PropertiesView propertiesView;
+
+    @FXML
+    public HBox boxMessageOptions;
 
     private String selectedDiagram;
     private String selectedClass;
@@ -101,7 +105,7 @@ public class SequenceDiagramController extends MainController {
                 e.printStackTrace();
             }
         }
-        //boxClassOptions.setVisible(this.selectedClass != null);
+        boxMessageOptions.setVisible(this.selectedMessage != null);
     };
 
     @Override
@@ -147,7 +151,7 @@ public class SequenceDiagramController extends MainController {
 
             //this.initDragDrop();
 
-            //boxClassOptions.setVisible(this.selectedClass != null);
+            boxMessageOptions.setVisible(this.selectedMessage != null);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -500,6 +504,44 @@ public class SequenceDiagramController extends MainController {
             return EMessageType.RELEASE_OBJECT;
         else
             return null;
+    }
+
+    public void handleMessageForward(ActionEvent actionEvent) {
+        Integer selectedIndex = this.messageTreeView.getSelectionModel().getSelectedIndex();
+        SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+        SequenceMessages current = thisDiagram.getMessageByIndex(selectedIndex);
+        Integer msgCount = thisDiagram.getMessages().size();
+
+        if (selectedIndex < msgCount-1) {
+            try {
+                this.dataModel.executeCommand(new EditSequenceDiagramMessageIndexCommand(thisDiagram.getID(), selectedIndex, ++selectedIndex));
+                this.updateView();
+            } catch (Exception e) {
+                showErrorMessage("Unable to move message forward", e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        } else {
+            return;
+        }
+    }
+
+    public void handleMessageBackward(ActionEvent actionEvent) {
+        Integer selectedIndex = this.messageTreeView.getSelectionModel().getSelectedIndex();
+        SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
+        SequenceMessages current = thisDiagram.getMessageByIndex(selectedIndex);
+        Integer msgCount = thisDiagram.getMessages().size();
+
+        if (selectedIndex > 0) {
+            try {
+                this.dataModel.executeCommand(new EditSequenceDiagramMessageIndexCommand(thisDiagram.getID(), selectedIndex, --selectedIndex));
+                this.updateView();
+            } catch (Exception e) {
+                showErrorMessage("Unable to move message backward", e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        } else {
+            return;
+        }
     }
 
     public void handleProperties(TreeItem<String> selected) {
