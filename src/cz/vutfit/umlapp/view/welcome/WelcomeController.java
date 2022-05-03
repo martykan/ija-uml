@@ -46,6 +46,7 @@ public class WelcomeController implements IController {
      */
     public void handleOpenFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
         try {
             File selectedFile = fileChooser.showOpenDialog(new Stage());
@@ -64,6 +65,7 @@ public class WelcomeController implements IController {
      */
     public void handleNewFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
         try {
             File selectedFile = fileChooser.showSaveDialog(new Stage());

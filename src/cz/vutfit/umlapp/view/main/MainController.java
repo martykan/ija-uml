@@ -55,6 +55,7 @@ public class MainController implements IController {
 
     public DataModel dataModel;
     public ViewHandler viewHandler;
+
     /**
      * Listens to changes in diagramTreeView.
      * Used for displaying properties of any element from diagramTreeView.
@@ -92,7 +93,7 @@ public class MainController implements IController {
      */
     public void updateView() {
         try {
-            viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName());
+            viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName() + (this.dataModel.getFileSaveStatus() ? "" : "*"));
 
             // Diagrams menu
             TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
@@ -131,6 +132,14 @@ public class MainController implements IController {
     public void handleSave(ActionEvent actionEvent) {
         try {
             this.dataModel.saveFile();
+            this.updateView();
+            /** Save info window **/
+            /**
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
+            alert.setTitle("File Save");
+            alert.setHeaderText("File saved successfully");
+            alert.showAndWait();
+             **/
         } catch (IOException e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -143,7 +152,24 @@ public class MainController implements IController {
      */
     public void handleClose(ActionEvent actionEvent) {
         try {
-            this.viewHandler.openView("Welcome");
+            /** Save window **/
+            if (this.dataModel.getFileSaveStatus() == false) {
+                ButtonType save = new ButtonType("Save and leave", ButtonBar.ButtonData.APPLY);
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Leave without saving changes?", ButtonType.YES, save, ButtonType.CANCEL);
+                alert.setTitle("Leave Warning");
+                alert.setHeaderText("You have unsaved changes in this file.");
+                alert.showAndWait();
+                if (alert.getResult() == ButtonType.YES) { // Leave without saving
+                    this.viewHandler.openView("Welcome");
+                } else if (alert.getResult() == save) { // Save and leave
+                    this.dataModel.saveFile();
+                    this.viewHandler.openView("Welcome");
+                } else if (alert.getResult() == ButtonType.NO) { // Do not leave
+                    return;
+                }
+            } else {
+                this.viewHandler.openView("Welcome");
+            }
         } catch (IOException e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -156,6 +182,12 @@ public class MainController implements IController {
      */
     public void handleUndo(ActionEvent actionEvent) {
         try {
+            if (this.dataModel.isCommandHistoryEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "You have not performed any command or you have already\nused undo command once. Nothing happened.", ButtonType.OK);
+                alert.setTitle("Undo operation");
+                alert.setHeaderText("Command history is empty");
+                alert.showAndWait();
+            }
             this.dataModel.undo();
             this.updateView();
         } catch (Exception e) {
@@ -206,6 +238,7 @@ public class MainController implements IController {
     public void handleSnapshot(ActionEvent actionEvent) {
         // Choose a file for output
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
         fileChooser.setTitle("Save Snapshot");
         File file = fileChooser.showSaveDialog(new Stage());

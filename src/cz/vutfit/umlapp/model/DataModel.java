@@ -22,6 +22,7 @@ public class DataModel {
     private File file;
     private UMLFileData data;
     private String activeDiagram;
+    public boolean savedFile = false;
 
     /**
      * Execute the given command and save it to history
@@ -32,6 +33,7 @@ public class DataModel {
         if (data == null) return;
         command.execute(data);
         commandHistory.add(command);
+        this.fileUnsaved();
     }
 
     /**
@@ -42,6 +44,8 @@ public class DataModel {
         ICommand command = commandHistory.remove(commandHistory.size() - 1);
         command.undo(data);
     }
+
+    public boolean isCommandHistoryEmpty() { return commandHistory.isEmpty(); }
 
     /**
      * Create a new instance from existing file
@@ -54,6 +58,7 @@ public class DataModel {
         JsonReader reader = new JsonReader(new FileReader(file));
         this.data = new Gson().fromJson(reader, UMLFileData.class);
         this.commandHistory.clear();
+        this.fileSaved();
     }
 
     /**
@@ -65,6 +70,7 @@ public class DataModel {
         this.file = file;
         this.data = new UMLFileData();
         this.commandHistory.clear();
+        this.fileUnsaved();
     }
 
     /**
@@ -78,7 +84,12 @@ public class DataModel {
         var writer = new BufferedWriter(new FileWriter(file));
         writer.write(serialized);
         writer.close();
+        this.fileSaved();
     }
+
+    public void fileSaved() { this.savedFile = true; }
+    public void fileUnsaved() { this.savedFile = false; }
+    public boolean getFileSaveStatus() { return this.savedFile; }
 
     public UMLFileData getData() {
         return data;
