@@ -169,6 +169,7 @@ public class SequenceDiagramController extends MainController {
                     try {
                         SequenceDiagram seqDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
                         this.dataModel.executeCommand(new RemoveSequenceDiagramCommand(seqDiagram.getID()));
+                        this.dataModel.setActiveDiagram(null);
                         this.updateView();
                     } catch (Exception e) {
                         this.showErrorMessage(e.getLocalizedMessage());
@@ -194,8 +195,14 @@ public class SequenceDiagramController extends MainController {
                 return;
 
             try {
-                String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue(); // TODO: split by :
-                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), objectName, objectName));
+                if (this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue() != null) { // selected object
+                    String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                    this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
+                } else { // selected class instance
+                    String instanceName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+                    this.dataModel.executeCommand(new RemoveSequenceDiagramClassInstanceCommand(currentSequence.getID(), instanceName));
+                }
                 this.updateView();
             } catch (Exception ex) {
                 this.showErrorMessage("Unable to remove object from sequence diagram", ex.getLocalizedMessage());
@@ -224,21 +231,21 @@ public class SequenceDiagramController extends MainController {
 
 
             ChoiceBox<String> classBox = new ChoiceBox<>();
-            boolean isObject = false;
             for (ClassDiagram x : this.dataModel.getData().getClasses()) {
-                isObject = false;
-                for (TreeItem<String> item : this.classTreeView.getRoot().getChildren()) {
-                    if (item.getValue().equals(x.getName())) {
-                        isObject = true;
-                        break;
-                    }
-                }
-                if (!isObject)
-                    classBox.getItems().add(x.getName());
+                classBox.getItems().add(x.getName());
             }
             classBox.getSelectionModel().selectFirst();
 
             TextField nameBox = new TextField();
+            // disable OK button if text-input is empty
+            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                if (nameBox.getText().equals("")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }, nameBox.textProperty());
+            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
             if (classBox.getItems().size() != 0) { // can add at least 1 class
                 grid.add(new Label("Objects in sequence diagrams must be from existing class instances from class diagram."), 0, 0);
@@ -382,22 +389,35 @@ public class SequenceDiagramController extends MainController {
                 ChoiceBox<String> msgType = new ChoiceBox<>();
                 ChoiceBox<String> sender = new ChoiceBox<>();
                 ChoiceBox<String> receiver = new ChoiceBox<>();
+                ArrayList<Pair<String, String>> senderID = new ArrayList<>();
+                ArrayList<Pair<String, String>> receiverID = new ArrayList<>();
                 for (EMessageType type : EMessageType.values()) {
                     msgType.getItems().add(type.typeToString());
                 }
                 msgType.getSelectionModel().selectFirst();
 
                 for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
-                    sender.getItems().add(obj.getObjectName() + " in " + obj.getClassName());
+                    sender.getItems().add(obj.getObjectName() + " [" + obj.getClassName() + "]");
+                    senderID.add(new Pair<>(obj.getClassName(), obj.getObjectName()));
                 }
                 sender.getSelectionModel().selectFirst();
 
                 for (SequenceObjects obj : this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects()) {
-                    receiver.getItems().add(obj.getObjectName() + " in " + obj.getClassName());
+                    receiver.getItems().add(obj.getObjectName() + " [" + obj.getClassName() + "]");
+                    receiverID.add(new Pair<>(obj.getClassName(), obj.getObjectName()));
                 }
                 receiver.getSelectionModel().selectFirst();
 
                 TextField contentBox = new TextField();
+                // disable OK button if text-input is empty
+                BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                    if (contentBox.getText().equals("")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }, contentBox.textProperty());
+                dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
                 grid.add(new Label("Message content: "), 0, 0);
                 grid.add(contentBox, 1, 0);
@@ -415,8 +435,10 @@ public class SequenceDiagramController extends MainController {
                         ArrayList<String> x = new ArrayList<>();
                         x.add(contentBox.getText());
                         x.add(msgType.getSelectionModel().getSelectedItem());
-                        x.add(sender.getSelectionModel().getSelectedItem());
-                        x.add(receiver.getSelectionModel().getSelectedItem());
+                        x.add(senderID.get(sender.getSelectionModel().getSelectedIndex()).getKey());
+                        x.add(senderID.get(sender.getSelectionModel().getSelectedIndex()).getValue());
+                        x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getKey());
+                        x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getValue());
                         return x;
                     }
                     return null;
@@ -426,8 +448,8 @@ public class SequenceDiagramController extends MainController {
                 result.ifPresent(returned -> {
                     try {
                         int seqID = this.dataModel.getData().getSequenceByName(this.selectedDiagram).getID();
-                        Pair<String, String> senderStr = new Pair<>(returned.get(2).split(":", 2)[0], returned.get(2).split(":", 2)[1]);
-                        Pair<String, String> receiverStr = new Pair<>(returned.get(3).split(":", 2)[0], returned.get(3).split(":", 2)[1]);
+                        Pair<String, String> senderStr = new Pair<>(returned.get(2), returned.get(3));
+                        Pair<String, String> receiverStr = new Pair<>(returned.get(4), returned.get(5));
                         EMessageType retType = stringToEMessageType(returned.get(1));
                         this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), senderStr, receiverStr, retType));
                         this.updateView();
@@ -486,15 +508,22 @@ public class SequenceDiagramController extends MainController {
             propertiesView.setMessagesTreeView(this.messageTreeView);
             SequenceDiagram current = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
-                String className = this.selectedClass.split(":", 2)[0];
-                String objectName = this.selectedClass.split(":", 2)[1];
-                SequenceObjects object = current.getObject(className, objectName);
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
-                propertiesView.setParentID(current.getID());
-                propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
-                propertiesView.addPropertyLine("Object", this.selectedClass);
-                propertiesView.addPropertyLine("Status", object.getActiveStatusString());
+                if (this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue() == null) { // class instance selected
+                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+                    propertiesView.addPropertyLine("Class instance", this.selectedClass);
+                } else { // object selected
+                    String className = this.classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                    String objectName = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
+
+                    SequenceObjects object = current.getObject(className, objectName);
+                    propertiesView.setParentID(current.getID());
+                    propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
+                    propertiesView.addPropertyLine("Object", objectName);
+                    propertiesView.addPropertyLine("Class instance", className);
+                    propertiesView.addPropertyLine("Status", object.getActiveStatusString());
+                }
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());
                 Pair<String, String> fromObject = message.getSender();
@@ -505,7 +534,7 @@ public class SequenceDiagramController extends MainController {
                 propertiesView.setParentID(current.getID());
                 propertiesView.setID(message.getID());
                 propertiesView.addPropertyLine("Message", this.selectedMessage);
-                propertiesView.addPropertyLine("From", fromObject.getKey() + ":" + toObject.getValue());
+                propertiesView.addPropertyLine("From", fromObject.getKey() + ":" + fromObject.getValue());
                 propertiesView.addPropertyLine("To", toObject.getKey() + ":" + toObject.getValue());
                 propertiesView.addPropertyLine("Type", message.getType().typeToString());
             } else {

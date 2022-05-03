@@ -70,6 +70,7 @@ public class MainController implements IController {
                     this.viewHandler.openView("SequenceDiagram");
                 }
             } catch (IOException e) {
+                this.showErrorMessage(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }

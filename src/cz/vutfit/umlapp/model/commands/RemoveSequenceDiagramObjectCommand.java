@@ -15,11 +15,13 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     private final int sequenceID;
     private final String objectName;
     private final String className;
+    private ArrayList<SequenceMessages> removedMessages;
 
     public RemoveSequenceDiagramObjectCommand(int sequenceID, String className, String objectName) {
         this.sequenceID = sequenceID;
         this.objectName = objectName;
         this.className = className;
+        this.removedMessages = new ArrayList<>();
     }
 
     @Override
@@ -32,6 +34,10 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
             }
         }
         for (int id : removalIDs) {
+            SequenceMessages removed = new SequenceMessages(id, file.getSequenceByID(this.sequenceID).getMessageByID(id).getContent());
+            removed.setType(file.getSequenceByID(this.sequenceID).getMessageByID(id).getType());
+            removed.setParticipants(file.getSequenceByID(this.sequenceID).getMessageByID(id).getSender(), file.getSequenceByID(this.sequenceID).getMessageByID(id).getReceiver());
+            this.removedMessages.add(removed);
             file.getSequenceByID(this.sequenceID).removeMessage(id);
         }
         file.getSequenceByID(this.sequenceID).removeObject(objectName);
@@ -41,6 +47,11 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     public void undo(UMLFileData file) throws Exception {
         Pair<String, String> objectName = new Pair<>(this.className, this.objectName);
         file.getSequenceByID(this.sequenceID).addObject(objectName);
-        System.out.println("RemoveSequenceDiagramObjectCommand: Operation undo completed only partially. (messages not restored)");
+
+        for (SequenceMessages restore : this.removedMessages) {
+            int newID = file.getSequenceByID(this.sequenceID).addMessage(restore.getContent());
+            file.getSequenceByID(this.sequenceID).getMessageByID(newID).setType(restore.getType());
+            file.getSequenceByID(this.sequenceID).getMessageByID(newID).setParticipants(restore.getSender(), restore.getReceiver());
+        }
     }
 }

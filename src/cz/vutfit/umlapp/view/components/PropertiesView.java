@@ -34,7 +34,7 @@ public class PropertiesView extends VBox {
     public DataModel dataModel;
     public TreeView<String> classTreeView;
     public TreeView<String> messagesTreeView;
-    public String stringID;
+    public String stringID = null;
     public int intID;
     public int parentIntID;
 
@@ -805,7 +805,7 @@ public class PropertiesView extends VBox {
                 if (e.getClickCount() == 2) {
                     try {
                         // Create the custom dialog.
-                        Dialog<ArrayList<String>> dialog = new Dialog<>();
+                        Dialog<ArrayList<Pair<String, String>>> dialog = new Dialog<>();
                         dialog.setTitle("Message direction");
                         dialog.setHeaderText("Change direction of message.\nYou can change class-object, who sends and who receives this message.");
 
@@ -820,12 +820,16 @@ public class PropertiesView extends VBox {
 
                         ChoiceBox<String> fromClassBox = new ChoiceBox<>();
                         ChoiceBox<String> toClassBox = new ChoiceBox<>();
+                        ArrayList<Pair<String, String>> fromClassID = new ArrayList<>();
+                        ArrayList<Pair<String, String>> toClassID = new ArrayList<>();
                         SequenceMessages mymessage = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID);
-                        String current = "From class '" + mymessage.getSender() + "' to class '" + mymessage.getReceiver() + "'";
+                        String current = "From object '" + mymessage.getSender().getKey() + ":" + mymessage.getSender().getValue() + "' to object '" + mymessage.getReceiver().getKey() + ":" + mymessage.getReceiver().getValue() + "'";
 
                         for (SequenceObjects c : this.dataModel.getData().getSequenceByID(this.parentIntID).getObjects()) {
-                            fromClassBox.getItems().add(c.getClassName() + ":" + c.getObjectName());
-                            toClassBox.getItems().add(c.getClassName() + ":" + c.getObjectName());
+                            fromClassBox.getItems().add(c.getObjectName() + " in " + c.getClassName());
+                            fromClassID.add(new Pair<>(c.getClassName(), c.getObjectName()));
+                            toClassBox.getItems().add(c.getObjectName() + " in " + c.getClassName());
+                            toClassID.add(new Pair<>(c.getClassName(), c.getObjectName()));
                         }
                         fromClassBox.getSelectionModel().selectFirst();
                         toClassBox.getSelectionModel().selectFirst();
@@ -840,19 +844,20 @@ public class PropertiesView extends VBox {
 
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
-                                ArrayList<String> x = new ArrayList<>();
-                                x.add(fromClassBox.getSelectionModel().getSelectedItem());
-                                x.add(toClassBox.getSelectionModel().getSelectedItem());
+                                ArrayList<Pair<String, String>> x = new ArrayList<>();
+                                x.add(fromClassID.get(fromClassBox.getSelectionModel().getSelectedIndex()));
+                                x.add(toClassID.get(toClassBox.getSelectionModel().getSelectedIndex()));
                                 return x;
                             }
                             return null;
                         });
 
-                        Optional<ArrayList<String>> result = dialog.showAndWait();
+                        Optional<ArrayList<Pair<String, String>>> result = dialog.showAndWait();
                         result.ifPresent(data -> {
                             try {
-                                Pair<String, String> newSender = new Pair<>(data.get(0).split(":", 2)[0], data.get(0).split(":", 2)[1]);
-                                Pair<String, String> newReceiver = new Pair<>(data.get(1).split(":", 2)[0], data.get(1).split(":", 2)[1]);
+                                Pair<String, String> newSender = data.get(0);
+                                Pair<String, String> newReceiver = data.get(1);
+                                System.out.println(newSender);
                                 this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
@@ -925,8 +930,14 @@ public class PropertiesView extends VBox {
     }
 
     private void bindSequenceObjectActions(Label prop, Label text, BorderPane line) {
-        if (prop.getText().equals("Object")) {
-            return;
+        if (prop.getText().equals("Class instance")) {
+            if (this.stringID != null) { // Class instance property in Object
+                return;
+            } else { // Class instance property in Class instances
+                return;
+            }
+        } else if (prop.getText().equals("Object")) {
+
         } else if (prop.getText().equals("Status")) {
             return;
         } else {

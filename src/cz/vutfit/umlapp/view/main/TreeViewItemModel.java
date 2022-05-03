@@ -10,6 +10,7 @@ import cz.vutfit.umlapp.model.uml.*;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -80,12 +81,28 @@ public class TreeViewItemModel {
                 }
                 break;
             case SEQ_OBJECTS:
+                if (this.selectedSequence == null)
+                    return;
+                ArrayList<String> usedClassName = new ArrayList<>();
                 for (SequenceObjects o : this.selectedSequence.getObjects()) {
-                    item = new TreeItem<>(o.getClassName() + ":" + o.getObjectName());
-                    this.root.getChildren().add(item);
+                    if (!usedClassName.contains(o.getClassName())) {
+                        item = new TreeItem<>(o.getClassName());
+                        item.getChildren().add(new TreeItem<>(o.getObjectName()));
+                        usedClassName.add(o.getClassName());
+                        this.root.getChildren().add(item);
+                    } else {
+                        for (TreeItem<String> i : this.root.getChildren()) {
+                            if (i.getValue().equals(o.getClassName())) {
+                                i.getChildren().add(new TreeItem<>(o.getObjectName()));
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
             case SEQ_MESSAGES:
+                if (this.selectedSequence == null)
+                    return;
                 int i = 1;
                 for (SequenceMessages m : this.selectedSequence.getMessages()) {
                     item = new TreeItem<>(i + ". " + m.getContent());

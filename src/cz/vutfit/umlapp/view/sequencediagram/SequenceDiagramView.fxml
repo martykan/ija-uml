@@ -80,11 +80,11 @@
                 <Button text="-" styleClass="icon-button" onAction="#handleRemoveDiagram"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddDiagram"/>
             </HBox>
-            <TreeView fx:id="diagramTreeView" maxHeight="150"/>
+            <TreeView fx:id="diagramTreeView" maxHeight="215"/>
 
-            <!-- Classes -->
+            <!-- Objects -->
             <HBox styleClass="box-heading" alignment="CENTER">
-                <Label text="Classes"/>
+                <Label text="Objects"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
                 <Button text="-" styleClass="icon-button" onAction="#handleRemoveClass"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
