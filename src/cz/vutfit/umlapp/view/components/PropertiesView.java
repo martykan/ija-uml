@@ -226,9 +226,19 @@ public class PropertiesView extends VBox {
 
                         // disable OK button if text-input is empty or name is same as old
                         BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                            if (dialog.getEditor().getText().equals("") || dialog.getEditor().getText().equals(text.getText())) {
+                            if (dialog.getEditor().getText().equals("")) {
+                                dialog.setHeaderText("You have not entered any attribute name!");
+                                return true;
+                            } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+[ ]?:[ ]?[A-z0-9]+$")) {
+                                dialog.setHeaderText("This attribute name seems wrong. (Example name: 'myattribute : void')");
+                                return true;
+                            } else if (dialog.getEditor().getText().equals(text.getText())) {
+                                dialog.setHeaderText("New name is same as old one!");
                                 return true;
                             } else {
+                                System.out.println("'" + dialog.getEditor().getText() + "'");
+                                System.out.println("'" + text.getText() + "'");
+                                dialog.setHeaderText("This name seems valid for attribute.");
                                 return false;
                             }
                         }, dialog.getEditor().textProperty());
@@ -386,9 +396,17 @@ public class PropertiesView extends VBox {
 
                         // disable OK button if text-input is empty or name is same as old
                         BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                            if (dialog.getEditor().getText().equals("") || dialog.getEditor().getText().equals(text.getText())) {
+                            if (dialog.getEditor().getText().equals("")) {
+                                dialog.setHeaderText("You have not entered any method name!");
+                                return true;
+                            } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
+                                dialog.setHeaderText("This method name seems wrong. (Example name: 'strToInt(String x) : int')");
+                                return true;
+                            } else if (dialog.getEditor().getText().equals(text.getText())) {
+                                dialog.setHeaderText("New name is same as the old one!");
                                 return true;
                             } else {
+                                dialog.setHeaderText("This name seems valid for method.");
                                 return false;
                             }
                         }, dialog.getEditor().textProperty());
@@ -405,6 +423,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String oldAttribName = this.stringID;
+                                System.out.println(oldAttribName);
                                 this.dataModel.executeCommand(new EditClassMethodNameCommand(myclass.getID(), oldAttribName, attribName));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {

@@ -9,5 +9,7 @@ public enum ESequenceCheckError {
     MSG_RET_DIRECTION,
     MSG_NONRET_DIRECTION,
 
+    OBJ_CLASS_NOEXISTENT,
+
     CHECK_OK
 }

@@ -85,7 +85,7 @@ public class TreeViewItemModel {
                     return;
                 ArrayList<String> usedClassName = new ArrayList<>();
                 for (SequenceObjects o : this.selectedSequence.getObjects()) {
-                    item = new TreeItem<>(o.getClassName() + ":" + o.getObjectName());
+                    item = new TreeItem<>(o.getObjectName() + ":" + o.getClassName());
                     this.root.getChildren().add(item);
                 }
                 break;

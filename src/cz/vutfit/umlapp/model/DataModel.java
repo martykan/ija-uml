@@ -46,6 +46,7 @@ public class DataModel {
         if (commandHistory.isEmpty()) return;
         ICommand command = commandHistory.remove(commandHistory.size() - 1);
         command.undo(data);
+        this.fileUnsaved();
     }
 
     public boolean isCommandHistoryEmpty() { return commandHistory.isEmpty(); }

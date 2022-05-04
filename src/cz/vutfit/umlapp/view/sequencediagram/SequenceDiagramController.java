@@ -683,11 +683,11 @@ public class SequenceDiagramController extends MainController {
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
                 String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
                 String splitValue[] = selectedValue.split(":");
-                String className = splitValue[0];
-                String objectName = splitValue[1];
+                String objectName = splitValue[0];
+                String className = splitValue[1];
                 SequenceObjects object = current.getObject(className, objectName);
                 propertiesView.setParentID(current.getID());
-                propertiesView.setID(object.getClassName() + ":" + object.getObjectName());
+                propertiesView.setID(object.getObjectName() + ":" + object.getClassName());
                 propertiesView.addPropertyLine("Object", objectName);
                 propertiesView.addPropertyLine("Class instance", className);
                 propertiesView.addPropertyLine("Status", object.getActiveStatusString());
@@ -701,8 +701,8 @@ public class SequenceDiagramController extends MainController {
                 propertiesView.setParentID(current.getID());
                 propertiesView.setID(message.getID());
                 propertiesView.addPropertyLine("Message", this.selectedMessage);
-                propertiesView.addPropertyLine("From", fromObject.getKey() + ":" + fromObject.getValue());
-                propertiesView.addPropertyLine("To", toObject.getKey() + ":" + toObject.getValue());
+                propertiesView.addPropertyLine("From", fromObject.getValue() + ":" + fromObject.getKey());
+                propertiesView.addPropertyLine("To", toObject.getValue() + ":" + toObject.getKey());
                 propertiesView.addPropertyLine("Type", message.getType().typeToString());
             } else {
                 propertiesView.resetProperties();
@@ -750,6 +750,20 @@ public class SequenceDiagramController extends MainController {
                 }
             }
             index++;
+        }
+
+        // Class instance not existing anymore (but exists in sequence diagram object) because:
+        //  1) user removed class from class diagram
+        //  2) file load failed
+        String className;
+        for (SequenceObjects obj : allObjects) {
+            className = obj.getClassName();
+            if (this.dataModel.getData().getClassByName(className) == null) {
+                errorType = ESequenceCheckError.OBJ_CLASS_NOEXISTENT;
+                errorContent = errorClass.generateErrorContent(currentDiagram.getName(), EElementType.SEQ_OBJECT, obj.getObjectClassName());
+                error = new ErrorCheckSequenceItem(errorType, errorContent);
+                errorClass.addSequenceError(error);
+            }
         }
 
         // Messages: non return type can be only send from current object to another (?)

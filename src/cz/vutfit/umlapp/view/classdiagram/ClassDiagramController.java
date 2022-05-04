@@ -219,10 +219,10 @@ public class ClassDiagramController extends MainController {
                     x = x[1].split("[(]", 2);
                     isAM = true;
                 }
-                if (x.length > 1 && x[1].equals(")")) {
+                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
                     for (Methods y : m) {
-                        if (y.getName().equals(x[0])) {
-                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, x[0], y.getVisibility()));
+                        if (y.getName().equals(currentOption.split("[+\\-#~]", 2)[1])) {
+                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, currentOption.split("[+\\-#~]", 2)[1], y.getVisibility()));
                             break;
                         }
                     }
@@ -294,8 +294,13 @@ public class ClassDiagramController extends MainController {
             // disable OK button if text-input is empty
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
                 if (dialog.getEditor().getText().equals("")) {
+                    dialog.setHeaderText("You have not entered any method name!");
+                    return true;
+                } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
+                    dialog.setHeaderText("This method name seems wrong. (Example name: 'strToInt(String x) : int')");
                     return true;
                 } else {
+                    dialog.setHeaderText("This name seems valid for method.");
                     return false;
                 }
             }, dialog.getEditor().textProperty());
@@ -343,8 +348,13 @@ public class ClassDiagramController extends MainController {
             // disable OK button if text-input is empty
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
                 if (dialog.getEditor().getText().equals("")) {
+                    dialog.setHeaderText("You have not entered any attribute name!");
+                    return true;
+                } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+[ ]?:[ ]?[A-z0-9]+$")) {
+                    dialog.setHeaderText("This attribute name seems wrong. (Example name: 'myattribute : void')");
                     return true;
                 } else {
+                    dialog.setHeaderText("This name seems valid for attribute.");
                     return false;
                 }
             }, dialog.getEditor().textProperty());
@@ -491,19 +501,21 @@ public class ClassDiagramController extends MainController {
                     x = x[1].split("[(]", 2);
                     isAM = true;
                 }
-                if (x.length > 1 && x[1].equals(")")) {
+                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
                     propertiesView.resetProperties();
                     propertiesView.setGroupType(EPropertyType.METHOD);
-                    propertiesView.setID(x[0]);
-                    propertiesView.addPropertyLine("Method", x[0]);
+                    propertiesView.setID(currentOption.split("[+\\-#~]", 2)[1]);
+                    propertiesView.addPropertyLine("Method", currentOption.split("[+\\-#~]", 2)[1]);
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
-                    propertiesView.addPropertyLine("Visibility", myclass.getMethod(x[0]).getVisibility().getVisiblityString());
+                    propertiesView.addPropertyLine("Visibility", myclass.getMethod(currentOption.split("[+\\-#~]", 2)[1]).getVisibility().getVisiblityString());
                 } else if (isAM) {
+                    String attribName = x[0];
                     propertiesView.resetProperties();
                     propertiesView.setGroupType(EPropertyType.ATTRIBUTE);
                     propertiesView.setID(x[0]);
-                    propertiesView.addPropertyLine("Attribute", x[0]);
+                    propertiesView.addPropertyLine("Attribute", attribName);
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
+                    System.out.println(x[0]);
                     propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
                 } else {
                     String relType = "<empty>";
