@@ -55,6 +55,7 @@ public class ViewHandler {
 
         Scene scene = new Scene(root);
         this.stage.setScene(scene);
+        this.stage.centerOnScreen();
         this.stage.show();
     }
 
