@@ -334,40 +334,6 @@ public class UMLFileData {
         }
         return false;
     }
-
-    /**
-     * Converts string to enum ERelationType (compatible with relationToString() method in ERelationType)
-     * @param string valid string to be converted
-     * @return enum value of string or null if invalid
-     * @see ERelationType
-     */
-    public ERelationType stringToRelation(String string) {
-        if (string.equals("Association")) {
-            return ERelationType.ASSOCIATION;
-        } else if (string.equals("Aggregation")) {
-            return ERelationType.AGGREGATION;
-        } else if (string.equals("Composition")) {
-            return ERelationType.COMPOSITION;
-        } else if (string.equals("Generalization")) {
-            return ERelationType.GENERALIZATION;
-        }
-        return null;
-    }
-
-    public EMessageType stringToMessageType(String string) {
-        if (string.equals("Synchronized")) {
-            return EMessageType.SYNC;
-        } else if (string.equals("Asynchronous")) {
-            return EMessageType.ASYNC;
-        } else if (string.equals("Return message")) {
-            return EMessageType.RETURN;
-        } else if (string.equals("Object creation")) {
-            return EMessageType.NEW_OBJECT;
-        } else if (string.equals("Object release")) {
-            return EMessageType.RELEASE_OBJECT;
-        }
-        return null;
-    }
 }
 
 

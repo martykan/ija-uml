@@ -14,13 +14,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.input.MouseButton;
-import cz.vutfit.umlapp.view.components.EPropertyType;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -797,7 +796,7 @@ public class PropertiesView extends VBox {
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
                                 String x = visBox.getSelectionModel().getSelectedItem();
-                                return this.dataModel.getData().stringToRelation(x);
+                                return ERelationType.fromString(x);
                             }
                             return null;
                         });
@@ -1102,7 +1101,7 @@ public class PropertiesView extends VBox {
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
                                 String x = typeBox.getSelectionModel().getSelectedItem();
-                                return this.dataModel.getData().stringToMessageType(x);
+                                return EMessageType.fromString(x);
                             }
                             return null;
                         });

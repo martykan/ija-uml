@@ -506,7 +506,7 @@ public class ClassDiagramController extends MainController {
                 try {
                     Integer idFrom = this.dataModel.getData().getClassByName(returned.get(0)).getID();
                     Integer idTo = this.dataModel.getData().getClassByName(returned.get(1)).getID();
-                    ERelationType relType = this.dataModel.getData().stringToRelation(returned.get(2));
+                    ERelationType relType = ERelationType.fromString(returned.get(2));
                     this.dataModel.executeCommand(new AddClassRelationshipCommand(idFrom, idTo, relType));
                     this.updateView();
                 } catch (Exception e) {

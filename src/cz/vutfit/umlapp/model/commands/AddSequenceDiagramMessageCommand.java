@@ -32,23 +32,13 @@ public class AddSequenceDiagramMessageCommand implements ICommand {
         file.getSequenceByID(this.sequenceID).getMessageByID(this.messageID).setType(this.type);
         file.getSequenceByID(this.sequenceID).getMessageByID(this.messageID).setParticipants(senderName, receiverName);
         file.getSequenceByID(this.sequenceID).getObject(senderName).setActiveStatus(true);
-        if (this.type == EMessageType.NEW_OBJECT) {
-            file.getSequenceByID(this.sequenceID).addObject(receiverName);
-        } else if (this.type == EMessageType.RELEASE_OBJECT)
-            file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(false);
-        else
-            file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(true);
+        file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(this.type != EMessageType.RELEASE_OBJECT);
     }
 
     @Override
     public void undo(UMLFileData file) throws Exception {
         file.getSequenceByID(this.sequenceID).removeMessage(this.messageID);
         file.getSequenceByID(this.sequenceID).getObject(senderName).setActiveStatus(false);
-        if (this.type == EMessageType.NEW_OBJECT)
-            file.getSequenceByID(this.sequenceID).removeObject(receiverName.getKey(), receiverName.getValue());
-        else if (this.type == EMessageType.RELEASE_OBJECT)
-            file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(true);
-        else
-                file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(false);
+        file.getSequenceByID(this.sequenceID).getObject(receiverName).setActiveStatus(this.type == EMessageType.RELEASE_OBJECT);
     }
 }

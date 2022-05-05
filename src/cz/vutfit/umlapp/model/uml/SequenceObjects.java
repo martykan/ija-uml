@@ -55,4 +55,8 @@ public class SequenceObjects {
     public String getObjectClassName() {
         return this.objectName + ":" + this.className;
     }
+
+    public boolean equals(Pair<String, String> classObjectName) {
+        return this.className.equals(classObjectName.getKey()) && this.objectName.equals(classObjectName.getValue());
+    }
 }

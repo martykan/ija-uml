@@ -29,7 +29,7 @@ public class SequenceMessages {
      * @param ID
      * @param content
      */
-    public SequenceMessages (int ID, String content) {
+    public SequenceMessages(int ID, String content) {
         this.ID = ID;
         this.content = content;
         this.fromObject = new Pair<String, String>(null, null);
@@ -38,15 +38,37 @@ public class SequenceMessages {
         checkTypeContent();
     }
 
-    public int getID() { return this.ID; }
+    public int getID() {
+        return this.ID;
+    }
 
-    public String getContent() { return this.content; }
+    public String getContent() {
+        return this.content;
+    }
 
-    public Pair<String, String> getSender() { return this.fromObject; }
-    public Pair<String, String> getReceiver() { return this.toObject; }
-    public Pair<Pair<String, String>, Pair<String, String>> getParticipants() { return new Pair<>(this.fromObject, this.toObject); }
+    public Pair<String, String> getSender() {
+        return this.fromObject;
+    }
 
-    public EMessageType getType() { return this.type; }
+    public Pair<String, String> getReceiver() {
+        return this.toObject;
+    }
+
+    public String getSenderString() {
+        return this.fromObject.getValue() + ":" + this.fromObject.getKey();
+    }
+
+    public String getReceiverString() {
+        return this.toObject.getValue() + ":" + this.toObject.getKey();
+    }
+
+    public Pair<Pair<String, String>, Pair<String, String>> getParticipants() {
+        return new Pair<>(this.fromObject, this.toObject);
+    }
+
+    public EMessageType getType() {
+        return this.type;
+    }
 
     public void setContent(String x) {
         this.content = x;

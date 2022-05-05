@@ -5,8 +5,6 @@
 
 package cz.vutfit.umlapp.model;
 
-import javafx.util.Pair;
-
 import java.util.ArrayList;
 
 public class ErrorCheckClass {
@@ -28,25 +26,30 @@ public class ErrorCheckClass {
 
     public ErrorCheckClassItem getLastClassError() {
         if (this.classErrors.size() > 0)
-            return this.classErrors.get(this.classErrors.size()-1);
+            return this.classErrors.get(this.classErrors.size() - 1);
         else
             return null;
     }
 
     public ErrorCheckSequenceItem getLastSequenceError() {
         if (this.sequenceErrors.size() > 0)
-            return this.sequenceErrors.get(this.sequenceErrors.size()-1);
+            return this.sequenceErrors.get(this.sequenceErrors.size() - 1);
         else
             return null;
     }
 
-    public boolean isClassDiagramCorrect() { return this.classErrors.size() == 0; }
-    public boolean isSequenceDiagramCorrect() { return this.sequenceErrors.size() == 0; }
+    public boolean isClassDiagramCorrect() {
+        return this.classErrors.size() == 0;
+    }
+
+    public boolean isSequenceDiagramCorrect() {
+        return this.sequenceErrors.size() == 0;
+    }
 
     public void printClassErrors() {
         if (!this.isClassDiagramCorrect()) {
             for (ErrorCheckClassItem error : this.getClassErrors()) {
-                System.out.println("CLASS_ERROR[" + error.getErrorType() + "; " + error.getErrorContent() + "]");
+                System.out.println("CLASS_ERROR[" + error.getErrorType() + "; " + error.toString() + "]");
             }
         } else {
             System.out.println("NO CLASS_ERROR FOUND");
@@ -56,7 +59,7 @@ public class ErrorCheckClass {
     public void printSequenceErrors() {
         if (!this.isSequenceDiagramCorrect()) {
             for (ErrorCheckSequenceItem error : this.getSequenceErrors()) {
-                System.out.println("SEQUENCE_ERROR[" + error.getErrorType() + "; " + error.getErrorContent() + "]");
+                System.out.println("SEQUENCE_ERROR[" + error.getErrorType() + "; " + error.toString() + "]");
             }
         } else {
             System.out.println("NO SEQUENCE_ERROR FOUND");
@@ -79,24 +82,17 @@ public class ErrorCheckClass {
         this.sequenceErrors.clear();
     }
 
-    public String generateErrorContent(String mainID, EElementType elementType, String elementID, EElementType subelementType, String subelementID) {
-        return mainID + ":" + elementType + ":String[" + elementID + "]:" + subelementType + ":" + subelementID;
+    public boolean isSeqObjectCorrect(String diagram, String objectID) {
+        return this.sequenceErrors.stream().anyMatch(it ->
+                it.getMainID().equals(diagram) && it.getElementType() == EElementType.SEQ_OBJECT &&
+                        it.getElementID().equals(objectID)
+        );
     }
 
-    public String generateErrorContent(String mainID, EElementType elementType, int elementID, EElementType subelementType, String subelementID) {
-        return mainID + ":" + elementType + ":int[" + elementID + "]:" + subelementType + ":" + subelementID;
+    public boolean isSeqMessageCorrect(String diagram, int messageID) {
+        return this.sequenceErrors.stream().anyMatch(it ->
+                it.getMainID().equals(diagram) && it.getElementType() == EElementType.SEQ_MESSAGE &&
+                        it.getElementID().equals(String.valueOf(messageID))
+        );
     }
-
-    public String generateErrorContent(String mainID, EElementType elementType, String elementID) {
-        return mainID + ":" + elementType + ":String[" + elementID + "]";
-    }
-
-    public String generateErrorContent(String mainID, EElementType elementType, int elementID) {
-        return mainID + ":" + elementType + ":int[" + elementID + "]";
-    }
-
-    public String generateErrorContent(String mainID) {
-        return mainID;
-    }
-
 }

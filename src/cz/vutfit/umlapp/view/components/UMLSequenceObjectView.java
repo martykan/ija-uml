@@ -38,4 +38,12 @@ public class UMLSequenceObjectView extends VBox {
     public void setActivatedAt(int activatedAt) {
         this.activatedAt = activatedAt;
     }
+
+    public void setHasError(boolean hasError) {
+        if (hasError) {
+            this.getStyleClass().add("class-box-error");
+        } else {
+            this.getStyleClass().remove("class-box-error");
+        }
+    }
 }

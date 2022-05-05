@@ -15,40 +15,47 @@ import javafx.scene.transform.Rotate;
 
 public class ArrowHead extends AnchorPane {
     Node arrow;
+    Paint primaryColor = Paint.valueOf("black");
 
     public ArrowHead() {
         this.setPickOnBounds(false);
     }
 
-    public ArrowHead(EArrowType arrowType) {
-        super();
+    public ArrowHead(EArrowType arrowType, Paint primaryColor) {
+        this();
+        if (primaryColor != null)
+            this.primaryColor = primaryColor;
         this.setArrowType(arrowType);
         this.show();
+    }
+
+    public ArrowHead(EArrowType arrowType) {
+        this(arrowType, null);
     }
 
     public void setArrowType(EArrowType arrowType) {
         if (arrowType == EArrowType.BASIC) {
             Polyline polyline = new Polyline(0, 16, 0, 0, 16, 0);
-            polyline.setStroke(Paint.valueOf("black"));
+            polyline.setStroke(primaryColor);
             polyline.setStrokeWidth(2);
             arrow = polyline;
         } else if (arrowType == EArrowType.TRIANGLE) {
             Polygon polygon = new Polygon(0, 0, 0, 16, 16, 0);
             polygon.setFill(Paint.valueOf("white"));
-            polygon.setStroke(Paint.valueOf("black"));
+            polygon.setStroke(primaryColor);
             polygon.setStrokeWidth(2);
             arrow = polygon;
         } else if (arrowType == EArrowType.TRIANGLE_FILLED) {
             Polygon polygon = new Polygon(0, 0, 0, 16, 16, 0);
-            polygon.setFill(Paint.valueOf("black"));
-            polygon.setStroke(Paint.valueOf("black"));
+            polygon.setFill(primaryColor);
+            polygon.setStroke(primaryColor);
             polygon.setStrokeWidth(2);
             arrow = polygon;
         } else if (arrowType == EArrowType.SQUARE_FILLED) {
-            arrow = new Rectangle(16, 16, Paint.valueOf("black"));
+            arrow = new Rectangle(16, 16, primaryColor);
         } else if (arrowType == EArrowType.SQUARE) {
             Rectangle rectangle = new Rectangle(16, 16, Paint.valueOf("white"));
-            rectangle.setStroke(Paint.valueOf("black"));
+            rectangle.setStroke(primaryColor);
             rectangle.setStrokeWidth(2);
             arrow = rectangle;
         } else if (arrowType == EArrowType.CROSS) {

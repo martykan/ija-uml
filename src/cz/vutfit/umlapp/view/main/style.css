@@ -90,13 +90,17 @@
     -fx-pref-height: 5px;
 }
 
+.class-box-error {
+    -fx-border-color: red;
+}
+
 /* TreeView */
 .tree-view {
 
 }
 
 .tree-cell {
-    -fx-font-weight: bold ;
+    -fx-font-weight: bold;
 }
 
 /* Buttons menu under TreeView */
