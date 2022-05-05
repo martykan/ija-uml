@@ -18,13 +18,17 @@ import java.util.stream.Collectors;
  * Class for draggable diagrams in MainView
  */
 public class DraggableUMLClassView extends VBox {
+    private ClassDiagram classDiagram;
+
     /**
      * Constructor - creates one new class in View
+     *
      * @param classDiagram class from model
-     * @param totalZoom zoom
+     * @param totalZoom    zoom
      */
     public DraggableUMLClassView(ClassDiagram classDiagram, AtomicReference<Double> totalZoom) {
         super();
+        this.classDiagram = classDiagram;
         this.getStyleClass().add("class-box");
         this.setTranslateX(classDiagram.positionX);
         this.setTranslateY(classDiagram.positionY);
@@ -64,9 +68,16 @@ public class DraggableUMLClassView extends VBox {
             originalY.set(this.getTranslateY());
         });
         this.setOnMouseDragged(event -> {
-            this.setTranslateX((event.getSceneX() - initialX.get()) / totalZoom.get() + originalX.get());
-            this.setTranslateY((event.getSceneY() - initialY.get()) / totalZoom.get() + originalY.get());
+            double xPos = (event.getSceneX() - initialX.get()) / totalZoom.get() + originalX.get();
+            double yPos = (event.getSceneY() - initialY.get()) / totalZoom.get() + originalY.get();
+            double snapStep = 20;
+            this.setTranslateX(Math.round(xPos / snapStep) * snapStep);
+            this.setTranslateY(Math.round(yPos / snapStep) * snapStep);
             event.consume();
         });
+    }
+
+    public ClassDiagram getClassDiagram() {
+        return classDiagram;
     }
 }

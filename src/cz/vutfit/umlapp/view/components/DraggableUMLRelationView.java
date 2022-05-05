@@ -8,10 +8,14 @@ package cz.vutfit.umlapp.view.components;
 import cz.vutfit.umlapp.model.uml.Relationships;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Rotate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +56,7 @@ public class DraggableUMLRelationView extends AnchorPane {
         });
 
         // Defer so we can compute node width/height
+        System.out.println("Init");
         Platform.runLater(DraggableUMLRelationView.this::drawLine);
     }
 
@@ -60,6 +65,23 @@ public class DraggableUMLRelationView extends AnchorPane {
      * Draw lines between classes, with midpoints
      */
     public void drawLine() {
+        if (this.node1.getWidth() == 0) {
+            // Node not rendered yet
+            Platform.runLater(DraggableUMLRelationView.this::drawLine);
+            return;
+        }
+
+        double node1CenterX = this.node1.getTranslateX() + this.node1.getWidth() / 2;
+        double node1CenterY = this.node1.getTranslateY() + this.node1.getHeight() / 2;
+        double node2CenterX = this.node2.getTranslateX() + this.node2.getWidth() / 2;
+        double node2CenterY = this.node2.getTranslateY() + this.node2.getHeight() / 2;
+
+        boolean toSelf = node1.getClassDiagram().getID() == node2.getClassDiagram().getID();
+        if (toSelf && relationship.lineMidpoints.isEmpty()) {
+            this.relationship.lineMidpoints.add(new Point2D(node1CenterX - 10, node1.getTranslateY() + node1.getHeight() + 50));
+            this.relationship.lineMidpoints.add(new Point2D(node1CenterX + 10, node1.getTranslateY() + node1.getHeight() + 50));
+        }
+
         this.getChildren().clear();
         List<Line> lines = new ArrayList<>();
 
@@ -68,15 +90,15 @@ public class DraggableUMLRelationView extends AnchorPane {
             // Line
             Line line = new Line();
             if (i == 0) {
-                line.setStartX(this.node1.getTranslateX() + this.node1.getWidth() / 2);
-                line.setStartY(this.node1.getTranslateY() + this.node1.getHeight() / 2);
+                line.setStartX(node1CenterX);
+                line.setStartY(node1CenterY);
             } else {
                 line.setStartX(this.relationship.lineMidpoints.get(i - 1).getX());
                 line.setStartY(this.relationship.lineMidpoints.get(i - 1).getY());
             }
             if (i == this.relationship.lineMidpoints.size()) {
-                line.setEndX(this.node2.getTranslateX() + this.node2.getWidth() / 2);
-                line.setEndY(this.node2.getTranslateY() + this.node2.getHeight() / 2);
+                line.setEndX(node2CenterX);
+                line.setEndY(node2CenterY);
             } else {
                 line.setEndX(this.relationship.lineMidpoints.get(i).getX());
                 line.setEndY(this.relationship.lineMidpoints.get(i).getY());
@@ -90,6 +112,69 @@ public class DraggableUMLRelationView extends AnchorPane {
         }
         this.getChildren().addAll(lines);
 
+        // Labels
+        double dx = node2.getTranslateX() - node1.getTranslateX();
+        double dy = node2.getTranslateY() - node1.getTranslateY();
+        double angle = Math.toDegrees(Math.atan2(dy, dx));
+        if (angle <= -90 || angle >= 90) {
+            angle += 180;
+        }
+        Rotate rotate = new Rotate();
+        rotate.setAngle(angle);
+        rotate.setPivotX(0);
+        rotate.setPivotY(0);
+
+        Label labelCenter = new Label(this.relationship.getName());
+        labelCenter.setAlignment(Pos.CENTER);
+        labelCenter.setTextAlignment(TextAlignment.CENTER);
+        if (node1.getTranslateX() < node2.getTranslateX()) {
+            labelCenter.setTranslateX(node1CenterX);
+            labelCenter.setTranslateY(node1CenterY);
+        } else {
+            labelCenter.setTranslateX(node2CenterX);
+            labelCenter.setTranslateY(node2CenterY);
+        }
+        labelCenter.setPrefWidth(Math.sqrt(Math.pow(node2.getTranslateX() - node1.getTranslateX(), 2) + Math.pow(node2.getTranslateY() - node1.getTranslateY(), 2)));
+        labelCenter.getTransforms().add(rotate);
+        this.getChildren().add(labelCenter);
+        Label labelStart = new Label(this.relationship.getFromDesc());
+        Point2D startIntersect = UMLRelationArrow.lineIntersectionOnRect(
+                node1.getWidth(),
+                node1.getHeight(),
+                new Point2D(node1CenterX, node1CenterY),
+                new Point2D(node2CenterX, node2CenterY)
+        );
+        Label labelEnd = new Label(this.relationship.getToDesc());
+        Point2D endIntersect = UMLRelationArrow.lineIntersectionOnRect(
+                node2.getWidth(),
+                node2.getHeight(),
+                new Point2D(node2CenterX, node2CenterY),
+                new Point2D(node1CenterX, node1CenterY)
+        );
+        labelStart.setPrefWidth(100);
+        labelEnd.setPrefWidth(100);
+        if (node1CenterX < node2CenterX) {
+            labelStart.setTranslateX(startIntersect.getX() + 15);
+            labelStart.setAlignment(Pos.CENTER_LEFT);
+            labelEnd.setTranslateX(endIntersect.getX() - 120);
+            labelEnd.setAlignment(Pos.CENTER_RIGHT);
+        } else {
+            labelEnd.setTranslateX(endIntersect.getX() + 15);
+            labelEnd.setAlignment(Pos.CENTER_LEFT);
+            labelStart.setTranslateX(startIntersect.getX() - 120);
+            labelStart.setAlignment(Pos.CENTER_RIGHT);
+        }
+        if (node1CenterY < node2CenterY) {
+            labelStart.setTranslateY(startIntersect.getY() + 10);
+            labelEnd.setTranslateY(endIntersect.getY() - 20);
+        } else {
+            labelStart.setTranslateY(startIntersect.getY() - 20);
+            labelEnd.setTranslateY(endIntersect.getY() + 10);
+        }
+        this.getChildren().add(labelStart);
+        this.getChildren().add(labelEnd);
+
+        // Arrows
         final UMLRelationArrow arrowStart = new UMLRelationArrow(this.node1, new Point2D(lines.get(0).getEndX(), lines.get(0).getEndY()), this.relationship.getType(), false);
         final UMLRelationArrow arrowEnd = new UMLRelationArrow(this.node2, new Point2D(lines.get(lines.size() - 1).getStartX(), lines.get(lines.size() - 1).getStartY()), this.relationship.getType(), true);
         this.getChildren().add(arrowStart);
