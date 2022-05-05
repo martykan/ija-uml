@@ -5,10 +5,8 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.SequenceDiagram;
-import cz.vutfit.umlapp.model.uml.SequenceObjects;
-import cz.vutfit.umlapp.model.uml.UMLFileData;
+import cz.vutfit.umlapp.model.uml.*;
+import javafx.util.Pair;
 
 
 public class EditClassNameCommand implements ICommand {
@@ -31,6 +29,12 @@ public class EditClassNameCommand implements ICommand {
                 if (obj.getClassName().equals(oldClassName))
                     obj.setClassName(this.newClassName);
             }
+            for (SequenceMessages mes : seq.getMessages()) {
+                if (mes.getSender().getKey().equals(oldClassName))
+                    mes.setParticipants(new Pair<>(this.newClassName, mes.getSender().getValue()), mes.getReceiver());
+                if (mes.getReceiver().getKey().equals(oldClassName))
+                    mes.setParticipants(mes.getSender(), new Pair<>(this.newClassName, mes.getReceiver().getValue()));
+            }
         }
     }
 
@@ -42,6 +46,12 @@ public class EditClassNameCommand implements ICommand {
             for (SequenceObjects obj : seq.getObjects()) {
                 if (obj.getClassName().equals(newClassName))
                     obj.setClassName(this.oldClassName);
+            }
+            for (SequenceMessages mes : seq.getMessages()) {
+                if (mes.getSender().getKey().equals(newClassName))
+                    mes.setParticipants(new Pair<>(this.oldClassName, mes.getSender().getValue()), mes.getReceiver());
+                if (mes.getReceiver().getKey().equals(newClassName))
+                    mes.setParticipants(mes.getSender(), new Pair<>(this.oldClassName, mes.getReceiver().getValue()));
             }
         }
     }

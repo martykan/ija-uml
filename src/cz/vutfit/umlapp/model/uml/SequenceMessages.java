@@ -35,6 +35,7 @@ public class SequenceMessages {
         this.fromObject = new Pair<String, String>(null, null);
         this.toObject = new Pair<String, String>(null, null);
         this.type = EMessageType.SYNC;
+        checkTypeContent();
     }
 
     public int getID() { return this.ID; }
@@ -47,12 +48,25 @@ public class SequenceMessages {
 
     public EMessageType getType() { return this.type; }
 
-    public void setContent(String x) { this.content = x; }
+    public void setContent(String x) {
+        this.content = x;
+        checkTypeContent();
+    }
 
     public void setParticipants(Pair<String, String> objectFrom, Pair<String, String> objectTo) {
         this.fromObject = objectFrom;
         this.toObject = objectTo;
     }
 
-    public void setType(EMessageType x) { this.type = x; }
+    public void setType(EMessageType x) {
+        this.type = x;
+        checkTypeContent();
+    }
+
+    public void checkTypeContent() {
+        if (this.type == EMessageType.NEW_OBJECT)
+            this.content = "<<create>> " + this.content;
+        else if (this.type == EMessageType.RELEASE_OBJECT)
+            this.content = "<<destroy>> " + this.content;
+    }
 }

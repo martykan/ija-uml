@@ -354,7 +354,7 @@ public class SequenceDiagramController extends MainController {
                 String[] splitValue = selectedValue.split(":");
                 String className = splitValue[0];
                 String objectName = splitValue[1];
-                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
+                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), objectName, className));
                 this.updateView();
             } catch (Exception ex) {
                 this.showErrorMessage("Unable to remove object from sequence diagram", ex.getLocalizedMessage());
@@ -553,12 +553,17 @@ public class SequenceDiagramController extends MainController {
                 }
                 receiver.getSelectionModel().selectFirst();
 
-                TextField contentBox = new TextField();
-                // disable OK button if text-input is empty
-                BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                    return contentBox.getText().equals("");
-                }, contentBox.textProperty());
-                dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
+                ChoiceBox<String> contentBox = new ChoiceBox<>();
+                String selection = sender.getSelectionModel().getSelectedItem();
+                String classID = selection.split("\\[", 2)[1].split("]",2)[0];
+                for (Methods m : this.dataModel.getData().getClassByName(classID).getMethods()) {
+                    contentBox.getItems().add(m.getName());
+                }
+                if (contentBox.getItems().size() == 0) {
+                    contentBox.getItems().add("<no methods>");
+                }
+                contentBox.getSelectionModel().selectFirst();
+                Label receiverLabel = new Label("Receiver: ");
 
                 grid.add(new Label("Message content: "), 0, 0);
                 grid.add(contentBox, 1, 0);
@@ -566,20 +571,86 @@ public class SequenceDiagramController extends MainController {
                 grid.add(msgType, 1, 1);
                 grid.add(new Label("Sender: "), 0, 2);
                 grid.add(sender, 1, 2);
-                grid.add(new Label("Receiver: "), 0, 3);
+                grid.add(receiverLabel, 0, 3);
                 grid.add(receiver, 1, 3);
 
+                TextField f = new TextField();
+                grid.add(f, 1, 0);
+                f.setVisible(false);
+
+                TextField objNew = new TextField();
+                ChoiceBox<String> recNew = new ChoiceBox<>();
+                for (ClassDiagram cl : this.dataModel.getData().getClasses()) {
+                    recNew.getItems().add(cl.getName());
+                }
+                recNew.getSelectionModel().selectFirst();
+                grid.add(recNew, 1, 3);
+                grid.add(objNew, 1, 4);
+
+                objNew.setVisible(false);
+                recNew.setVisible(false);
                 dialog.getDialogPane().setContent(grid);
+
+
+                sender.setOnAction(event -> {
+                    contentBox.getItems().clear();
+                    String selectionX = sender.getSelectionModel().getSelectedItem();
+                    String classIDX = selectionX.split("\\[", 2)[1].split("]",2)[0];
+                    for (Methods m : this.dataModel.getData().getClassByName(classIDX).getMethods()) {
+                        contentBox.getItems().add(m.getName());
+                    }
+                    if (contentBox.getItems().size() == 0) {
+                        contentBox.getItems().add("<no methods>");
+                    }
+                    contentBox.getSelectionModel().selectFirst();
+
+                    BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                        return contentBox.getItems().get(0).equals("<no methods>");
+                    });
+                    dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
+                });
+
+                msgType.setOnAction(event -> {
+                    if (msgType.getSelectionModel().getSelectedItem().equals("Return message")) {
+                        f.setVisible(true);
+                    } else {
+                        f.setVisible(false);
+                    }
+                    if (msgType.getSelectionModel().getSelectedItem().equals("Object creation")) {
+                        objNew.setVisible(true);
+                        recNew.setVisible(true);
+                        receiver.setVisible(false);
+                        receiverLabel.setText("New object: ");
+                    } else {
+                        objNew.setVisible(false);
+                        recNew.setVisible(false);
+                        receiver.setVisible(true);
+                        receiverLabel.setText("Receiver: ");
+                    }
+                });
+                BooleanBinding validName2 = Bindings.createBooleanBinding(() -> {
+                    return ( objNew.isVisible() && objNew.getText().equals("") ) || ( f.isVisible() && f.getText().equals("") );
+                });
+                dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName2);
+
 
                 dialog.setResultConverter(dialogButton -> {
                     if (dialogButton == createButtonType) {
                         ArrayList<String> x = new ArrayList<>();
-                        x.add(contentBox.getText());
+                        if (f.isVisible())
+                            x.add(f.getText());
+                        else
+                            x.add(contentBox.getSelectionModel().getSelectedItem());
                         x.add(msgType.getSelectionModel().getSelectedItem());
                         x.add(senderID.get(sender.getSelectionModel().getSelectedIndex()).getKey());
                         x.add(senderID.get(sender.getSelectionModel().getSelectedIndex()).getValue());
-                        x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getKey());
-                        x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getValue());
+                        if (recNew.isVisible()) {
+                            x.add(recNew.getSelectionModel().getSelectedItem());
+                            x.add(objNew.getText());
+                        } else {
+                            x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getKey());
+                            x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getValue());
+                        }
                         return x;
                     }
                     return null;
@@ -592,6 +663,10 @@ public class SequenceDiagramController extends MainController {
                         Pair<String, String> senderStr = new Pair<>(returned.get(2), returned.get(3));
                         Pair<String, String> receiverStr = new Pair<>(returned.get(4), returned.get(5));
                         EMessageType retType = stringToEMessageType(returned.get(1));
+                        if (returned.get(5).equals("")) {
+                            this.showErrorMessage("Unable to add new message", "New object has no name.");
+                            return;
+                        }
                         this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), senderStr, receiverStr, retType));
                         this.updateView();
                     } catch (Exception ex) {

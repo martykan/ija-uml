@@ -895,20 +895,54 @@ public class PropertiesView extends VBox {
             line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if (e.getClickCount() == 2) {
                     try {
-                        TextInputDialog dialog = new TextInputDialog("");
-                        dialog.setTitle("Message content");
-                        dialog.setHeaderText("Change content of this message.\nOld content: " + text.getText());
-                        dialog.setContentText("New content:");
+                        Dialog<String> dialog = new Dialog<>();
+                        dialog.setTitle("Change message");
+                        dialog.setHeaderText("Change content of this message");
 
-                        // disable OK button if text-input is same as old
+                        ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+                        GridPane grid = new GridPane();
+                        grid.setHgap(10);
+                        grid.setVgap(10);
+                        grid.setPadding(new Insets(20, 150, 10, 10));
+
+                        ChoiceBox<String> contentBox = new ChoiceBox<>();
+                        String clName = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getSender().getKey();
+                        for (Methods m : this.dataModel.getData().getClassByName(clName).getMethods()) {
+                            contentBox.getItems().add(m.getName());
+                        }
+                        if (contentBox.getItems().size() == 0) {
+                            contentBox.getItems().add("<no methods>");
+                        }
+                        contentBox.getSelectionModel().selectFirst();
+
+                        grid.add(new Label("New Content: "), 0, 0);
+                        grid.add(contentBox, 1, 0);
+                        TextField f = new TextField();
+                        grid.add(f, 1, 0);
+                        f.setVisible(false);
+                        dialog.getDialogPane().setContent(grid);
+
                         BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                            if (dialog.getEditor().getText().equals(text.getText())) {
-                                return true;
-                            } else {
-                                return false;
+                            return contentBox.getItems().get(0).equals("<no methods>");
+                        });
+                        dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
+
+                        dialog.setResultConverter(dialogButton -> {
+                            if (dialogButton == createButtonType) {
+                                String x = contentBox.getSelectionModel().getSelectedItem();
+                                if (f.isVisible())
+                                    x = f.getText();
+                                return x;
                             }
-                        }, dialog.getEditor().textProperty());
-                        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+                            return null;
+                        });
+
+                        BooleanBinding fVisible = Bindings.createBooleanBinding(() -> {
+                            return this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getType() == EMessageType.RETURN;
+                        });
+                        f.visibleProperty().bind(fVisible);
 
                         Optional<String> result = dialog.showAndWait();
                         result.ifPresent(newString -> {
@@ -929,6 +963,10 @@ public class PropertiesView extends VBox {
             line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if (e.getClickCount() == 2) {
                     try {
+                        EMessageType thisMsgType = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getType();
+                        if (thisMsgType == EMessageType.NEW_OBJECT || thisMsgType == EMessageType.RELEASE_OBJECT) {
+                            return;
+                        }
                         // Create the custom dialog.
                         Dialog<ArrayList<Pair<String, String>>> dialog = new Dialog<>();
                         dialog.setTitle("Message direction");
@@ -951,27 +989,58 @@ public class PropertiesView extends VBox {
                         String current = "From object '" + mymessage.getSender().getKey() + ":" + mymessage.getSender().getValue() + "' to object '" + mymessage.getReceiver().getKey() + ":" + mymessage.getReceiver().getValue() + "'";
 
                         for (SequenceObjects c : this.dataModel.getData().getSequenceByID(this.parentIntID).getObjects()) {
-                            fromClassBox.getItems().add(c.getObjectName() + " in " + c.getClassName());
+                            fromClassBox.getItems().add(c.getObjectName() + " [" + c.getClassName() + "]");
                             fromClassID.add(new Pair<>(c.getClassName(), c.getObjectName()));
-                            toClassBox.getItems().add(c.getObjectName() + " in " + c.getClassName());
+                            toClassBox.getItems().add(c.getObjectName() + " [" + c.getClassName() + "]");
                             toClassID.add(new Pair<>(c.getClassName(), c.getObjectName()));
                         }
                         fromClassBox.getSelectionModel().selectFirst();
                         toClassBox.getSelectionModel().selectFirst();
+                        ChoiceBox<String> msgBox = new ChoiceBox<>();
+                        String selection = fromClassBox.getSelectionModel().getSelectedItem();
+                        String classID = selection.split("\\[", 2)[1].split("]",2)[0];
+                        for (Methods m : this.dataModel.getData().getClassByName(classID).getMethods()) {
+                            msgBox.getItems().add(m.getName());
+                        }
+                        if (msgBox.getItems().size() == 0) {
+                            msgBox.getItems().add("<no methods>");
+                        }
+                        msgBox.getSelectionModel().selectFirst();
 
                         grid.add(new Label("Current participants: "), 0, 0);
                         grid.add(new Label(current), 1, 0);
-                        grid.add(new Label("From: "), 0, 1);
-                        grid.add(fromClassBox, 1, 1);
-                        grid.add(new Label("To: "), 0, 2);
-                        grid.add(toClassBox, 1, 2);
+                        grid.add(new Label("New Content: "), 0, 1);
+                        grid.add(msgBox, 1, 1);
+                        grid.add(new Label("From: "), 0, 2);
+                        grid.add(fromClassBox, 1, 2);
+                        grid.add(new Label("To: "), 0, 3);
+                        grid.add(toClassBox, 1, 3);
                         dialog.getDialogPane().setContent(grid);
+
+                        fromClassBox.setOnAction(event -> {
+                            msgBox.getItems().clear();
+                            String selectionX = fromClassBox.getSelectionModel().getSelectedItem();
+                            String classIDX = selectionX.split("\\[", 2)[1].split("]",2)[0];
+                            for (Methods m : this.dataModel.getData().getClassByName(classIDX).getMethods()) {
+                                msgBox.getItems().add(m.getName());
+                            }
+                            if (msgBox.getItems().size() == 0) {
+                                msgBox.getItems().add("<no methods>");
+                            }
+                            msgBox.getSelectionModel().selectFirst();
+
+                            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+                                return msgBox.getItems().get(0).equals("<no methods>");
+                            });
+                            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
+                        });
 
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
                                 ArrayList<Pair<String, String>> x = new ArrayList<>();
                                 x.add(fromClassID.get(fromClassBox.getSelectionModel().getSelectedIndex()));
                                 x.add(toClassID.get(toClassBox.getSelectionModel().getSelectedIndex()));
+                                x.add(new Pair<>(msgBox.getSelectionModel().getSelectedItem(), ""));
                                 return x;
                             }
                             return null;
@@ -982,7 +1051,7 @@ public class PropertiesView extends VBox {
                             try {
                                 Pair<String, String> newSender = data.get(0);
                                 Pair<String, String> newReceiver = data.get(1);
-                                this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver));
+                                this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver, data.get(2).getKey()));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 this.showErrorMessage("Unable to set new participants for selected message", ex.getLocalizedMessage());
@@ -998,6 +1067,10 @@ public class PropertiesView extends VBox {
             line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if (e.getClickCount() == 2) {
                     try {
+                        EMessageType thisMsgType = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getType();
+                        if (thisMsgType == EMessageType.NEW_OBJECT || thisMsgType == EMessageType.RELEASE_OBJECT) {
+                            return;
+                        }
                         // Create the custom dialog.
                         Dialog<EMessageType> dialog = new Dialog<>();
                         dialog.setTitle("Message type");
@@ -1015,7 +1088,8 @@ public class PropertiesView extends VBox {
 
                         ChoiceBox<String> typeBox = new ChoiceBox<>();
                         for (EMessageType x : EMessageType.values()) {
-                            typeBox.getItems().add(x.typeToString());
+                            if (x != EMessageType.NEW_OBJECT && x != EMessageType.RELEASE_OBJECT)
+                                typeBox.getItems().add(x.typeToString());
                         }
                         typeBox.getSelectionModel().selectFirst();
 
