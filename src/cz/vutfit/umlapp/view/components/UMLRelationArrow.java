@@ -73,6 +73,7 @@ public class UMLRelationArrow extends ArrowHead {
     }
 
     void updatePosition(Point2D startPoint) {
+        if (arrow == null) return;
         Point2D center = new Point2D(
                 node.getTranslateX() + node.getWidth() / 2,
                 node.getTranslateY() + node.getHeight() / 2

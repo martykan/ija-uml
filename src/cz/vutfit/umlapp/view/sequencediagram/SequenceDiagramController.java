@@ -28,18 +28,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.layout.HBox;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class SequenceDiagramController extends MainController {
     @FXML
@@ -60,6 +59,10 @@ public class SequenceDiagramController extends MainController {
     private String selectedDiagram;
     private String selectedClass;
     private String selectedMessage;
+
+    private final double cardWidth = 200;
+    private final double spaceWidth = 250;
+    private final double spaceHeight = 40;
 
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
@@ -158,10 +161,6 @@ public class SequenceDiagramController extends MainController {
         double currentX = 10;
         double currentY = 100;
 
-        double cardWidth = 200;
-        double spaceWidth = 250;
-        double spaceHeight = 40;
-
         for (SequenceObjects sequenceObject : diagram.getObjects()) {
             // Is created or destroyed at some point?
             int activatedAt = -1;
@@ -182,7 +181,7 @@ public class SequenceDiagramController extends MainController {
             // Lifeline
             double startPos = 10;
             if (activatedAt >= 0) {
-                startPos += activatedAt * spaceHeight;
+                startPos = 100 + activatedAt * spaceHeight;
             }
             double endPos = 200 + diagram.getMessages().size() * spaceHeight;
             if (destroyedAt >= 0) {
@@ -206,21 +205,67 @@ public class SequenceDiagramController extends MainController {
             objectsViewMap.put(sequenceObject.getObjectClassName(), node);
             currentX += spaceWidth;
         }
-        for (SequenceMessages sequenceMessage : diagram.getMessages()) {
+
+        // Activation boxes
+        ArrayList<SequenceMessages> messages = diagram.getMessages();
+        List<Node> nodesToAdd = new ArrayList<>();
+        for (int i = 0; i < messages.size(); i++) {
+            SequenceMessages sequenceMessage = messages.get(i);
             UMLSequenceObjectView fromObject = objectsViewMap.get(sequenceMessage.fromObject.getValue() + ":" + sequenceMessage.fromObject.getKey());
             UMLSequenceObjectView toObject = objectsViewMap.get(sequenceMessage.toObject.getValue() + ":" + sequenceMessage.toObject.getKey());
             if (fromObject == null || toObject == null) continue;
 
+            if (fromObject.getActivatedAt() >= 0) {
+                if (i >= messages.size() - 1 || sequenceMessage.type == EMessageType.RELEASE_OBJECT || sequenceMessage.type == EMessageType.RETURN) {
+                    createActivationRectangle(i, fromObject);
+                    System.out.println("Deactivating from at message " + i);
+                }
+            } else if (
+                    i == 0 ||
+                            sequenceMessage.type == EMessageType.NEW_OBJECT ||
+                            sequenceMessage.type == EMessageType.SYNC ||
+                            sequenceMessage.type == EMessageType.ASYNC
+            ) {
+                fromObject.setActivatedAt(i);
+                System.out.println("Activating from at message " + i);
+            }
+            if (toObject.getActivatedAt() >= 0) {
+                if (i >= messages.size() - 1 || sequenceMessage.type == EMessageType.RELEASE_OBJECT) {
+                    createActivationRectangle(i, toObject);
+                    System.out.println("Deactivating to at message " + i);
+                }
+            } else if (
+                    sequenceMessage.type == EMessageType.ASYNC
+            ) {
+                toObject.setActivatedAt(i);
+                System.out.println("Activating to at message " + i);
+            }
+
+            // Lines
             Line line = new Line();
             line.setStartX(fromObject.getTranslateX() + cardWidth / 2);
             line.setStartY(currentY);
-            line.setEndX(toObject.getTranslateX() + cardWidth / 2);
+            if (sequenceMessage.fromObject.equals(sequenceMessage.toObject)) {
+                line.setEndX(cardWidth * 1.25);
+            } else if (sequenceMessage.type == EMessageType.NEW_OBJECT) {
+                line.setEndX(toObject.getTranslateX());
+            } else {
+                line.setEndX(toObject.getTranslateX() + cardWidth / 2);
+            }
+            if (line.getEndX() >= line.getStartX()) {
+                line.setStartX(line.getStartX() + 5);
+                line.setEndX(line.getEndX() - 5);
+            } else {
+                line.setStartX(line.getStartX() - 5);
+                line.setEndX(line.getEndX() + 5);
+            }
             line.setEndY(currentY);
             line.setStrokeWidth(2);
             if (sequenceMessage.type == EMessageType.RETURN) {
                 line.getStrokeDashArray().addAll(2.0, 4.0);
             }
-            anchorScrollPane.getChildren().add(line);
+            nodesToAdd.add(line);
+
             ArrowHead.EArrowType arrowType = ArrowHead.EArrowType.BASIC;
             if (sequenceMessage.type == EMessageType.SYNC) {
                 arrowType = ArrowHead.EArrowType.TRIANGLE_FILLED;
@@ -229,14 +274,13 @@ public class SequenceDiagramController extends MainController {
             }
             ArrowHead arrow = new ArrowHead(arrowType);
             arrow.setTranslateY(currentY);
-            if (fromObject.getTranslateX() > toObject.getTranslateX()) {
-                arrow.setTranslateX(toObject.getTranslateX() + cardWidth / 2);
+            arrow.setTranslateX(line.getEndX());
+            if (fromObject.getTranslateX() >= toObject.getTranslateX()) {
                 arrow.setAngle(315);
             } else {
-                arrow.setTranslateX(toObject.getTranslateX() + cardWidth / 2);
                 arrow.setAngle(135);
             }
-            anchorScrollPane.getChildren().add(arrow);
+            nodesToAdd.add(arrow);
 
             Label label = new Label();
             label.setText(sequenceMessage.content);
@@ -244,11 +288,25 @@ public class SequenceDiagramController extends MainController {
             label.setAlignment(Pos.CENTER);
             label.setTranslateX(Math.min(fromObject.getTranslateX(), toObject.getTranslateX()) + cardWidth / 2);
             label.setTranslateY(currentY - 20);
-            label.setPrefWidth(spaceWidth);
+            label.setPrefWidth(Math.abs(line.getStartX() - line.getEndX()));
             anchorScrollPane.getChildren().add(label);
 
             currentY += spaceHeight;
         }
+        anchorScrollPane.getChildren().addAll(nodesToAdd);
+    }
+
+    private void createActivationRectangle(int i, UMLSequenceObjectView toObject) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setWidth(8);
+        rectangle.setStrokeWidth(2);
+        rectangle.setStroke(Paint.valueOf("black"));
+        rectangle.setFill(Paint.valueOf("white"));
+        rectangle.setTranslateX(toObject.getTranslateX() + cardWidth / 2 - 4);
+        rectangle.setTranslateY(toObject.getActivatedAt() * spaceHeight + 90);
+        rectangle.setHeight((i - toObject.getActivatedAt()) * spaceHeight + 20);
+        toObject.setActivatedAt(-1);
+        this.anchorScrollPane.getChildren().add(rectangle);
     }
 
     public void handleRemoveDiagram(ActionEvent actionEvent) {
@@ -267,7 +325,7 @@ public class SequenceDiagramController extends MainController {
                         SequenceDiagram seqDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
                         this.dataModel.executeCommand(new RemoveSequenceDiagramCommand(seqDiagram.getID()));
                         this.dataModel.setActiveDiagram(null);
-                        this.updateView();
+                        this.diagramTreeView.getSelectionModel().selectFirst();
                     } catch (Exception e) {
                         this.showErrorMessage(e.getLocalizedMessage());
                         e.printStackTrace();
@@ -293,7 +351,7 @@ public class SequenceDiagramController extends MainController {
 
             try {
                 String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String splitValue[] = selectedValue.split(":");
+                String[] splitValue = selectedValue.split(":");
                 String className = splitValue[0];
                 String objectName = splitValue[1];
                 this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), className, objectName));
@@ -333,11 +391,7 @@ public class SequenceDiagramController extends MainController {
             TextField nameBox = new TextField();
             // disable OK button if text-input is empty
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                if (nameBox.getText().equals("")) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return nameBox.getText().equals("");
             }, nameBox.textProperty());
             dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
@@ -408,11 +462,7 @@ public class SequenceDiagramController extends MainController {
 
             // disable OK button if text-input is empty
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                if (dialog.getEditor().getText().equals("")) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return dialog.getEditor().getText().equals("");
             }, dialog.getEditor().textProperty());
             dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
 
@@ -506,11 +556,7 @@ public class SequenceDiagramController extends MainController {
                 TextField contentBox = new TextField();
                 // disable OK button if text-input is empty
                 BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                    if (contentBox.getText().equals("")) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return contentBox.getText().equals("");
                 }, contentBox.textProperty());
                 dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
@@ -682,7 +728,7 @@ public class SequenceDiagramController extends MainController {
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
                 String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String splitValue[] = selectedValue.split(":");
+                String[] splitValue = selectedValue.split(":");
                 String objectName = splitValue[0];
                 String className = splitValue[1];
                 SequenceObjects object = current.getObject(className, objectName);

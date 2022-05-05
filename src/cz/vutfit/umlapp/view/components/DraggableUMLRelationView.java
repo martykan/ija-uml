@@ -203,6 +203,8 @@ public class DraggableUMLRelationView extends AnchorPane {
                 circle.setOnMouseDragged(event -> {
                     double posX = (event.getSceneX() - initialX.get()) / totalZoom.get() + originalX.get();
                     double posY = (event.getSceneY() - initialY.get()) / totalZoom.get() + originalY.get();
+                    posX = Math.round(posX / 5) * 5;
+                    posY = Math.round(posY / 5) * 5;
                     circle.setTranslateX(posX);
                     circle.setTranslateY(posY);
                     event.consume();

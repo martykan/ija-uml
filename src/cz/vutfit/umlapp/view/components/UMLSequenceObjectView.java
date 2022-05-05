@@ -13,6 +13,8 @@ import javafx.scene.layout.VBox;
  * Class for draggable diagrams in MainView
  */
 public class UMLSequenceObjectView extends VBox {
+    private int activatedAt = -1;
+
     /**
      * Constructor - creates one new class in View
      *
@@ -27,5 +29,13 @@ public class UMLSequenceObjectView extends VBox {
         title.setText(sequenceObjects.getObjectName() + ":" + sequenceObjects.getClassName());
         title.getStyleClass().add("class-box-title");
         this.getChildren().add(title);
+    }
+
+    public int getActivatedAt() {
+        return activatedAt;
+    }
+
+    public void setActivatedAt(int activatedAt) {
+        this.activatedAt = activatedAt;
     }
 }
