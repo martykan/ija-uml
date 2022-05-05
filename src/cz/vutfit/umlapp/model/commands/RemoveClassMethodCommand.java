@@ -7,6 +7,7 @@ package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
+import cz.vutfit.umlapp.model.uml.EClassElementType;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
 
@@ -17,6 +18,7 @@ public class RemoveClassMethodCommand implements ICommand {
     public ClassDiagram myClass;
     public String id;
     public EAttribVisibility visibility;
+    public EClassElementType type;
 
     /**
      * Constructor
@@ -24,10 +26,11 @@ public class RemoveClassMethodCommand implements ICommand {
      * @param ID ID-name of method
      * @param visibility visibility of removed method
      */
-    public RemoveClassMethodCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility) {
+    public RemoveClassMethodCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility, EClassElementType type) {
         this.myClass = myClass;
         this.id = ID;
         this.visibility = visibility;
+        this.type = type;
     }
 
     /**
@@ -48,7 +51,7 @@ public class RemoveClassMethodCommand implements ICommand {
     public void undo(UMLFileData file) {
         if (this.myClass != null) {
             try {
-                this.myClass.addMethod(this.id, this.visibility);
+                this.myClass.addMethod(this.id, this.visibility, this.type);
             } catch (DuplicateMethodNameException e) {
                 System.out.println("DuplicateAttribNameException");
             }

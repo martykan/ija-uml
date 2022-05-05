@@ -229,16 +229,10 @@ public class PropertiesView extends VBox {
                             if (dialog.getEditor().getText().equals("")) {
                                 dialog.setHeaderText("You have not entered any attribute name!");
                                 return true;
-                            } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+[ ]?:[ ]?[A-z0-9]+$")) {
-                                dialog.setHeaderText("This attribute name seems wrong. (Example name: 'myattribute : void')");
-                                return true;
                             } else if (dialog.getEditor().getText().equals(text.getText())) {
                                 dialog.setHeaderText("New name is same as old one!");
                                 return true;
                             } else {
-                                System.out.println("'" + dialog.getEditor().getText() + "'");
-                                System.out.println("'" + text.getText() + "'");
-                                dialog.setHeaderText("This name seems valid for attribute.");
                                 return false;
                             }
                         }, dialog.getEditor().textProperty());
@@ -379,6 +373,68 @@ public class PropertiesView extends VBox {
                     }
                 }
             });
+        } else if (prop.getText().equals("Type")) {
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        // Create the custom dialog.
+                        Dialog<EClassElementType> dialog = new Dialog<>();
+                        dialog.setTitle("Attribute type");
+                        dialog.setHeaderText("Change current type of this attribute");
+
+                        ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+                        GridPane grid = new GridPane();
+                        grid.setHgap(10);
+                        grid.setVgap(10);
+                        grid.setPadding(new Insets(20, 150, 10, 10));
+
+                        Label currVis = new Label(text.getText());
+
+                        ChoiceBox<String> visBox = new ChoiceBox<>();
+                        for (EClassElementType x : EClassElementType.values()) {
+                            visBox.getItems().add(x.typeToString());
+                        }
+                        visBox.getSelectionModel().selectFirst();
+
+                        grid.add(new Label("Current type: "), 0, 0);
+                        grid.add(currVis, 1, 0);
+                        grid.add(new Label("New type: "), 0, 1);
+                        grid.add(visBox, 1, 1);
+                        dialog.getDialogPane().setContent(grid);
+
+                        dialog.setResultConverter(dialogButton -> {
+                            if (dialogButton == createButtonType) {
+                                String x = visBox.getSelectionModel().getSelectedItem();
+                                return this.dataModel.getData().stringToClassElementType(x);
+                            }
+                            return null;
+                        });
+
+                        Optional<EClassElementType> result = dialog.showAndWait();
+                        result.ifPresent(newVisibility -> {
+                            try {
+                                String id;
+                                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                                    id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                                } else {
+                                    return;
+                                }
+                                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                                String attribName = this.stringID;
+                                this.dataModel.executeCommand(new EditClassAttributeTypeCommand(myclass.getID(), attribName, newVisibility));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new attribute type", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
         } else {
             System.out.println("Warning: bindAttributeActions did not recognize following propertyText: " + prop.getText());
         }
@@ -399,14 +455,12 @@ public class PropertiesView extends VBox {
                             if (dialog.getEditor().getText().equals("")) {
                                 dialog.setHeaderText("You have not entered any method name!");
                                 return true;
-                            } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
-                                dialog.setHeaderText("This method name seems wrong. (Example name: 'strToInt(String x) : int')");
+                            } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?$")) {
                                 return true;
                             } else if (dialog.getEditor().getText().equals(text.getText())) {
                                 dialog.setHeaderText("New name is same as the old one!");
                                 return true;
                             } else {
-                                dialog.setHeaderText("This name seems valid for method.");
                                 return false;
                             }
                         }, dialog.getEditor().textProperty());
@@ -540,6 +594,68 @@ public class PropertiesView extends VBox {
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 this.showErrorMessage("Unable to set new method visibility", ex.getLocalizedMessage());
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        } else if (prop.getText().equals("Return type")) {
+            line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                if (e.getClickCount() == 2) {
+                    try {
+                        // Create the custom dialog.
+                        Dialog<EClassElementType> dialog = new Dialog<>();
+                        dialog.setTitle("Method type");
+                        dialog.setHeaderText("Change current type of this method");
+
+                        ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+                        GridPane grid = new GridPane();
+                        grid.setHgap(10);
+                        grid.setVgap(10);
+                        grid.setPadding(new Insets(20, 150, 10, 10));
+
+                        Label currVis = new Label(text.getText());
+
+                        ChoiceBox<String> visBox = new ChoiceBox<>();
+                        for (EClassElementType x : EClassElementType.values()) {
+                            visBox.getItems().add(x.typeToString());
+                        }
+                        visBox.getSelectionModel().selectFirst();
+
+                        grid.add(new Label("Current type: "), 0, 0);
+                        grid.add(currVis, 1, 0);
+                        grid.add(new Label("New type: "), 0, 1);
+                        grid.add(visBox, 1, 1);
+                        dialog.getDialogPane().setContent(grid);
+
+                        dialog.setResultConverter(dialogButton -> {
+                            if (dialogButton == createButtonType) {
+                                String x = visBox.getSelectionModel().getSelectedItem();
+                                return this.dataModel.getData().stringToClassElementType(x);
+                            }
+                            return null;
+                        });
+
+                        Optional<EClassElementType> result = dialog.showAndWait();
+                        result.ifPresent(newVisibility -> {
+                            try {
+                                String id;
+                                if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
+                                    id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
+                                } else {
+                                    return;
+                                }
+                                ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
+                                String attribName = this.stringID;
+                                this.dataModel.executeCommand(new EditClassMethodTypeCommand(myclass.getID(), attribName, newVisibility));
+                                this.updatedCallback.onUpdated();
+                            } catch (Exception ex) {
+                                this.showErrorMessage("Unable to set new attribute type", ex.getLocalizedMessage());
                                 ex.printStackTrace();
                             }
                         });

@@ -28,10 +28,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.transform.Scale;
-
+import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -222,7 +223,7 @@ public class ClassDiagramController extends MainController {
                 if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
                     for (Methods y : m) {
                         if (y.getName().equals(currentOption.split("[+\\-#~]", 2)[1])) {
-                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, currentOption.split("[+\\-#~]", 2)[1], y.getVisibility()));
+                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, currentOption.split("[+\\-#~]", 2)[1], y.getVisibility(), y.getType()));
                             break;
                         }
                     }
@@ -230,7 +231,8 @@ public class ClassDiagramController extends MainController {
                 } else if (isAM) {
                     for (Attributes z : a) {
                         if (z.getName().equals(x[0])) {
-                            this.dataModel.executeCommand(new RemoveClassAttributeCommand(myclass, x[0], z.getVisibility()));
+                            String type = x[0].split(":",2)[1];
+                            this.dataModel.executeCommand(new RemoveClassAttributeCommand(myclass, x[0], z.getVisibility(), this.dataModel.getData().stringToClassElementType(type)));
                             break;
                         }
                     }
@@ -286,27 +288,52 @@ public class ClassDiagramController extends MainController {
      */
     public void handleAddClassMethod(ActionEvent actionEvent) {
         try {
-            TextInputDialog dialog = new TextInputDialog("");
+            Dialog<Pair<String, EClassElementType>> dialog = new Dialog<>();
             dialog.setTitle("New Class Method");
-            dialog.setHeaderText(null);
-            dialog.setContentText("New Class Method Name:");
+            dialog.setHeaderText("Add new method to class");
 
-            // disable OK button if text-input is empty
+            ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            ChoiceBox<String> visBox = new ChoiceBox<>();
+            for (EClassElementType x : EClassElementType.values()) {
+                visBox.getItems().add(x.typeToString());
+            }
+            visBox.getSelectionModel().selectFirst();
+
+            TextField currVis = new TextField();
+
+            grid.add(new Label("Name: "), 0, 0);
+            grid.add(currVis, 1, 0);
+            grid.add(new Label("New type: "), 0, 1);
+            grid.add(visBox, 1, 1);
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == createButtonType) {
+                    String x = visBox.getSelectionModel().getSelectedItem();
+                    return new Pair<>(currVis.getText(), this.dataModel.getData().stringToClassElementType(x));
+                }
+                return null;
+            });
+
             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                if (dialog.getEditor().getText().equals("")) {
-                    dialog.setHeaderText("You have not entered any method name!");
+                if (currVis.getText().equals("")) {
                     return true;
-                } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
-                    dialog.setHeaderText("This method name seems wrong. (Example name: 'strToInt(String x) : int')");
+                } else if (!currVis.getText().matches("^[A-z0-9]+\\(.*\\)[ ]?$")) {
                     return true;
                 } else {
-                    dialog.setHeaderText("This name seems valid for method.");
                     return false;
                 }
-            }, dialog.getEditor().textProperty());
-            dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+            }, currVis.textProperty());
+            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
-            Optional<String> result = dialog.showAndWait();
+            Optional<Pair<String, EClassElementType>> result = dialog.showAndWait();
             result.ifPresent(className -> {
                 try {
                     String id;
@@ -318,7 +345,7 @@ public class ClassDiagramController extends MainController {
                     ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                     if (myclass == null) // if not selected class but some attribute/method/relationship in that class
                         myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                    this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
+                    this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className.getKey(), EAttribVisibility.PUBLIC, className.getValue()));
                     this.updateView();
                 } catch (Exception e) {
                     this.showErrorMessage("Unable to add new method", e.getLocalizedMessage());
@@ -340,27 +367,41 @@ public class ClassDiagramController extends MainController {
      */
     public void handleAddAttribute(ActionEvent actionEvent) {
         try {
-            TextInputDialog dialog = new TextInputDialog("");
+            Dialog<Pair<String, EClassElementType>> dialog = new Dialog<>();
             dialog.setTitle("New Class Attribute");
-            dialog.setHeaderText(null);
-            dialog.setContentText("New Class Attribute Name:");
+            dialog.setHeaderText("Add new attribute to class");
 
-            // disable OK button if text-input is empty
-            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                if (dialog.getEditor().getText().equals("")) {
-                    dialog.setHeaderText("You have not entered any attribute name!");
-                    return true;
-                } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+[ ]?:[ ]?[A-z0-9]+$")) {
-                    dialog.setHeaderText("This attribute name seems wrong. (Example name: 'myattribute : void')");
-                    return true;
-                } else {
-                    dialog.setHeaderText("This name seems valid for attribute.");
-                    return false;
+            ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            ChoiceBox<String> visBox = new ChoiceBox<>();
+            for (EClassElementType x : EClassElementType.values()) {
+                visBox.getItems().add(x.typeToString());
+            }
+            visBox.getSelectionModel().selectFirst();
+
+            TextField currVis = new TextField();
+
+            grid.add(new Label("Name: "), 0, 0);
+            grid.add(currVis, 1, 0);
+            grid.add(new Label("New type: "), 0, 1);
+            grid.add(visBox, 1, 1);
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == createButtonType) {
+                    String x = visBox.getSelectionModel().getSelectedItem();
+                    return new Pair<>(currVis.getText(), this.dataModel.getData().stringToClassElementType(x));
                 }
-            }, dialog.getEditor().textProperty());
-            dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
+                return null;
+            });
 
-            Optional<String> result = dialog.showAndWait();
+            Optional<Pair<String, EClassElementType>> result = dialog.showAndWait();
             result.ifPresent(className -> {
                 try {
                     String id;
@@ -372,7 +413,7 @@ public class ClassDiagramController extends MainController {
                     ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                     if (myclass == null) // if not selected class but some attribute/method/relationship in that class
                         myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                    this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className, EAttribVisibility.PUBLIC));
+                    this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className.getKey(), EAttribVisibility.PUBLIC, className.getValue()));
                     this.updateView();
                 } catch (Exception e) {
                     this.showErrorMessage("Unable to add new attribute", e.getLocalizedMessage());
@@ -501,19 +542,21 @@ public class ClassDiagramController extends MainController {
                     x = x[1].split("[(]", 2);
                     isAM = true;
                 }
-                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?:[ ]?[A-z0-9]+$")) {
+                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?$")) {
                     propertiesView.resetProperties();
                     propertiesView.setGroupType(EPropertyType.METHOD);
                     propertiesView.setID(currentOption.split("[+\\-#~]", 2)[1]);
                     propertiesView.addPropertyLine("Method", currentOption.split("[+\\-#~]", 2)[1]);
+                    propertiesView.addPropertyLine("Return type", myclass.getMethod(currentOption.split("[+\\-#~]", 2)[1]).getType().typeToString());
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
                     propertiesView.addPropertyLine("Visibility", myclass.getMethod(currentOption.split("[+\\-#~]", 2)[1]).getVisibility().getVisiblityString());
                 } else if (isAM) {
-                    String attribName = x[0];
+                    String attribName = x[0].split(":", 2)[0];
                     propertiesView.resetProperties();
                     propertiesView.setGroupType(EPropertyType.ATTRIBUTE);
                     propertiesView.setID(x[0]);
                     propertiesView.addPropertyLine("Attribute", attribName);
+                    propertiesView.addPropertyLine("Type", myclass.getAttribute(x[0]).getType().typeToString());
                     propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
                     System.out.println(x[0]);
                     propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
