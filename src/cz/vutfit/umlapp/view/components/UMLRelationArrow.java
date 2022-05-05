@@ -27,6 +27,8 @@ public class UMLRelationArrow extends ArrowHead {
             arrowType = EArrowType.SQUARE_FILLED;
         } else if (type == ERelationType.AGGREGATION && !isEnd) {
             arrowType = EArrowType.SQUARE;
+        } else if (type == ERelationType.ASSOCIATION && !isEnd) {
+            arrowType = EArrowType.BASIC;
         } else {
             return;
         }

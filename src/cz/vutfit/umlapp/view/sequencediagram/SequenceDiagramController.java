@@ -389,11 +389,11 @@ public class SequenceDiagramController extends MainController {
             classBox.getSelectionModel().selectFirst();
 
             TextField nameBox = new TextField();
-            // disable OK button if text-input is empty
-            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
+            // Reference shows it's possible to have empty name
+            /* BooleanBinding validName = Bindings.createBooleanBinding(() -> {
                 return nameBox.getText().equals("");
             }, nameBox.textProperty());
-            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
+            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);*/
 
             if (classBox.getItems().size() != 0) { // can add at least 1 class
                 grid.add(new Label("Objects in sequence diagrams must be from existing class instances from class diagram."), 0, 0);

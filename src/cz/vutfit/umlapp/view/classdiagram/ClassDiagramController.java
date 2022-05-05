@@ -28,11 +28,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.transform.Scale;
 import javafx.util.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -572,43 +572,27 @@ public class ClassDiagramController extends MainController {
                     Integer ID = 0;
                     String splitString = currentOption.split("[<>]", 2)[1];
                     if (currentOption.contains("><")) {
-                        fromString = String.valueOf(myclass.getName());
+                        fromString = String.valueOf(myclass.getName()).trim();
                         toString = fromString;
-                        for (Relationships y : this.dataModel.getData().getRelationships()) {
-                            if (toString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
-                                relType = y.getType().relationToString();
-                                fromDesc = y.getFromDesc();
-                                toDesc = y.getToDesc();
-                                ID = y.getID();
-                                relName = y.getName();
-                                break;
-                            }
-                        }
                     } else if (currentOption.contains(">")) {
-                        fromString = String.valueOf(myclass.getName());
-                        toString = splitString;
-                        for (Relationships y : this.dataModel.getData().getRelationships()) {
-                            if (fromString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())) {
-                                relType = y.getType().relationToString();
-                                fromDesc = y.getFromDesc();
-                                toDesc = y.getToDesc();
-                                ID = y.getID();
-                                relName = y.getName();
-                                break;
-                            }
-                        }
+                        fromString = String.valueOf(myclass.getName()).trim();
+                        toString = splitString.trim();
                     } else if (currentOption.contains("<")) {
-                        toString = String.valueOf(myclass.getName());
-                        fromString = splitString;
-                        for (Relationships y : this.dataModel.getData().getRelationships()) {
-                            if (toString.equals(this.dataModel.getData().getClassByID(y.getToClassID()).getName())) {
-                                relType = y.getType().relationToString();
-                                fromDesc = y.getFromDesc();
-                                toDesc = y.getToDesc();
-                                ID = y.getID();
-                                relName = y.getName();
-                                break;
-                            }
+                        toString = String.valueOf(myclass.getName()).trim();
+                        fromString = splitString.trim();
+                    }
+
+                    for (Relationships y : this.dataModel.getData().getRelationships()) {
+                        if (
+                                toString.equals(this.dataModel.getData().getClassByID(y.getToClassID()).getName()) &&
+                                        fromString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())
+                        ) {
+                            relType = y.getType().relationToString();
+                            fromDesc = y.getFromDesc();
+                            toDesc = y.getToDesc();
+                            ID = y.getID();
+                            relName = y.getName();
+                            break;
                         }
                     }
 

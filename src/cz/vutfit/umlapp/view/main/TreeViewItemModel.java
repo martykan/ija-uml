@@ -53,11 +53,9 @@ public class TreeViewItemModel {
                 }
                 break;
             case CLASS:
-                String relationString = null;
-                int classID = 0;
                 for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
                     item = new TreeItem<>(classDiagram.getName());
-                    classID = classDiagram.getID();
+                    int classID = classDiagram.getID();
                     for (Attributes attributes : classDiagram.getAttribs()) {
                         item.getChildren().add(new TreeItem<>(attributes.getNameWithPrefix()));
                     }
@@ -65,19 +63,18 @@ public class TreeViewItemModel {
                         item.getChildren().add(new TreeItem<>(methods.getNameWithPrefix()));
                     }
                     for (Relationships relations : this.dataModel.getData().getRelationships()) {
+                        String relationString = null;
                         if (relations.getFromClassID() == classID && relations.getToClassID() == classID) {
                             relationString = ">< " + classDiagram.getName();
                         } else if (relations.getToClassID() == classID) {
                             relationString = "< " + this.dataModel.getData().getClassByID(relations.getFromClassID()).getName();
-                        } else if  (relations.getFromClassID() == classID) {
+                        } else if (relations.getFromClassID() == classID) {
                             relationString = "> " + this.dataModel.getData().getClassByID(relations.getToClassID()).getName();
                         }
-
                         if (relationString != null)
                             item.getChildren().add(new TreeItem<>(relationString));
                     }
                     this.root.getChildren().add(item);
-                    relationString = null;
                 }
                 break;
             case SEQ_OBJECTS:

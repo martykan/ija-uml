@@ -56,7 +56,6 @@ public class DraggableUMLRelationView extends AnchorPane {
         });
 
         // Defer so we can compute node width/height
-        System.out.println("Init");
         Platform.runLater(DraggableUMLRelationView.this::drawLine);
     }
 
@@ -104,6 +103,12 @@ public class DraggableUMLRelationView extends AnchorPane {
                 line.setEndY(this.relationship.lineMidpoints.get(i).getY());
             }
             line.setStrokeWidth(2);
+            line.setOnMouseEntered(event -> {
+                line.setStrokeWidth(4);
+            });
+            line.setOnMouseExited(event -> {
+                line.setStrokeWidth(2);
+            });
             line.setOnMousePressed(event -> {
                 this.relationship.lineMidpoints.add(finalI, new Point2D(event.getX(), event.getY()));
                 this.drawLine();
@@ -180,9 +185,9 @@ public class DraggableUMLRelationView extends AnchorPane {
         this.getChildren().add(arrowStart);
         this.getChildren().add(arrowEnd);
 
+        // Midpoint indicators
         for (int i = 0; i <= this.relationship.lineMidpoints.size(); i++) {
             int finalI = i;
-            // Midpoint indicator
             if (i < this.relationship.lineMidpoints.size()) {
                 Circle circle = new Circle(15, Paint.valueOf("blue"));
                 circle.setTranslateX(this.relationship.lineMidpoints.get(i).getX());
@@ -205,9 +210,10 @@ public class DraggableUMLRelationView extends AnchorPane {
                     double posY = (event.getSceneY() - initialY.get()) / totalZoom.get() + originalY.get();
                     posX = Math.round(posX / 5) * 5;
                     posY = Math.round(posY / 5) * 5;
+                    event.consume();
+                    if (posX == circle.getTranslateX() && posY == circle.getTranslateY()) return;
                     circle.setTranslateX(posX);
                     circle.setTranslateY(posY);
-                    event.consume();
 
                     lines.get(finalI).setEndX(posX);
                     lines.get(finalI).setEndY(posY);

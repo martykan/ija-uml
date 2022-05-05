@@ -293,6 +293,7 @@ public class UMLFileData {
             }
             if (id == 0 && !found) id = (this.relationships).size();
         }
+        System.out.println("New relation ID " + id);
 
         // relationships cannot have same fromID, toID
         if (!checkRelationshipDuplicates(fromId, toId)) {

@@ -72,6 +72,7 @@ public class ArrowHead extends AnchorPane {
         rotate.setAngle(angle);
         rotate.setPivotX(0);
         rotate.setPivotY(0);
+        arrow.getTransforms().clear();
         arrow.getTransforms().add(rotate);
     }
 
