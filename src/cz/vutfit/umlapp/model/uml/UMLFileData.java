@@ -32,7 +32,7 @@ public class UMLFileData {
      */
     public final ArrayList<Relationships> relationships = new ArrayList<>();
 
-    public int dataVersion = -1;
+    public String dataVersion = null;
 
     /**
      * Getter

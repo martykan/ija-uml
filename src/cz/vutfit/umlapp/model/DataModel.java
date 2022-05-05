@@ -28,6 +28,7 @@ public class DataModel {
 
     private boolean savedFile = false;
     private ErrorCheckClass error;
+    public String currentFileDataVersion = "20220505-001";
 
     /**
      * Execute the given command and save it to history
@@ -65,7 +66,6 @@ public class DataModel {
         this.data = new Gson().fromJson(reader, UMLFileData.class);
 
         if (this.checkFile() == false) {
-            System.out.println("error");
             Alert alert = new Alert(Alert.AlertType.WARNING, "This file is not entirely correct input for this program.\nProceed with caution.", ButtonType.OK);
             alert.setTitle("File Open");
             alert.setHeaderText("File check failed");
@@ -88,6 +88,7 @@ public class DataModel {
         this.commandHistory.clear();
         this.fileUnsaved();
         this.error = new ErrorCheckClass();
+        this.getData().dataVersion = this.currentFileDataVersion;
     }
 
     /**

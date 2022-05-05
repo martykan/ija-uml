@@ -91,7 +91,7 @@ public class MainController implements IController {
      */
     public void updateView() {
         try {
-            viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName() + (this.dataModel.getFileSaveStatus() ? "" : "*"));
+            viewHandler.setTitle("IJA UML App - " + this.dataModel.getFileName() + (this.dataModel.getFileSaveStatus() ? "" : "*") + (this.dataModel.currentFileDataVersion.equals(this.dataModel.getData().dataVersion) ? "" : " [created in old version]"));
 
             // Diagrams menu
             TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
