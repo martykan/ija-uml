@@ -556,8 +556,13 @@ public class SequenceDiagramController extends MainController {
                 ChoiceBox<String> contentBox = new ChoiceBox<>();
                 String selection = sender.getSelectionModel().getSelectedItem();
                 String classID = selection.split("\\[", 2)[1].split("]",2)[0];
+                TextField arguments = new TextField();
+                Methods firstM = null;
+
                 for (Methods m : this.dataModel.getData().getClassByName(classID).getMethods()) {
                     contentBox.getItems().add(m.getName());
+                    if (firstM == null)
+                        firstM = m;
                 }
                 if (contentBox.getItems().size() == 0) {
                     contentBox.getItems().add("<no methods>");
@@ -565,8 +570,11 @@ public class SequenceDiagramController extends MainController {
                 contentBox.getSelectionModel().selectFirst();
                 Label receiverLabel = new Label("Receiver: ");
 
+
                 grid.add(new Label("Message content: "), 0, 0);
                 grid.add(contentBox, 1, 0);
+                grid.add(new Label("Arguments: "), 2, 0);
+                grid.add(arguments, 3, 0);
                 grid.add(new Label("Message type: "), 0, 1);
                 grid.add(msgType, 1, 1);
                 grid.add(new Label("Sender: "), 0, 2);
@@ -596,8 +604,11 @@ public class SequenceDiagramController extends MainController {
                     contentBox.getItems().clear();
                     String selectionX = sender.getSelectionModel().getSelectedItem();
                     String classIDX = selectionX.split("\\[", 2)[1].split("]",2)[0];
+                    Methods firstM2 = null;
                     for (Methods m : this.dataModel.getData().getClassByName(classIDX).getMethods()) {
                         contentBox.getItems().add(m.getName());
+                        if (firstM2 == null)
+                            firstM2 = m;
                     }
                     if (contentBox.getItems().size() == 0) {
                         contentBox.getItems().add("<no methods>");
@@ -651,6 +662,7 @@ public class SequenceDiagramController extends MainController {
                             x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getKey());
                             x.add(receiverID.get(receiver.getSelectionModel().getSelectedIndex()).getValue());
                         }
+                        x.add(arguments.getText());
                         return x;
                     }
                     return null;
@@ -663,11 +675,16 @@ public class SequenceDiagramController extends MainController {
                         Pair<String, String> senderStr = new Pair<>(returned.get(2), returned.get(3));
                         Pair<String, String> receiverStr = new Pair<>(returned.get(4), returned.get(5));
                         EMessageType retType = stringToEMessageType(returned.get(1));
+                        String args = returned.get(6);
+                        String txt = returned.get(0);
+                        if (!args.equals("") && retType != EMessageType.RETURN) {
+                            txt = txt.split("\\(", 2)[0] + "(" + args + ")";
+                        }
                         if (returned.get(5).equals("")) {
                             this.showErrorMessage("Unable to add new message", "New object has no name.");
                             return;
                         }
-                        this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, returned.get(0), senderStr, receiverStr, retType));
+                        this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, txt, senderStr, receiverStr, retType));
                         this.updateView();
                     } catch (Exception ex) {
                         this.showErrorMessage("Unable to add new message to sequence diagram", ex.getLocalizedMessage());
