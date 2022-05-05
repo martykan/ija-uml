@@ -32,6 +32,8 @@ public class UMLFileData {
      */
     public final ArrayList<Relationships> relationships = new ArrayList<>();
 
+    public int dataVersion = -1;
+
     /**
      * Getter
      * @return arrayList of classes in class diagram
