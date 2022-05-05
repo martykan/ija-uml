@@ -381,7 +381,7 @@ public class ClassDiagramController extends MainController {
 
             grid.add(new Label("Name: "), 0, 0);
             grid.add(currVis, 1, 0);
-            grid.add(new Label("New type: "), 0, 1);
+            grid.add(new Label("Type: "), 0, 1);
             grid.add(visBox, 1, 1);
             dialog.getDialogPane().setContent(grid);
 
