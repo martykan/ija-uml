@@ -5,18 +5,15 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.Attributes;
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.EClassElementType;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 public class EditClassMethodTypeCommand implements ICommand {
     private final int classID;
     private final String attribName;
-    private final EClassElementType newType;
-    private EClassElementType oldType;
+    private final String newType;
+    private String oldType;
 
-    public EditClassMethodTypeCommand(Integer classID, String attribName, EClassElementType newType) {
+    public EditClassMethodTypeCommand(Integer classID, String attribName, String newType) {
         this.classID = classID;
         this.attribName = attribName;
         this.newType = newType;

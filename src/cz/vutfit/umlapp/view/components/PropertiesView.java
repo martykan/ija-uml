@@ -378,7 +378,7 @@ public class PropertiesView extends VBox {
                 if (e.getClickCount() == 2) {
                     try {
                         // Create the custom dialog.
-                        Dialog<EClassElementType> dialog = new Dialog<>();
+                        Dialog<String> dialog = new Dialog<>();
                         dialog.setTitle("Attribute type");
                         dialog.setHeaderText("Change current type of this attribute");
 
@@ -392,11 +392,7 @@ public class PropertiesView extends VBox {
 
                         Label currVis = new Label(text.getText());
 
-                        ChoiceBox<String> visBox = new ChoiceBox<>();
-                        for (EClassElementType x : EClassElementType.values()) {
-                            visBox.getItems().add(x.typeToString());
-                        }
-                        visBox.getSelectionModel().selectFirst();
+                        TextField visBox = new TextField();
 
                         grid.add(new Label("Current type: "), 0, 0);
                         grid.add(currVis, 1, 0);
@@ -406,13 +402,13 @@ public class PropertiesView extends VBox {
 
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
-                                String x = visBox.getSelectionModel().getSelectedItem();
-                                return this.dataModel.getData().stringToClassElementType(x);
+                                String x = visBox.getText();
+                                return x;
                             }
                             return null;
                         });
 
-                        Optional<EClassElementType> result = dialog.showAndWait();
+                        Optional<String> result = dialog.showAndWait();
                         result.ifPresent(newVisibility -> {
                             try {
                                 String id;
@@ -423,7 +419,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String attribName = this.stringID;
-                                this.dataModel.executeCommand(new EditClassAttributeTypeCommand(myclass.getID(), attribName, newVisibility));
+                                this.dataModel.executeCommand(new EditClassAttributeTypeCommand(myclass.getID(), attribName, (newVisibility.equals("") ? "void" : newVisibility)));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 this.showErrorMessage("Unable to set new attribute type", ex.getLocalizedMessage());
@@ -607,7 +603,7 @@ public class PropertiesView extends VBox {
                 if (e.getClickCount() == 2) {
                     try {
                         // Create the custom dialog.
-                        Dialog<EClassElementType> dialog = new Dialog<>();
+                        Dialog<String> dialog = new Dialog<>();
                         dialog.setTitle("Method type");
                         dialog.setHeaderText("Change current type of this method");
 
@@ -621,11 +617,7 @@ public class PropertiesView extends VBox {
 
                         Label currVis = new Label(text.getText());
 
-                        ChoiceBox<String> visBox = new ChoiceBox<>();
-                        for (EClassElementType x : EClassElementType.values()) {
-                            visBox.getItems().add(x.typeToString());
-                        }
-                        visBox.getSelectionModel().selectFirst();
+                        TextField visBox = new TextField();
 
                         grid.add(new Label("Current type: "), 0, 0);
                         grid.add(currVis, 1, 0);
@@ -635,13 +627,13 @@ public class PropertiesView extends VBox {
 
                         dialog.setResultConverter(dialogButton -> {
                             if (dialogButton == createButtonType) {
-                                String x = visBox.getSelectionModel().getSelectedItem();
-                                return this.dataModel.getData().stringToClassElementType(x);
+                                String x = visBox.getText();
+                                return x;
                             }
                             return null;
                         });
 
-                        Optional<EClassElementType> result = dialog.showAndWait();
+                        Optional<String> result = dialog.showAndWait();
                         result.ifPresent(newVisibility -> {
                             try {
                                 String id;
@@ -652,7 +644,7 @@ public class PropertiesView extends VBox {
                                 }
                                 ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                                 String attribName = this.stringID;
-                                this.dataModel.executeCommand(new EditClassMethodTypeCommand(myclass.getID(), attribName, newVisibility));
+                                this.dataModel.executeCommand(new EditClassMethodTypeCommand(myclass.getID(), attribName, (newVisibility.equals("") ? "void" : newVisibility)));
                                 this.updatedCallback.onUpdated();
                             } catch (Exception ex) {
                                 this.showErrorMessage("Unable to set new attribute type", ex.getLocalizedMessage());

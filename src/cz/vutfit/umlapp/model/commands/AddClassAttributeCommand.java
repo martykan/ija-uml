@@ -6,7 +6,6 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.EClassElementType;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 /**
@@ -16,7 +15,7 @@ public class AddClassAttributeCommand implements ICommand {
     private final Integer classId;
     private final String attrName;
     private final EAttribVisibility visibility;
-    private final EClassElementType type;
+    private final String  type;
 
     /**
      * Constructor
@@ -25,7 +24,7 @@ public class AddClassAttributeCommand implements ICommand {
      * @param visibility visibility of attribute
      * @see EAttribVisibility
      */
-    public AddClassAttributeCommand(Integer classId, String attrName, EAttribVisibility visibility, EClassElementType type) {
+    public AddClassAttributeCommand(Integer classId, String attrName, EAttribVisibility visibility, String type) {
         this.classId = classId;
         this.attrName = attrName;
         this.visibility = visibility;

@@ -11,7 +11,7 @@ package cz.vutfit.umlapp.model.uml;
 public class Methods {
     public String name;
     public EAttribVisibility visibility;
-    public EClassElementType type;
+    public String type;
 
     /** Getters **/
     public String getName() {
@@ -26,14 +26,14 @@ public class Methods {
         return this.getVisibility().getPrefix() + this.getName();
     }
 
-    public EClassElementType getType() { return this.type; }
+    public String getType() { return this.type; }
 
     /** Setters **/
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setType(EClassElementType type) { this.type = type; }
+    public void setType(String type) { this.type = type; }
 
     public void setVisibility(EAttribVisibility value) {
         this.visibility = value;
@@ -45,7 +45,7 @@ public class Methods {
      * @param value
      * @see EAttribVisibility
      */
-    public void setMethod(String name, EAttribVisibility value, EClassElementType type) {
+    public void setMethod(String name, EAttribVisibility value, String type) {
         this.visibility = value;
         this.name = name;
         this.type = type;

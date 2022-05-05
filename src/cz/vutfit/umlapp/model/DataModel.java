@@ -28,7 +28,7 @@ public class DataModel {
 
     private boolean savedFile = false;
     private ErrorCheckClass error;
-    public String currentFileDataVersion = "20220505-001";
+    public String currentFileDataVersion = "20220505-002";
 
     /**
      * Execute the given command and save it to history
@@ -146,22 +146,24 @@ public class DataModel {
                 for (Attributes y : attrib) {
                     y.getName().charAt(0);
                     y.getVisibility().getVisiblityString();
-                    y.getType().typeToString();
+                    y.getType().charAt(0);
                     y.getNameWithPrefix().charAt(0);
                 }
                 for (Methods y : m) {
                     y.getName().charAt(0);
                     y.getVisibility().getVisiblityString();
-                    y.getType().typeToString();
+                    y.getType().charAt(0);
                     y.getNameWithPrefix().charAt(0);
                 }
             }
             for (Relationships x : r) {
-                x.getName().charAt(0);
+                x.getName();
                 int id2 = x.getID();
                 x.getType().relationToString();
                 int fid = x.getFromClassID();
                 int tid = x.getToClassID();
+                x.getFromDesc();
+                x.getToDesc();
             }
             for (SequenceDiagram x : s) {
                 int id3 = x.getID();

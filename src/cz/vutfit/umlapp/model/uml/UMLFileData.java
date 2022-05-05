@@ -367,26 +367,6 @@ public class UMLFileData {
         }
         return null;
     }
-
-    public EClassElementType stringToClassElementType(String string) {
-        if (string.equals("void"))
-            return EClassElementType.VOID;
-        else if (string.equals("int"))
-            return EClassElementType.INT;
-        else if (string.equals("boolean"))
-            return EClassElementType.BOOLEAN;
-        else if (string.equals("String"))
-            return EClassElementType.STRING;
-        else if (string.equals("float"))
-            return EClassElementType.FLOAT;
-        else if (string.equals("long"))
-            return EClassElementType.LONG;
-        else if (string.equals("char"))
-            return EClassElementType.CHAR;
-        else if (string.equals("double"))
-            return EClassElementType.DOUBLE;
-        return null;
-    }
 }
 
 

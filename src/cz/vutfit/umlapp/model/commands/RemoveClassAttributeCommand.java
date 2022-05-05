@@ -7,7 +7,6 @@ package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
-import cz.vutfit.umlapp.model.uml.EClassElementType;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateAttributeNameException;
 
@@ -18,7 +17,7 @@ public class RemoveClassAttributeCommand implements ICommand {
     private final ClassDiagram myClass;
     private final String id;
     private final EAttribVisibility visibility;
-    private final EClassElementType type;
+    private final String type;
 
     /**
      * Constructor
@@ -27,7 +26,7 @@ public class RemoveClassAttributeCommand implements ICommand {
      * @param visibility removed attribute visibility
      * @see EAttribVisibility
      */
-    public RemoveClassAttributeCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility, EClassElementType type) {
+    public RemoveClassAttributeCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility, String type) {
         this.myClass = myClass;
         this.id = ID;
         this.visibility = visibility;

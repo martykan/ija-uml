@@ -100,7 +100,7 @@ public class ClassDiagram {
      * @throws DuplicateAttributeNameException if new attribute has same name as any other existing
      * @see EAttribVisibility
      */
-    public void addAttribute(String name, EAttribVisibility visibility, EClassElementType type) throws DuplicateAttributeNameException {
+    public void addAttribute(String name, EAttribVisibility visibility, String type) throws DuplicateAttributeNameException {
         Attributes x = new Attributes();
         x.setAttribute(name, visibility, type);
 
@@ -147,7 +147,7 @@ public class ClassDiagram {
      * @throws DuplicateMethodNameException if new method has same name as any other existing
      * @see EAttribVisibility
      */
-    public void addMethod(String name, EAttribVisibility visibility, EClassElementType type) throws DuplicateMethodNameException {
+    public void addMethod(String name, EAttribVisibility visibility, String type) throws DuplicateMethodNameException {
         Methods x = new Methods();
         x.setMethod(name, visibility, type);
 
