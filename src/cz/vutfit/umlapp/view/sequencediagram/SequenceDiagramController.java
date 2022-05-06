@@ -60,8 +60,8 @@ public class SequenceDiagramController extends MainController {
     private String selectedClass;
     private String selectedMessage;
 
-    private final double cardWidth = 200;
-    private final double spaceWidth = 250;
+    private final double cardWidth = 150;
+    private final double spaceWidth = 210;
     private final double spaceHeight = 40;
 
     ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
@@ -153,6 +153,27 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
+    // TODO move elsewhere
+    public static void populateMethodsContentBox(DataModel dataModel, ChoiceBox<String> methodsContentBox, String className) {
+        ClassDiagram classDiagram = dataModel.getData().getClassByName(className);
+        for (Methods m : classDiagram.getMethods()) {
+            methodsContentBox.getItems().add(m.getName());
+        }
+        // Get inherited methods
+        // TODO do this recursively
+        for (Relationships r : dataModel.getData().getRelationships()) {
+            if (r.getToClassID() == classDiagram.getID() && r.getType() == ERelationType.GENERALIZATION) {
+                for (Methods m : dataModel.getData().getClassByID(r.getFromClassID()).getMethods()) {
+                    methodsContentBox.getItems().add(m.getName());
+                }
+            }
+        }
+        if (methodsContentBox.getItems().size() == 0) {
+            methodsContentBox.getItems().add("<no methods>");
+        }
+        methodsContentBox.getSelectionModel().selectFirst();
+    }
+
     private void initDiagram() {
         anchorScrollPane.getChildren().clear();
         HashMap<String, UMLSequenceObjectView> objectsViewMap = new HashMap<>();
@@ -221,7 +242,8 @@ public class SequenceDiagramController extends MainController {
             // Activation boxes
             if (fromObject.getActivatedAt() >= 0) {
                 if (i >= messages.size() - 1 || sequenceMessage.type == EMessageType.RELEASE_OBJECT || sequenceMessage.type == EMessageType.RETURN) {
-                    createActivationRectangle(i, fromObject, primaryColor);
+                    boolean hasObjectError = this.dataModel.getErrorClass().isSeqObjectCorrect(selectedDiagram, sequenceMessage.getSenderString());
+                    createActivationRectangle(i, fromObject, hasObjectError);
                 }
             } else if (
                     i == 0 ||
@@ -233,7 +255,8 @@ public class SequenceDiagramController extends MainController {
             }
             if (toObject.getActivatedAt() >= 0) {
                 if (i >= messages.size() - 1 || sequenceMessage.type == EMessageType.RELEASE_OBJECT) {
-                    createActivationRectangle(i, toObject, primaryColor);
+                    boolean hasObjectError = this.dataModel.getErrorClass().isSeqObjectCorrect(selectedDiagram, sequenceMessage.getReceiverString());
+                    createActivationRectangle(i, toObject, hasObjectError);
                 }
             } else if (
                     sequenceMessage.type == EMessageType.ASYNC
@@ -268,7 +291,7 @@ public class SequenceDiagramController extends MainController {
             nodesToAdd.add(line);
 
             ArrowHead.EArrowType arrowType = ArrowHead.EArrowType.BASIC;
-            if (sequenceMessage.type == EMessageType.SYNC) {
+            if (sequenceMessage.type == EMessageType.SYNC || sequenceMessage.type == EMessageType.ASYNC) {
                 arrowType = ArrowHead.EArrowType.TRIANGLE_FILLED;
             } else if (sequenceMessage.type == EMessageType.RELEASE_OBJECT) {
                 arrowType = ArrowHead.EArrowType.CROSS;
@@ -284,7 +307,7 @@ public class SequenceDiagramController extends MainController {
             nodesToAdd.add(arrow);
 
             Label label = new Label();
-            label.setText(sequenceMessage.content);
+            label.setText(sequenceMessage.getContent());
             label.setTextAlignment(TextAlignment.CENTER);
             label.setTextFill(primaryColor);
             label.setAlignment(Pos.CENTER);
@@ -294,21 +317,11 @@ public class SequenceDiagramController extends MainController {
             anchorScrollPane.getChildren().add(label);
 
             currentY += spaceHeight;
+            if (sequenceMessage.type == EMessageType.NEW_OBJECT) {
+                currentY += spaceHeight;
+            }
         }
         anchorScrollPane.getChildren().addAll(nodesToAdd);
-    }
-
-    private void createActivationRectangle(int i, UMLSequenceObjectView toObject, Paint primaryColor) {
-        Rectangle rectangle = new Rectangle();
-        rectangle.setWidth(8);
-        rectangle.setStrokeWidth(2);
-        rectangle.setStroke(primaryColor);
-        rectangle.setFill(Paint.valueOf("white"));
-        rectangle.setTranslateX(toObject.getTranslateX() + cardWidth / 2 - 4);
-        rectangle.setTranslateY(toObject.getActivatedAt() * spaceHeight + 90);
-        rectangle.setHeight((i - toObject.getActivatedAt()) * spaceHeight + 20);
-        toObject.setActivatedAt(-1);
-        this.anchorScrollPane.getChildren().add(rectangle);
     }
 
     public void handleRemoveDiagram(ActionEvent actionEvent) {
@@ -516,7 +529,20 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleAddMessage (ActionEvent actionEvent) {
+    private void createActivationRectangle(int i, UMLSequenceObjectView toObject, boolean hasObjectError) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setWidth(8);
+        rectangle.setStrokeWidth(2);
+        rectangle.setStroke(Paint.valueOf(hasObjectError ? "red" : "black"));
+        rectangle.setFill(Paint.valueOf("white"));
+        rectangle.setTranslateX(toObject.getTranslateX() + cardWidth / 2 - 4);
+        rectangle.setTranslateY(toObject.getActivatedAt() * spaceHeight + 90);
+        rectangle.setHeight((i - toObject.getActivatedAt()) * spaceHeight + 20);
+        toObject.setActivatedAt(-1);
+        this.anchorScrollPane.getChildren().add(rectangle);
+    }
+
+    public void handleAddMessage(ActionEvent actionEvent) {
         try {
             if (this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects().size() == 0) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -579,7 +605,7 @@ public class SequenceDiagramController extends MainController {
             TextField arguments = new TextField();
             Label argumentsLabel = new Label("Arguments: ");
 
-            populateMethodsContentBox(methodsContentBox, classID);
+            populateMethodsContentBox(this.dataModel, methodsContentBox, classID);
 
             Label receiverLabel = new Label("Receiver: ");
             grid.add(new Label("Message content: "), 0, 0);
@@ -603,7 +629,7 @@ public class SequenceDiagramController extends MainController {
                 methodsContentBox.getItems().clear();
                 String selectionX = receiver.getSelectionModel().getSelectedItem();
                 String classIDX = selectionX.split("\\[", 2)[1].split("]", 2)[0];
-                populateMethodsContentBox(methodsContentBox, classIDX);
+                populateMethodsContentBox(this.dataModel, methodsContentBox, classIDX);
             });
             msgType.setOnAction(event -> {
                 boolean isReturnMessage = msgType.getSelectionModel().getSelectedItem().equals("Return message");
@@ -613,10 +639,12 @@ public class SequenceDiagramController extends MainController {
             });
 
             BooleanBinding validation = Bindings.createBooleanBinding(() -> {
-                if (returnMessageText.isVisible())
+                System.out.println("Binding called");
+                if (returnMessageText.isVisible()) {
                     return returnMessageText.getText().equals("");
-                return methodsContentBox.getItems().get(0).equals("<no methods>");
-            }, returnMessageText.visibleProperty(), returnMessageText.textProperty(), methodsContentBox.itemsProperty());
+                }
+                return methodsContentBox.getSelectionModel().getSelectedItem().equals("<no methods>");
+            }, returnMessageText.visibleProperty(), returnMessageText.textProperty(), methodsContentBox.getSelectionModel().selectedItemProperty());
             dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validation);
 
             dialog.setResultConverter(dialogButton -> {
@@ -649,10 +677,6 @@ public class SequenceDiagramController extends MainController {
                     if (!args.equals("") && retType != EMessageType.RETURN) {
                         txt = txt.split("\\(", 2)[0] + "(" + args + ")";
                     }
-                    if (returned.get(5).equals("")) {
-                        this.showErrorMessage("Unable to add new message", "New object has no name.");
-                        return;
-                    }
                     this.dataModel.executeCommand(new AddSequenceDiagramMessageCommand(seqID, txt, senderStr, receiverStr, retType));
                     this.updateView();
                 } catch (Exception ex) {
@@ -664,19 +688,6 @@ public class SequenceDiagramController extends MainController {
             this.showErrorMessage("Unable to add new message", ex.getLocalizedMessage());
             ex.printStackTrace();
         }
-    }
-
-    private void populateMethodsContentBox(ChoiceBox<String> methodsContentBox, String classID) {
-        Methods firstM = null;
-        for (Methods m : this.dataModel.getData().getClassByName(classID).getMethods()) {
-            methodsContentBox.getItems().add(m.getName());
-            if (firstM == null)
-                firstM = m;
-        }
-        if (methodsContentBox.getItems().size() == 0) {
-            methodsContentBox.getItems().add("<no methods>");
-        }
-        methodsContentBox.getSelectionModel().selectFirst();
     }
 
     public void handleMessageForward(ActionEvent actionEvent) {
@@ -830,12 +841,28 @@ public class SequenceDiagramController extends MainController {
 
         // Messages: method must exist on receiver
         for (SequenceMessages message : allMessages) {
-            if (message.type == EMessageType.RETURN) continue;
+            if (message.type == EMessageType.RETURN || message.type == EMessageType.NEW_OBJECT || message.type == EMessageType.RELEASE_OBJECT)
+                continue;
             String className = message.getReceiver().getKey();
             String methodName = message.content.split("\\(")[0];
             ClassDiagram classDiagram = this.dataModel.getData().getClassByName(className);
             if (classDiagram != null) {
-                if (classDiagram.getMethod(methodName) == null) {
+                if (classDiagram.getMethodByNameOnly(methodName) != null) continue;
+
+                // Search inherited methods
+                boolean found = false;
+                for (Relationships r : this.dataModel.getData().getRelationships()) {
+                    if (r.getToClassID() == classDiagram.getID() && r.getType() == ERelationType.GENERALIZATION) {
+                        for (Methods m : this.dataModel.getData().getClassByID(r.getFromClassID()).getMethods()) {
+                            if (m.getName().startsWith(methodName + "(")) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!found) {
                     errorType = ESequenceCheckError.OBJ_METHOD_NONEXISTENT;
                     error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_OBJECT, message.getSenderString());
                     errorClass.addSequenceError(error);

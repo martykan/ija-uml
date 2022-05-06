@@ -113,6 +113,8 @@ public class ClassDiagramController extends MainController {
         for (Relationships relationship : this.dataModel.getData().getRelationships()) {
             DraggableUMLClassView node = classNodes.get(relationship.fromId);
             DraggableUMLClassView node2 = classNodes.get(relationship.toId);
+            if (node == null || node2 == null) continue;
+            ;
             DraggableUMLRelationView line = new DraggableUMLRelationView(node, node2, totalZoom, relationship);
             anchorScrollPane.getChildren().add(line);
         }

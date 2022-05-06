@@ -129,7 +129,7 @@ public class ClassDiagram {
     }
 
     /**
-     * @param name
+     * @param name full name with parenthesis
      * @return method if found or null
      */
     public Methods getMethod(String name) {
@@ -141,7 +141,20 @@ public class ClassDiagram {
     }
 
     /**
+     * @param name method name
+     * @return method if found or null
+     */
+    public Methods getMethodByNameOnly(String name) {
+        for (Methods x : this.methods) {
+            if (x.getName().startsWith(name + "("))
+                return x;
+        }
+        return null;
+    }
+
+    /**
      * Adds new method to methods list.
+     *
      * @param name
      * @param visibility
      * @throws DuplicateMethodNameException if new method has same name as any other existing

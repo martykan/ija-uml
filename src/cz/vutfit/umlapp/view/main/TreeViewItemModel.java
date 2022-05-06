@@ -63,16 +63,21 @@ public class TreeViewItemModel {
                         item.getChildren().add(new TreeItem<>(methods.getNameWithPrefix()));
                     }
                     for (Relationships relations : this.dataModel.getData().getRelationships()) {
-                        String relationString = null;
-                        if (relations.getFromClassID() == classID && relations.getToClassID() == classID) {
-                            relationString = ">< " + classDiagram.getName();
-                        } else if (relations.getToClassID() == classID) {
-                            relationString = "< " + this.dataModel.getData().getClassByID(relations.getFromClassID()).getName();
-                        } else if (relations.getFromClassID() == classID) {
-                            relationString = "> " + this.dataModel.getData().getClassByID(relations.getToClassID()).getName();
+                        try {
+                            String relationString = null;
+                            if (relations.getFromClassID() == classID && relations.getToClassID() == classID) {
+                                relationString = ">< " + classDiagram.getName();
+                            } else if (relations.getToClassID() == classID) {
+                                relationString = "< " + this.dataModel.getData().getClassByID(relations.getFromClassID()).getName();
+                            } else if (relations.getFromClassID() == classID) {
+                                relationString = "> " + this.dataModel.getData().getClassByID(relations.getToClassID()).getName();
+                            }
+                            if (relationString != null)
+                                item.getChildren().add(new TreeItem<>(relationString));
+                        } catch (NullPointerException npe) {
+                            // Don't add item
+                            npe.printStackTrace();
                         }
-                        if (relationString != null)
-                            item.getChildren().add(new TreeItem<>(relationString));
                     }
                     this.root.getChildren().add(item);
                 }

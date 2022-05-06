@@ -41,7 +41,7 @@ public class DraggableUMLClassView extends VBox {
         Label attributes = new Label();
         attributes.getStyleClass().add("class-box-attribs");
         if (!classDiagram.getAttribs().isEmpty()) {
-            attributes.setText(classDiagram.getAttribs().stream().map(Attributes::getNameWithPrefix).collect(Collectors.joining("\n")));
+            attributes.setText(classDiagram.getAttribs().stream().map(Attributes::getNameWithPrefixWithType).collect(Collectors.joining("\n")));
         } else {
             attributes.getStyleClass().add("class-box-empty");
         }
@@ -50,7 +50,7 @@ public class DraggableUMLClassView extends VBox {
         Label methods = new Label();
         methods.getStyleClass().add("class-box-methods");
         if (!classDiagram.getMethods().isEmpty()) {
-            methods.setText(classDiagram.getMethods().stream().map(Methods::getNameWithPrefix).collect(Collectors.joining("\n")));
+            methods.setText(classDiagram.getMethods().stream().map(Methods::getNameWithPrefixWithType).collect(Collectors.joining("\n")));
         } else {
             methods.getStyleClass().add("class-box-empty");
         }

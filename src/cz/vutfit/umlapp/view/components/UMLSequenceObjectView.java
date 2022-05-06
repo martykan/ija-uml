@@ -23,6 +23,7 @@ public class UMLSequenceObjectView extends VBox {
     public UMLSequenceObjectView(SequenceObjects sequenceObjects) {
         super();
         this.getStyleClass().add("class-box");
+        this.setMaxWidth(150);
         this.setTranslateY(10);
 
         Label title = new Label();

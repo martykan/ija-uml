@@ -26,14 +26,26 @@ public class Methods {
         return this.getVisibility().getPrefix() + this.getName();
     }
 
-    public String getType() { return this.type; }
+    public String getNameWithPrefixWithType() {
+        if (this.getType() != null)
+            return this.getNameWithPrefix() + ":" + this.getType();
+        return this.getNameWithPrefix();
+    }
 
-    /** Setters **/
+    public String getType() {
+        return this.type;
+    }
+
+    /**
+     * Setters
+     **/
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setType(String type) { this.type = type; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public void setVisibility(EAttribVisibility value) {
         this.visibility = value;

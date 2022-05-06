@@ -30,7 +30,15 @@ public class Attributes {
         return this.getVisibility().getPrefix() + this.getName();
     }
 
-    /** setters **/
+    public String getNameWithPrefixWithType() {
+        if (this.getType() != null)
+            return this.getNameWithPrefix() + ":" + this.getType();
+        return this.getNameWithPrefix();
+    }
+
+    /**
+     * setters
+     **/
     public void setName(String name) {
         this.name = name;
     }

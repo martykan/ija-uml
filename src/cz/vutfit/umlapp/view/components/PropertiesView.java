@@ -8,6 +8,7 @@ package cz.vutfit.umlapp.view.components;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.*;
+import cz.vutfit.umlapp.view.sequencediagram.SequenceDiagramController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.EventHandler;
@@ -451,11 +452,13 @@ public class PropertiesView extends VBox {
                                 dialog.setHeaderText("You have not entered any method name!");
                                 return true;
                             } else if (!dialog.getEditor().getText().matches("^[A-z0-9]+\\(.*\\)[ ]?$")) {
+                                dialog.setHeaderText("Doesn't match method name format (include parenthesis)");
                                 return true;
                             } else if (dialog.getEditor().getText().equals(text.getText())) {
                                 dialog.setHeaderText("New name is same as the old one!");
                                 return true;
                             } else {
+                                dialog.setHeaderText("Name is valid");
                                 return false;
                             }
                         }, dialog.getEditor().textProperty());
@@ -907,14 +910,8 @@ public class PropertiesView extends VBox {
                         grid.setPadding(new Insets(20, 150, 10, 10));
 
                         ChoiceBox<String> contentBox = new ChoiceBox<>();
-                        String clName = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getSender().getKey();
-                        for (Methods m : this.dataModel.getData().getClassByName(clName).getMethods()) {
-                            contentBox.getItems().add(m.getName());
-                        }
-                        if (contentBox.getItems().size() == 0) {
-                            contentBox.getItems().add("<no methods>");
-                        }
-                        contentBox.getSelectionModel().selectFirst();
+                        String clName = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getReceiver().getKey();
+                        SequenceDiagramController.populateMethodsContentBox(this.dataModel, contentBox, clName);
 
                         grid.add(new Label("New Content: "), 0, 0);
                         grid.add(contentBox, 1, 0);
@@ -924,8 +921,8 @@ public class PropertiesView extends VBox {
                         dialog.getDialogPane().setContent(grid);
 
                         BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                            return contentBox.getItems().get(0).equals("<no methods>");
-                        });
+                            return contentBox.getSelectionModel().getSelectedItem().equals("<no methods>");
+                        }, contentBox.getSelectionModel().selectedItemProperty());
                         dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
 
                         dialog.setResultConverter(dialogButton -> {
@@ -969,7 +966,7 @@ public class PropertiesView extends VBox {
                         // Create the custom dialog.
                         Dialog<ArrayList<Pair<String, String>>> dialog = new Dialog<>();
                         dialog.setTitle("Message direction");
-                        dialog.setHeaderText("Change direction of message.\nYou can change class-object, who sends and who receives this message.");
+                        dialog.setHeaderText("m of message.\nYou can change class-object, who sends and who receives this message.");
 
                         ButtonType createButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
                         dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
@@ -996,15 +993,9 @@ public class PropertiesView extends VBox {
                         fromClassBox.getSelectionModel().selectFirst();
                         toClassBox.getSelectionModel().selectFirst();
                         ChoiceBox<String> msgBox = new ChoiceBox<>();
-                        String selection = fromClassBox.getSelectionModel().getSelectedItem();
-                        String classID = selection.split("\\[", 2)[1].split("]",2)[0];
-                        for (Methods m : this.dataModel.getData().getClassByName(classID).getMethods()) {
-                            msgBox.getItems().add(m.getName());
-                        }
-                        if (msgBox.getItems().size() == 0) {
-                            msgBox.getItems().add("<no methods>");
-                        }
-                        msgBox.getSelectionModel().selectFirst();
+                        String selection = toClassBox.getSelectionModel().getSelectedItem();
+                        String classID = selection.split("\\[", 2)[1].split("]", 2)[0];
+                        SequenceDiagramController.populateMethodsContentBox(this.dataModel, msgBox, classID);
 
                         grid.add(new Label("Current participants: "), 0, 0);
                         grid.add(new Label(current), 1, 0);
@@ -1016,17 +1007,11 @@ public class PropertiesView extends VBox {
                         grid.add(toClassBox, 1, 3);
                         dialog.getDialogPane().setContent(grid);
 
-                        fromClassBox.setOnAction(event -> {
+                        toClassBox.setOnAction(event -> {
                             msgBox.getItems().clear();
-                            String selectionX = fromClassBox.getSelectionModel().getSelectedItem();
-                            String classIDX = selectionX.split("\\[", 2)[1].split("]",2)[0];
-                            for (Methods m : this.dataModel.getData().getClassByName(classIDX).getMethods()) {
-                                msgBox.getItems().add(m.getName());
-                            }
-                            if (msgBox.getItems().size() == 0) {
-                                msgBox.getItems().add("<no methods>");
-                            }
-                            msgBox.getSelectionModel().selectFirst();
+                            String selectionX = toClassBox.getSelectionModel().getSelectedItem();
+                            String classIDX = selectionX.split("\\[", 2)[1].split("]", 2)[0];
+                            SequenceDiagramController.populateMethodsContentBox(this.dataModel, msgBox, classIDX);
 
                             BooleanBinding validName = Bindings.createBooleanBinding(() -> {
                                 return msgBox.getItems().get(0).equals("<no methods>");

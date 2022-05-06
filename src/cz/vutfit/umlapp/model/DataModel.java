@@ -11,11 +11,11 @@ import cz.vutfit.umlapp.model.commands.ICommand;
 import cz.vutfit.umlapp.model.uml.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.util.Pair;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class for data model of app
@@ -97,6 +97,7 @@ public class DataModel {
      * @throws IOException File couldn't be written to
      */
     public void saveFile() throws IOException {
+        this.getData().dataVersion = this.currentFileDataVersion;
         String serialized = new Gson().toJson(data);
 
         var writer = new BufferedWriter(new FileWriter(file));
@@ -139,60 +140,61 @@ public class DataModel {
             s = data.getSequenceDiagrams();
             r = data.getRelationships();
             for (ClassDiagram x : c) {
-                x.getName().charAt(0);
+                Objects.requireNonNull(x.getName());
                 int id1 = x.getID();
                 attrib = x.getAttribs();
                 m = x.getMethods();
                 for (Attributes y : attrib) {
-                    y.getName().charAt(0);
-                    y.getVisibility().getVisiblityString();
-                    y.getType().charAt(0);
-                    y.getNameWithPrefix().charAt(0);
+                    Objects.requireNonNull(y.getName());
+                    Objects.requireNonNull(y.getVisibility().getVisiblityString());
+                    Objects.requireNonNull(y.getType());
+                    Objects.requireNonNull(y.getNameWithPrefix());
                 }
                 for (Methods y : m) {
-                    y.getName().charAt(0);
-                    y.getVisibility().getVisiblityString();
-                    y.getType().charAt(0);
-                    y.getNameWithPrefix().charAt(0);
+                    Objects.requireNonNull(y.getName());
+                    Objects.requireNonNull(y.getVisibility().getVisiblityString());
+                    Objects.requireNonNull(y.getType());
+                    Objects.requireNonNull(y.getNameWithPrefix());
                 }
             }
             for (Relationships x : r) {
-                x.getName();
                 int id2 = x.getID();
-                x.getType().relationToString();
+                Objects.requireNonNull(x.getType().relationToString());
                 int fid = x.getFromClassID();
                 int tid = x.getToClassID();
-                x.getFromDesc();
-                x.getToDesc();
+                // Objects.requireNonNull(x.getName());
+                // Objects.requireNonNull(x.getFromDesc());
+                // Objects.requireNonNull(x.getToDesc());
             }
             for (SequenceDiagram x : s) {
                 int id3 = x.getID();
-                x.getName().charAt(0);
+                Objects.requireNonNull(x.getName());
                 seq_m = x.getMessages();
                 seq_o = x.getObjects();
                 for (SequenceObjects y : seq_o) {
-                    y.getClassName().charAt(0);
-                    y.getObjectName().charAt(0);
+                    Objects.requireNonNull(y.getClassName());
+                    Objects.requireNonNull(y.getObjectName());
                     boolean a = y.getActiveStatus();
-                    y.getActiveStatusString().charAt(0);
-                    y.getObjectClassName().charAt(0);
+                    Objects.requireNonNull(y.getActiveStatusString());
+                    Objects.requireNonNull(y.getObjectClassName());
                 }
                 for (SequenceMessages y : seq_m) {
-                    y.getType().typeToString();
-                    y.getSender().getKey().charAt(0);
-                    y.getSender().getValue().charAt(0);
-                    y.getReceiver().getKey().charAt(0);
-                    y.getReceiver().getValue().charAt(0);
-                    y.getParticipants().getKey().getKey().charAt(0);
-                    y.getParticipants().getKey().getValue().charAt(0);
-                    y.getParticipants().getValue().getKey().charAt(0);
-                    y.getParticipants().getValue().getValue().charAt(0);
+                    Objects.requireNonNull(y.getType().typeToString());
+                    Objects.requireNonNull(y.getSender().getKey());
+                    Objects.requireNonNull(y.getSender().getValue());
+                    Objects.requireNonNull(y.getReceiver().getKey());
+                    Objects.requireNonNull(y.getReceiver().getValue());
+                    Objects.requireNonNull(y.getParticipants().getKey().getKey());
+                    Objects.requireNonNull(y.getParticipants().getKey().getValue());
+                    Objects.requireNonNull(y.getParticipants().getValue().getKey());
+                    Objects.requireNonNull(y.getParticipants().getValue().getValue());
                     int id4 = y.getID();
-                    y.getContent().charAt(0);
+                    Objects.requireNonNull(y.getContent());
                 }
             }
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
