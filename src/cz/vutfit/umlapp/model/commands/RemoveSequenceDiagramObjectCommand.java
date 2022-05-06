@@ -6,6 +6,7 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.SequenceMessages;
+import cz.vutfit.umlapp.model.uml.SequenceObjects;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 import javafx.util.Pair;
 
@@ -15,12 +16,12 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     private final int sequenceID;
     private final String objectName;
     private final String className;
-    private ArrayList<SequenceMessages> removedMessages;
+    private final ArrayList<SequenceMessages> removedMessages;
 
-    public RemoveSequenceDiagramObjectCommand(int sequenceID, String className, String objectName) {
+    public RemoveSequenceDiagramObjectCommand(int sequenceID, SequenceObjects sequenceObject) {
         this.sequenceID = sequenceID;
-        this.objectName = objectName;
-        this.className = className;
+        this.objectName = sequenceObject.getObjectName();
+        this.className = sequenceObject.getClassName();
         this.removedMessages = new ArrayList<>();
     }
 

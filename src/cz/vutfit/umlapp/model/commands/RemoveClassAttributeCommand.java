@@ -5,6 +5,7 @@
 
 package cz.vutfit.umlapp.model.commands;
 
+import cz.vutfit.umlapp.model.uml.Attributes;
 import cz.vutfit.umlapp.model.uml.ClassDiagram;
 import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
@@ -21,16 +22,16 @@ public class RemoveClassAttributeCommand implements ICommand {
 
     /**
      * Constructor
-     * @param myClass class from which attribute will be removed
-     * @param ID ID-name of attribute
-     * @param visibility removed attribute visibility
+     *
+     * @param myClass   class from which attribute will be removed
+     * @param attribute attribute to be removed
      * @see EAttribVisibility
      */
-    public RemoveClassAttributeCommand(ClassDiagram myClass, String ID, EAttribVisibility visibility, String type) {
+    public RemoveClassAttributeCommand(ClassDiagram myClass, Attributes attribute) {
         this.myClass = myClass;
-        this.id = ID;
-        this.visibility = visibility;
-        this.type = type;
+        this.id = attribute.getName();
+        this.visibility = attribute.getVisibility();
+        this.type = attribute.getType();
     }
 
     /**

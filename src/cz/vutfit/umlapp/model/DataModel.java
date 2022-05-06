@@ -66,7 +66,7 @@ public class DataModel {
         JsonReader reader = new JsonReader(new FileReader(file));
         this.data = new Gson().fromJson(reader, UMLFileData.class);
 
-        if (this.checkFile() == false) {
+        if (!this.checkFile()) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "This file is not entirely correct input for this program.\nProceed with caution.", ButtonType.OK);
             alert.setTitle("File Open");
             alert.setHeaderText("File check failed");
@@ -147,13 +147,13 @@ public class DataModel {
                 m = x.getMethods();
                 for (Attributes y : attrib) {
                     Objects.requireNonNull(y.getName());
-                    Objects.requireNonNull(y.getVisibility().getVisiblityString());
+                    Objects.requireNonNull(y.getVisibility().getVisibilityString());
                     Objects.requireNonNull(y.getType());
                     Objects.requireNonNull(y.getNameWithPrefix());
                 }
                 for (Methods y : m) {
                     Objects.requireNonNull(y.getName());
-                    Objects.requireNonNull(y.getVisibility().getVisiblityString());
+                    Objects.requireNonNull(y.getVisibility().getVisibilityString());
                     Objects.requireNonNull(y.getType());
                     Objects.requireNonNull(y.getNameWithPrefix());
                 }

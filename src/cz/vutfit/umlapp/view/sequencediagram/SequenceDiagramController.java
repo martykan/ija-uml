@@ -21,11 +21,11 @@ import cz.vutfit.umlapp.view.components.PropertiesView;
 import cz.vutfit.umlapp.view.components.UMLSequenceObjectView;
 import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.main.MainController;
+import cz.vutfit.umlapp.view.main.TreeViewDataHolder;
 import cz.vutfit.umlapp.view.main.TreeViewItemModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -43,10 +43,10 @@ import java.util.*;
 
 public class SequenceDiagramController extends MainController {
     @FXML
-    public TreeView<String> classTreeView;
+    public TreeView<TreeViewDataHolder> classTreeView;
 
     @FXML
-    public TreeView<String> messageTreeView;
+    public TreeView<TreeViewDataHolder> messageTreeView;
 
     @FXML
     public PropertiesView propertiesView;
@@ -65,11 +65,11 @@ public class SequenceDiagramController extends MainController {
     private final double spaceWidth = 210;
     private final double spaceHeight = 40;
 
-    ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
+    ChangeListener<TreeItem<TreeViewDataHolder>> handleObjectSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
-            this.selectedClass = newItem.getValue();
+            this.selectedClass = newItem.getValue().getSequenceObject().getObjectClassName();
             this.messageTreeView.getSelectionModel().clearSelection();
-            handleProperties(newItem);
+            handleProperties();
         } else {
             this.selectedClass = null;
             propertiesView.resetProperties();
@@ -83,11 +83,11 @@ public class SequenceDiagramController extends MainController {
         boxClassOptions.setVisible(this.selectedClass != null);
     };
 
-    ChangeListener<TreeItem<String>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
+    ChangeListener<TreeItem<TreeViewDataHolder>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
-            this.selectedMessage = newItem.getValue().split("\\.", 2)[1];
+            this.selectedMessage = newItem.getValue().getSequenceMessage().getContent();
             this.classTreeView.getSelectionModel().clearSelection();
-            handleProperties(newItem);
+            handleProperties();
         } else {
             this.selectedMessage = null;
             propertiesView.resetProperties();
@@ -104,7 +104,9 @@ public class SequenceDiagramController extends MainController {
     @Override
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         super.init(modelFactory, viewHandler);
-        this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
+        this.classTreeView.setCellFactory(TreeViewDataHolder.getCellFactory(this.dataModel));
+        this.messageTreeView.setCellFactory(TreeViewDataHolder.getCellFactory(this.dataModel));
+        this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleObjectSelection);
         this.messageTreeView.getSelectionModel().selectedItemProperty().addListener(handleMessageSelection);
         try {
             propertiesView.addPropertyLine("Nothing selected", "");
@@ -121,24 +123,19 @@ public class SequenceDiagramController extends MainController {
     public void updateView() {
         super.updateView();
         try {
-            // Diagram menu
-            TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
-            diagrams.showTreeItem();
-            diagrams.rootViewUpdate();
-
             // Classes (objects) menu
             TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.SEQ_OBJECTS);
 
             this.selectedDiagram = this.dataModel.getActiveDiagram();
 
             classes.setSelectedSequence(this.selectedDiagram);
-            classes.showTreeItem();
+            classes.buildTree();
             classes.rootViewUpdate();
 
             // Messages menu
             TreeViewItemModel messages = new TreeViewItemModel(this.dataModel, messageTreeView, EDataType.SEQ_MESSAGES);
             messages.setSelectedSequence(this.selectedDiagram);
-            messages.showTreeItem();
+            messages.buildTree();
             messages.rootViewUpdate();
 
             // Handle inconsistencies
@@ -154,14 +151,12 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    // TODO move elsewhere
     public static void populateMethodsContentBox(DataModel dataModel, ChoiceBox<String> methodsContentBox, String className) {
         ClassDiagram classDiagram = dataModel.getData().getClassByName(className);
         for (Methods m : classDiagram.getMethods()) {
             methodsContentBox.getItems().add(m.getName());
         }
         // Get inherited methods
-        // TODO do this recursively
         for (Relationships r : dataModel.getData().getRelationships()) {
             if (r.getToClassID() == classDiagram.getID() && r.getType() == ERelationType.GENERALIZATION) {
                 for (Methods m : dataModel.getData().getClassByID(r.getFromClassID()).getMethods()) {
@@ -326,9 +321,8 @@ public class SequenceDiagramController extends MainController {
         anchorScrollPane.getChildren().addAll(nodesToAdd);
     }
 
-    public void handleRemoveDiagram(ActionEvent actionEvent) {
+    public void handleRemoveDiagram() {
         try {
-            String id;
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Remove Sequence Diagram");
             alert.setContentText("This action will remove currently selected sequence diagram. Proceed?");
@@ -347,8 +341,6 @@ public class SequenceDiagramController extends MainController {
                         this.showErrorMessage(e.getLocalizedMessage());
                         e.printStackTrace();
                     }
-                } else if (type.getButtonData() == ButtonBar.ButtonData.NO) {
-                    return;
                 }
             });
         } catch(Exception e){
@@ -357,7 +349,7 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleRemoveClass (ActionEvent actionEvent) {
+    public void handleRemoveObject() {
         try {
             SequenceDiagram currentSequence = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
             ArrayList<SequenceObjects> objects = currentSequence.getObjects();
@@ -367,11 +359,8 @@ public class SequenceDiagramController extends MainController {
                 return;
 
             try {
-                String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] splitValue = selectedValue.split(":");
-                String className = splitValue[0];
-                String objectName = splitValue[1];
-                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), objectName, className));
+                SequenceObjects selectedObject = this.classTreeView.getSelectionModel().getSelectedItem().getValue().getSequenceObject();
+                this.dataModel.executeCommand(new RemoveSequenceDiagramObjectCommand(currentSequence.getID(), selectedObject));
                 this.updateView();
             } catch (Exception ex) {
                 this.showErrorMessage("Unable to remove object from sequence diagram", ex.getLocalizedMessage());
@@ -383,7 +372,7 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleAddClass (ActionEvent actionEvent) {
+    public void handleAddClass() {
         try {
             // Create the custom dialog.
             Dialog<ArrayList<String>> dialog = new Dialog<>();
@@ -449,7 +438,7 @@ public class SequenceDiagramController extends MainController {
 
                 dialog.setResultConverter(dialogButton -> {
                     if (dialogButton == createButtonType) {
-                        return new ArrayList<String>();
+                        return new ArrayList<>();
                     }
                     return null;
                 });
@@ -506,7 +495,7 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleRemoveMessage (ActionEvent actionEvent) {
+    public void handleRemoveMessage() {
         try {
             SequenceDiagram currentSequence = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
             ArrayList<SequenceMessages> messages = currentSequence.getMessages();
@@ -516,9 +505,7 @@ public class SequenceDiagramController extends MainController {
                 return;
 
             try {
-                String selectedItem = this.messageTreeView.getSelectionModel().getSelectedItem().getValue();
-                String splitNumber = selectedItem.split("\\.", 2)[0];
-                int messageIndex = Integer.parseInt(splitNumber);
+                int messageIndex = this.messageTreeView.getSelectionModel().getSelectedIndex();
                 this.dataModel.executeCommand(new RemoveSequenceDiagramMessageCommand(currentSequence.getID(), messageIndex));
                 this.updateView();
             } catch (Exception ex) {
@@ -544,7 +531,7 @@ public class SequenceDiagramController extends MainController {
         this.anchorScrollPane.getChildren().add(rectangle);
     }
 
-    public void handleAddMessage(ActionEvent actionEvent) {
+    public void handleAddMessage() {
         try {
             if (this.dataModel.getData().getSequenceByName(this.selectedDiagram).getObjects().size() == 0) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -557,7 +544,7 @@ public class SequenceDiagramController extends MainController {
                 alert.showAndWait().ifPresent(type -> {
                     if (type.getButtonData() == ButtonBar.ButtonData.YES) {
                         try {
-                            handleAddClass(null);
+                            handleAddClass();
                         } catch (Exception e) {
                             this.showErrorMessage(e.getLocalizedMessage());
                             e.printStackTrace();
@@ -692,10 +679,10 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleMessageForward(ActionEvent actionEvent) {
+    public void handleMessageForward() {
         int selectedIndex = this.messageTreeView.getSelectionModel().getSelectedIndex();
         SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
-        Integer msgCount = thisDiagram.getMessages().size();
+        int msgCount = thisDiagram.getMessages().size();
 
         if (selectedIndex < msgCount - 1) {
             try {
@@ -708,7 +695,7 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleMessageBackward(ActionEvent actionEvent) {
+    public void handleMessageBackward() {
         int selectedIndex = this.messageTreeView.getSelectionModel().getSelectedIndex();
         SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
 
@@ -723,12 +710,12 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleObjectForward(ActionEvent actionEvent) {
-        Integer selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
+    public void handleObjectForward() {
+        int selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
         SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
-        Integer objCount = thisDiagram.getObjects().size();
+        int objCount = thisDiagram.getObjects().size();
 
-        if (selectedIndex < objCount-1) {
+        if (selectedIndex < objCount - 1) {
             try {
                 this.dataModel.executeCommand(new EditSequenceDiagramObjectIndexCommand(thisDiagram.getID(), selectedIndex, ++selectedIndex));
                 this.updateView();
@@ -739,8 +726,8 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleObjectBackward(ActionEvent actionEvent) {
-        Integer selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
+    public void handleObjectBackward() {
+        int selectedIndex = this.classTreeView.getSelectionModel().getSelectedIndex();
         SequenceDiagram thisDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
 
         if (selectedIndex > 0) {
@@ -754,7 +741,7 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
-    public void handleProperties(TreeItem<String> selected) {
+    public void handleProperties() {
         try {
             propertiesView.setDataModel(this.dataModel);
             propertiesView.setClassTreeView(this.classTreeView);
@@ -763,15 +750,11 @@ public class SequenceDiagramController extends MainController {
             if (this.classTreeView.getSelectionModel().getSelectedItem() != null) {
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.SEQ_OBJECT);
-                String selectedValue = this.classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] splitValue = selectedValue.split(":");
-                String objectName = splitValue[0];
-                String className = splitValue[1];
-                SequenceObjects object = current.getObject(className, objectName);
+                SequenceObjects object = this.classTreeView.getSelectionModel().getSelectedItem().getValue().getSequenceObject();
                 propertiesView.setParentID(current.getID());
                 propertiesView.setID(object.getObjectName() + ":" + object.getClassName());
-                propertiesView.addPropertyLine("Object", objectName);
-                propertiesView.addPropertyLine("Class instance", className);
+                propertiesView.addPropertyLine("Object", object.getObjectName());
+                propertiesView.addPropertyLine("Class instance", object.getClassName());
                 propertiesView.addPropertyLine("Status", object.getActiveStatusString());
             } else if (this.messageTreeView.getSelectionModel().getSelectedItem() != null) {
                 SequenceMessages message = current.getMessageByIndex(this.messageTreeView.getSelectionModel().getSelectedIndex());

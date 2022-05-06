@@ -13,7 +13,6 @@ import javafx.util.Pair;
 public class RemoveSequenceDiagramMessageCommand implements ICommand {
     private final int sequenceID;
     private final int msgIndex;
-    private int msgID;
     private String content;
     private EMessageType type;
     private Pair<String, String> senderName;
@@ -26,11 +25,11 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
 
     @Override
     public void execute(UMLFileData file) throws Exception {
-        this.msgID = file.getSequenceByID(this.sequenceID).getMessageByIndex(this.msgIndex - 1).getID();
-        this.content = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getContent();
-        this.type = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getType();
-        this.senderName = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getSender();
-        this.receiverName = file.getSequenceByID(this.sequenceID).getMessageByID(this.msgID).getReceiver();
+        int msgID = file.getSequenceByID(this.sequenceID).getMessageByIndex(this.msgIndex).getID();
+        this.content = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getContent();
+        this.type = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getType();
+        this.senderName = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getSender();
+        this.receiverName = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getReceiver();
         file.getSequenceByID(this.sequenceID).removeMessage(msgID);
 
         boolean senderActive = false;

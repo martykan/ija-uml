@@ -8,6 +8,7 @@ package cz.vutfit.umlapp.view.main;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.AddSequenceDiagramCommand;
+import cz.vutfit.umlapp.model.uml.SequenceDiagram;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
 import javafx.application.Platform;
@@ -15,7 +16,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -46,7 +46,7 @@ public class MainController implements IController {
     @FXML
     public Button undoButton;
     @FXML
-    public TreeView<String> diagramTreeView;
+    public TreeView<TreeViewDataHolder> diagramTreeView;
     @FXML
     public ScrollPane scrollPane;
     @FXML
@@ -59,14 +59,14 @@ public class MainController implements IController {
      * Listens to changes in diagramTreeView.
      * Used for displaying properties of any element from diagramTreeView.
      */
-    ChangeListener<TreeItem<String>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
+    ChangeListener<TreeItem<TreeViewDataHolder>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             try {
-                if (Objects.equals(newItem.getValue(), "Class diagram")) {
+                if (newItem.getValue().getSequenceDiagram() == null) {
                     this.dataModel.setActiveDiagram(null);
                     this.viewHandler.openView("ClassDiagram");
                 } else {
-                    this.dataModel.setActiveDiagram(newItem.getValue());
+                    this.dataModel.setActiveDiagram(newItem.getValue().getSequenceDiagram().getName());
                     this.viewHandler.openView("SequenceDiagram");
                 }
             } catch (IOException e) {
@@ -81,6 +81,7 @@ public class MainController implements IController {
         this.dataModel = modelFactory.getDataModel();
         this.viewHandler = viewHandler;
 
+        this.diagramTreeView.setCellFactory(TreeViewDataHolder.getCellFactory(this.dataModel));
         this.updateView();
 
         Platform.runLater(MainController.this::initKeyboardShortcuts);
@@ -95,18 +96,21 @@ public class MainController implements IController {
 
             // Diagrams menu
             TreeViewItemModel diagrams = new TreeViewItemModel(this.dataModel, diagramTreeView, EDataType.DIAGRAM);
-            diagrams.showTreeItem();
+            diagrams.buildTree();
             diagrams.rootViewUpdate();
 
             // Highlight active diagram
             Platform.runLater(() -> {
                 this.diagramTreeView.getSelectionModel().selectedItemProperty().removeListener(handleDiagramSelection);
-                if (this.dataModel.getActiveDiagram() == null) {
-                    this.diagramTreeView.getSelectionModel().selectFirst();
-                } else {
-                    int index = diagrams.getTreeItemIndex(this.dataModel.getActiveDiagram());
-                    this.diagramTreeView.getSelectionModel().clearAndSelect(index);
+                int index = 0;
+                int i = 0;
+                for (SequenceDiagram diagram : this.dataModel.getData().getSequenceDiagrams()) {
+                    i++;
+                    if (Objects.equals(diagram.getName(), this.dataModel.getActiveDiagram())) {
+                        index = i;
+                    }
                 }
+                this.diagramTreeView.getSelectionModel().clearAndSelect(index);
                 this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
             });
         } catch (Exception e) {
@@ -137,19 +141,11 @@ public class MainController implements IController {
 
     /**
      * After clicking on save icon, this function is called. It saves changes user made into file opened.
-     * @param actionEvent
      */
-    public void handleSave(ActionEvent actionEvent) {
+    public void handleSave() {
         try {
             this.dataModel.saveFile();
             this.updateView();
-            /** Save info window **/
-            /**
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
-            alert.setTitle("File Save");
-            alert.setHeaderText("File saved successfully");
-            alert.showAndWait();
-             **/
         } catch (IOException e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -158,12 +154,11 @@ public class MainController implements IController {
 
     /**
      * Function called after clicking on home icon. View changes back to 'Welcome screen'.
-     * @param actionEvent
      */
-    public void handleClose(ActionEvent actionEvent) {
+    public void handleClose() {
         try {
-            /** Save window **/
-            if (this.dataModel.getFileSaveStatus() == false) {
+            // Save window
+            if (!this.dataModel.getFileSaveStatus()) {
                 ButtonType save = new ButtonType("Save and leave", ButtonBar.ButtonData.APPLY);
                 Alert alert = new Alert(Alert.AlertType.WARNING, "Leave without saving changes?", ButtonType.YES, save, ButtonType.CANCEL);
                 alert.setTitle("Leave Warning");
@@ -174,8 +169,8 @@ public class MainController implements IController {
                 } else if (alert.getResult() == save) { // Save and leave
                     this.dataModel.saveFile();
                     this.viewHandler.openView("Welcome");
-                } else if (alert.getResult() == ButtonType.NO) { // Do not leave
-                    return;
+                } else {
+                    alert.getResult();// Do not leave
                 }
             } else {
                 this.viewHandler.openView("Welcome");
@@ -188,9 +183,8 @@ public class MainController implements IController {
 
     /**
      * After clicking on undo button, this function is called.
-     * @param actionEvent
      */
-    public void handleUndo(ActionEvent actionEvent) {
+    public void handleUndo() {
         try {
             if (this.dataModel.isCommandHistoryEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "You have not performed any command or you have already\nundo-ed all operations. Nothing happened.", ButtonType.OK);
@@ -208,10 +202,9 @@ public class MainController implements IController {
 
     /**
      * After clicking on + button (next to Diagrams in menu), this function is called.
-     * It is supposed to add new sequence diagram. Currently TODO.
-     * @param actionEvent
+     * It is supposed to add new sequence diagram.
      */
-    public void handleAddDiagram(ActionEvent actionEvent) {
+    public void handleAddDiagram() {
         try {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("New Sequence Diagram");
@@ -243,9 +236,8 @@ public class MainController implements IController {
     /**
      * After clicking on camera button in menu, this function is called.
      * Outputs entire diagram into PNG image.
-     * @param actionEvent
      */
-    public void handleSnapshot(ActionEvent actionEvent) {
+    public void handleSnapshot() {
         // Choose a file for output
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));

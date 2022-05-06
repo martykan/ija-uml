@@ -86,7 +86,7 @@
             <HBox styleClass="box-heading" alignment="CENTER">
                 <Label text="Objects"/>
                 <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-                <Button text="-" styleClass="icon-button" onAction="#handleRemoveClass"/>
+                <Button text="-" styleClass="icon-button" onAction="#handleRemoveObject"/>
                 <Button text="+" styleClass="icon-button" onAction="#handleAddClass"/>
             </HBox>
             <TreeView fx:id="classTreeView" maxHeight="225"/>

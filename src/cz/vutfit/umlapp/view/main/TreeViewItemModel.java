@@ -8,11 +8,9 @@ package cz.vutfit.umlapp.view.main;
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.uml.*;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,20 +18,30 @@ import java.util.Set;
  * Class for TreeViewItem used for working with TreeViews and its items
  */
 public class TreeViewItemModel {
-    public TreeView<String> view; /** TreeView */
-    public TreeItem<String> root; /** Root of TreeView */
-    public EDataType itemType; /** Type of the TreeItem @see EDataType */
+    public TreeView<TreeViewDataHolder> view;
+    /**
+     * TreeView
+     */
+    public TreeItem<TreeViewDataHolder> root;
+    /**
+     * Root of TreeView
+     */
+    public EDataType itemType;
+    /**
+     * Type of the TreeItem @see EDataType
+     */
     public DataModel dataModel;
     public SequenceDiagram selectedSequence;
 
     /**
      * Constructor
+     *
      * @param model
      * @param view
      * @param itemType type of TreeItem
      * @see EDataType
      */
-    public TreeViewItemModel(DataModel model, TreeView<String> view, EDataType itemType) {
+    public TreeViewItemModel(DataModel model, TreeView<TreeViewDataHolder> view, EDataType itemType) {
         this.view = view;
         this.dataModel = model;
         this.root = new TreeItem<>();
@@ -43,62 +51,45 @@ public class TreeViewItemModel {
     /**
      * This method handles showing (creating and adding to rootItem) TreeItems depending on TreeItem type.
      */
-    public void showTreeItem() {
-        TreeItem<String> item;
+    public void buildTree() {
+        root = new TreeItem<>();
         switch (this.itemType) {
             case DIAGRAM:
-                item = new TreeItem<>("Class diagram");
-                this.root.getChildren().add(item);
+                root.getChildren().add(new TreeViewDataHolder(EDataType.DIAGRAM).getTreeItem());
                 for (SequenceDiagram diagram : this.dataModel.getData().getSequenceDiagrams()) {
-                    item = new TreeItem<>(diagram.getName());
-                    this.root.getChildren().add(item);
+                    root.getChildren().add(new TreeViewDataHolder(diagram).getTreeItem());
                 }
                 break;
             case CLASS:
                 for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
-                    item = new TreeItem<>(classDiagram.getName());
-                    int classID = classDiagram.getID();
+                    TreeItem<TreeViewDataHolder> classItem = new TreeViewDataHolder(classDiagram).getTreeItem();
                     for (Attributes attributes : classDiagram.getAttribs()) {
-                        item.getChildren().add(new TreeItem<>(attributes.getNameWithPrefix()));
+                        classItem.getChildren().add(new TreeViewDataHolder(attributes).getTreeItem());
                     }
                     for (Methods methods : classDiagram.getMethods()) {
-                        item.getChildren().add(new TreeItem<>(methods.getNameWithPrefix()));
+                        classItem.getChildren().add(new TreeViewDataHolder(methods).getTreeItem());
                     }
                     for (Relationships relations : this.dataModel.getData().getRelationships()) {
-                        try {
-                            String relationString = null;
-                            if (relations.getFromClassID() == classID && relations.getToClassID() == classID) {
-                                relationString = ">< " + classDiagram.getName();
-                            } else if (relations.getToClassID() == classID) {
-                                relationString = "< " + this.dataModel.getData().getClassByID(relations.getFromClassID()).getName();
-                            } else if (relations.getFromClassID() == classID) {
-                                relationString = "> " + this.dataModel.getData().getClassByID(relations.getToClassID()).getName();
-                            }
-                            if (relationString != null)
-                                item.getChildren().add(new TreeItem<>(relationString));
-                        } catch (NullPointerException npe) {
-                            // Don't add invalid relation
+                        if (relations.getFromClassID() == classDiagram.getID() || relations.getToClassID() == classDiagram.getID()) {
+                            classItem.getChildren().add(new TreeViewDataHolder(relations, classDiagram).getTreeItem());
                         }
                     }
-                    this.root.getChildren().add(item);
+                    root.getChildren().add(classItem);
                 }
                 break;
             case SEQ_OBJECTS:
                 if (this.selectedSequence == null)
                     return;
-                ArrayList<String> usedClassName = new ArrayList<>();
-                for (SequenceObjects o : this.selectedSequence.getObjects()) {
-                    item = new TreeItem<>(o.getObjectName() + ":" + o.getClassName());
-                    this.root.getChildren().add(item);
+                for (SequenceObjects object : this.selectedSequence.getObjects()) {
+                    root.getChildren().add(new TreeViewDataHolder(object).getTreeItem());
                 }
                 break;
             case SEQ_MESSAGES:
                 if (this.selectedSequence == null)
                     return;
-                int i = 1;
-                for (SequenceMessages m : this.selectedSequence.getMessages()) {
-                    item = new TreeItem<>(i + ". " + m.getContent());
-                    this.root.getChildren().add(item);
+                Integer i = 1;
+                for (SequenceMessages message : this.selectedSequence.getMessages()) {
+                    this.root.getChildren().add(new TreeViewDataHolder(message, i).getTreeItem());
                     i++;
                 }
                 break;
@@ -110,55 +101,6 @@ public class TreeViewItemModel {
     }
 
     /**
-     * Getter function
-     * @param name
-     * @return returns item if present in root or null
-     */
-    public TreeItem<String> getTreeItem(String name) {
-        for (TreeItem<String> i : this.root.getChildren()) {
-            if (i.getValue().equals(name)) {
-                return i;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Getter function
-     *
-     * @param name
-     * @return returns item index if present in root or null
-     */
-    public int getTreeItemIndex(String name) {
-        ObservableList<TreeItem<String>> children = this.root.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            TreeItem<String> it = children.get(i);
-            if (it.getValue().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Adds new treeItem (child) to another treeItem (parent)
-     *
-     * @param item
-     * @param name
-     */
-    public void addTreeItemChild(TreeItem<String> item, String name) {
-        TreeItem<String> child = null;
-        switch (this.itemType) {
-            case METHOD:
-            case ATTRIBUTE:
-            case RELATIONSHIP:
-                child = new TreeItem<>(name);
-                break;
-        }
-        item.getChildren().add(child);
-    }
-
-    /**
      * Used for updating root TreeItem and TreeView to correctly display all items in view.
      */
     public void rootViewUpdate() {
@@ -167,11 +109,11 @@ public class TreeViewItemModel {
             Set<String> previousExpanded = new HashSet<>();
             this.view.getRoot().getChildren().forEach(child -> {
                 if (child.isExpanded()) {
-                    previousExpanded.add(child.getValue());
+                    previousExpanded.add(child.getValue().toString());
                 }
             });
             root.getChildren().forEach(child -> {
-                if (previousExpanded.contains(child.getValue())) {
+                if (previousExpanded.contains(child.getValue().toString())) {
                     child.setExpanded(true);
                 }
             });

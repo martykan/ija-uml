@@ -3,16 +3,14 @@
  * Authors: Dominik Horký, Tomáš Martykán
  */
 
-/*
- * File: MainController.java
- * Authors: Dominik Horký, Tomáš Martykán
- */
-
 package cz.vutfit.umlapp.view.classdiagram;
 
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.*;
-import cz.vutfit.umlapp.model.uml.*;
+import cz.vutfit.umlapp.model.uml.ClassDiagram;
+import cz.vutfit.umlapp.model.uml.EAttribVisibility;
+import cz.vutfit.umlapp.model.uml.ERelationType;
+import cz.vutfit.umlapp.model.uml.Relationships;
 import cz.vutfit.umlapp.view.ViewHandler;
 import cz.vutfit.umlapp.view.components.DraggableUMLClassView;
 import cz.vutfit.umlapp.view.components.DraggableUMLRelationView;
@@ -20,11 +18,11 @@ import cz.vutfit.umlapp.view.components.EPropertyType;
 import cz.vutfit.umlapp.view.components.PropertiesView;
 import cz.vutfit.umlapp.view.main.EDataType;
 import cz.vutfit.umlapp.view.main.MainController;
+import cz.vutfit.umlapp.view.main.TreeViewDataHolder;
 import cz.vutfit.umlapp.view.main.TreeViewItemModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -43,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ClassDiagramController extends MainController {
     @FXML
-    public TreeView<String> classTreeView;
+    public TreeView<TreeViewDataHolder> classTreeView;
     @FXML
     public HBox boxClassOptions;
     /**
@@ -52,7 +50,7 @@ public class ClassDiagramController extends MainController {
     @FXML
     public PropertiesView propertiesView;
 
-    private String selectedClass;
+    private boolean isSelectedClass;
 
     /**
      * Listens to changes in classTreeView.
@@ -60,12 +58,12 @@ public class ClassDiagramController extends MainController {
      *
      * @see #handleProperties(TreeItem)
      */
-    ChangeListener<TreeItem<String>> handleClassSelection = (observableValue, oldItem, newItem) -> {
+    ChangeListener<TreeItem<TreeViewDataHolder>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
-            this.selectedClass = newItem.getValue();
+            this.isSelectedClass = true;
             handleProperties(newItem);
         } else {
-            this.selectedClass = null;
+            this.isSelectedClass = false;
             propertiesView.resetProperties();
             try {
                 propertiesView.addPropertyLine("Nothing selected", "");
@@ -74,7 +72,7 @@ public class ClassDiagramController extends MainController {
                 e.printStackTrace();
             }
         }
-        boxClassOptions.setVisible(this.selectedClass != null);
+        boxClassOptions.setVisible(this.isSelectedClass);
     };
 
     private void initDragDrop() {
@@ -108,11 +106,11 @@ public class ClassDiagramController extends MainController {
                 }
             });
             node.setOnMouseClicked(event -> {
-                // Select in treeview
+                // Select in treeView
                 int index = -1;
                 int i = 0;
-                for (TreeItem<String> treeItem : this.classTreeView.getRoot().getChildren()) {
-                    if (treeItem.getValue().equals(classDiagram.getName())) {
+                for (TreeItem<TreeViewDataHolder> treeItem : this.classTreeView.getRoot().getChildren()) {
+                    if (treeItem.getValue().getClassDiagram().getName().equals(classDiagram.getName())) {
                         index = i;
                         treeItem.setExpanded(true);
                     }
@@ -131,7 +129,6 @@ public class ClassDiagramController extends MainController {
             DraggableUMLClassView node = classNodes.get(relationship.fromId);
             DraggableUMLClassView node2 = classNodes.get(relationship.toId);
             if (node == null || node2 == null) continue;
-            ;
             DraggableUMLRelationView line = new DraggableUMLRelationView(node, node2, totalZoom, relationship);
             anchorScrollPane.getChildren().add(line);
         }
@@ -140,6 +137,7 @@ public class ClassDiagramController extends MainController {
     @Override
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         super.init(modelFactory, viewHandler);
+        this.classTreeView.setCellFactory(TreeViewDataHolder.getCellFactory(this.dataModel));
         this.classTreeView.getSelectionModel().selectedItemProperty().addListener(handleClassSelection);
         try {
             propertiesView.addPropertyLine("Nothing selected", "");
@@ -158,7 +156,7 @@ public class ClassDiagramController extends MainController {
         try {
             // Classes menu
             TreeViewItemModel classes = new TreeViewItemModel(this.dataModel, classTreeView, EDataType.CLASS);
-            classes.showTreeItem();
+            classes.buildTree();
             classes.rootViewUpdate();
 
             // Handle inconsistencies
@@ -166,7 +164,7 @@ public class ClassDiagramController extends MainController {
 
             this.initDragDrop();
 
-            boxClassOptions.setVisible(this.selectedClass != null);
+            boxClassOptions.setVisible(this.isSelectedClass);
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
@@ -175,10 +173,8 @@ public class ClassDiagramController extends MainController {
 
     /**
      * Called after clicking on + button (next to Classes header in menu)
-     *
-     * @param actionEvent
      */
-    public void handleAddClass(ActionEvent actionEvent) {
+    public void handleAddClass() {
         try {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("New Class");
@@ -186,13 +182,8 @@ public class ClassDiagramController extends MainController {
             dialog.setContentText("New Class Name:");
 
             // disable OK button if text-input is empty
-            BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                if (dialog.getEditor().getText().equals("")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }, dialog.getEditor().textProperty());
+            BooleanBinding validName = Bindings.createBooleanBinding(() ->
+                    dialog.getEditor().getText().equals(""), dialog.getEditor().textProperty());
             dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(validName);
 
             Optional<String> result = dialog.showAndWait();
@@ -213,80 +204,30 @@ public class ClassDiagramController extends MainController {
 
     /**
      * Called after clicking on - button (next to Classes in menu).
-     * The button deletes anything that's selected in classTreeView - class, method, attribute or relationship (todo).
-     *
-     * @param actionEvent
+     * The button deletes anything that's selected in classTreeView - class, method, attribute or relationship.
      */
-    public void handleRemove(ActionEvent actionEvent) {
+    public void handleRemove() {
         try {
-            String id;
+            TreeItem<TreeViewDataHolder> selectedTreeItem;
             if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                id = classTreeView.getSelectionModel().getSelectedItem().getValue();
+                selectedTreeItem = classTreeView.getSelectionModel().getSelectedItem();
             } else {
                 return;
             }
-            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-            if (myclass == null) { // currently not selected class
-                id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
-                myclass = this.dataModel.getData().getClassByName(id);
-                ArrayList<Attributes> a = myclass.getAttribs();
-                ArrayList<Methods> m = myclass.getMethods();
-                ArrayList<Relationships> r = this.dataModel.getData().getRelationships();
-                String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] x = currentOption.split("[+\\-#~]", 2);
-                boolean isAM = false;
-                if (x.length > 1) {
-                    x = x[1].split("[(]", 2);
-                    isAM = true;
-                }
-                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?$")) {
-                    for (Methods y : m) {
-                        if (y.getName().equals(currentOption.split("[+\\-#~]", 2)[1])) {
-                            this.dataModel.executeCommand(new RemoveClassMethodCommand(myclass, currentOption.split("[+\\-#~]", 2)[1], y.getVisibility(), y.getType()));
-                            break;
-                        }
-                    }
-                    this.updateView();
-                } else if (isAM) {
-                    for (Attributes z : a) {
-                        if (z.getName().equals(x[0])) {
-                            this.dataModel.executeCommand(new RemoveClassAttributeCommand(myclass, x[0], z.getVisibility(), z.getType()));
-                            break;
-                        }
-                    }
-                    this.updateView();
-                } else {
-                    String currSplit = currentOption.split("[>< ]", 3)[2];
-                    if (currentOption.contains("><")) {
-                        currSplit = currSplit.split("[ ]", 2)[1];
-                        for (Relationships relation : r) {
-                            ClassDiagram nameclass = this.dataModel.getData().getClassByName(currSplit);
-                            if (nameclass == null)
-                                return;
-                            if (relation.getToClassID() == nameclass.getID() && relation.getFromClassID() == relation.getToClassID()) {
-                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
-                                break;
-                            }
-                        }
-                    } else if (currentOption.contains(">")) {
-                        for (Relationships relation : r) {
-                            if (relation.getToClassID() == this.dataModel.getData().getClassByName(currSplit).getID() && relation.getFromClassID() == this.dataModel.getData().getClassByName(id).getID()) {
-                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
-                                break;
-                            }
-                        }
-                    } else if (currentOption.contains("<")) {
-                        for (Relationships relation : r) {
-                            if (relation.getFromClassID() == this.dataModel.getData().getClassByName(currSplit).getID() && relation.getToClassID() == this.dataModel.getData().getClassByName(id).getID()) {
-                                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(relation.getID()));
-                                break;
-                            }
-                        }
-                    }
-                    this.updateView();
-                }
-            } else {
-                this.dataModel.executeCommand(new RemoveClassCommand(myclass.getID()));
+            TreeViewDataHolder selectedItem = selectedTreeItem.getValue();
+            if (selectedItem.getDataType() == EDataType.CLASS) {
+                this.dataModel.executeCommand(new RemoveClassCommand(selectedItem.getClassDiagram().getID()));
+                this.updateView();
+            } else if (selectedItem.getDataType() == EDataType.ATTRIBUTE) {
+                ClassDiagram selectedClass = selectedTreeItem.getParent().getValue().getClassDiagram();
+                this.dataModel.executeCommand(new RemoveClassAttributeCommand(selectedClass, selectedItem.getAttribute()));
+                this.updateView();
+            } else if (selectedItem.getDataType() == EDataType.METHOD) {
+                ClassDiagram selectedClass = selectedTreeItem.getParent().getValue().getClassDiagram();
+                this.dataModel.executeCommand(new RemoveClassMethodCommand(selectedClass, selectedItem.getMethod()));
+                this.updateView();
+            } else if (selectedItem.getDataType() == EDataType.RELATIONSHIP) {
+                this.dataModel.executeCommand(new RemoveClassRelationshipCommand(selectedItem.getRelationship().getID()));
                 this.updateView();
             }
         } catch (Exception e) {
@@ -301,10 +242,8 @@ public class ClassDiagramController extends MainController {
      * Add new method to class.
      * If selected item in classTreeView is class, method will be added to this class.
      * If selected item is method, attribute or relationship, new method will be added to the same class as the selected item.
-     *
-     * @param actionEvent
      */
-    public void handleAddClassMethod(ActionEvent actionEvent) {
+    public void handleAddClassMethod() {
         try {
             Dialog<Pair<String, String>> dialog = new Dialog<>();
             dialog.setTitle("New Class Method");
@@ -350,17 +289,10 @@ public class ClassDiagramController extends MainController {
             Optional<Pair<String, String>> result = dialog.showAndWait();
             result.ifPresent(className -> {
                 try {
-                    String id;
-                    if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                        id = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                    } else {
-                        return;
-                    }
                     String type = (className.getValue().equals("") ? "void" : className.getValue());
-                    ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-                    if (myclass == null) // if not selected class but some attribute/method/relationship in that class
-                        myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                    this.dataModel.executeCommand(new AddClassMethodCommand(myclass.getID(), className.getKey(), EAttribVisibility.PUBLIC, type));
+                    ClassDiagram selectedClass = TreeViewDataHolder.getTreeViewSelectedClass(this.classTreeView);
+                    if (selectedClass == null) return;
+                    this.dataModel.executeCommand(new AddClassMethodCommand(selectedClass.getID(), className.getKey(), EAttribVisibility.PUBLIC, type));
                     this.updateView();
                 } catch (Exception e) {
                     this.showErrorMessage("Unable to add new method", e.getLocalizedMessage());
@@ -377,10 +309,9 @@ public class ClassDiagramController extends MainController {
      * In boxClassOptions after clicking on New Attribute, this function is called.
      * Works same handleAddClassMethod, instead of method it adds attribute.
      *
-     * @param actionEvent
-     * @see #handleAddClassMethod(ActionEvent)
+     * @see #handleAddClassMethod()
      */
-    public void handleAddAttribute(ActionEvent actionEvent) {
+    public void handleAddAttribute() {
         try {
             Dialog<Pair<String, String>> dialog = new Dialog<>();
             dialog.setTitle("New Class Attribute");
@@ -424,17 +355,10 @@ public class ClassDiagramController extends MainController {
             Optional<Pair<String, String>> result = dialog.showAndWait();
             result.ifPresent(className -> {
                 try {
-                    String id;
-                    if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                        id = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                    } else {
-                        return;
-                    }
-                    ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
                     String type = (className.getValue().equals("") ? "void" : className.getValue());
-                    if (myclass == null) // if not selected class but some attribute/method/relationship in that class
-                        myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-                    this.dataModel.executeCommand(new AddClassAttributeCommand(myclass.getID(), className.getKey(), EAttribVisibility.PUBLIC, type));
+                    ClassDiagram selectedClass = TreeViewDataHolder.getTreeViewSelectedClass(this.classTreeView);
+                    if (selectedClass == null) return;
+                    this.dataModel.executeCommand(new AddClassAttributeCommand(selectedClass.getID(), className.getKey(), EAttribVisibility.PUBLIC, type));
                     this.updateView();
                 } catch (Exception e) {
                     this.showErrorMessage("Unable to add new attribute", e.getLocalizedMessage());
@@ -452,21 +376,11 @@ public class ClassDiagramController extends MainController {
      * It is supposed to add new relationship from current class to another, works same way
      * as handleAddClassMethod or as handleAddAttribute.
      *
-     * @param actionEvent
-     * @see #handleAddClassMethod(ActionEvent)
+     * @see #handleAddClassMethod()
      */
-    public void handleAddRelation(ActionEvent actionEvent) {
+    public void handleAddRelation() {
         try {
-            String id;
-            if (classTreeView.getSelectionModel().getSelectedItem() != null) { // no item selected / 0 items in tree-view
-                id = classTreeView.getSelectionModel().getSelectedItem().getValue();
-            } else {
-                return;
-            }
-            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-            if (myclass == null) // if not selected class but some attribute/method/relationship in that class
-                myclass = this.dataModel.getData().getClassByName(classTreeView.getSelectionModel().getSelectedItem().getParent().getValue());
-            String fromName = myclass.getName();
+            ClassDiagram selectedClass = TreeViewDataHolder.getTreeViewSelectedClass(this.classTreeView);
 
             // Create the custom dialog.
             Dialog<ArrayList<String>> dialog = new Dialog<>();
@@ -495,8 +409,8 @@ public class ClassDiagramController extends MainController {
                 toClassBox.getItems().add(c.getName());
             }
             fromClassBox.getSelectionModel().selectFirst();
-            if (fromName != null) {
-                fromClassBox.getSelectionModel().select(fromName);
+            if (selectedClass != null) {
+                fromClassBox.getSelectionModel().select(selectedClass.getName());
             }
             toClassBox.getSelectionModel().selectFirst();
 
@@ -510,7 +424,7 @@ public class ClassDiagramController extends MainController {
 
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == createButtonType) {
-                    ArrayList<String> x = new ArrayList<String>();
+                    ArrayList<String> x = new ArrayList<>();
                     x.add(fromClassBox.getSelectionModel().getSelectedItem());
                     x.add(toClassBox.getSelectionModel().getSelectedItem());
                     x.add(typeBox.getSelectionModel().getSelectedItem());
@@ -541,104 +455,72 @@ public class ClassDiagramController extends MainController {
 
     /**
      * This function is called after item selection in classTreeView is changed (by user).
-     * Shows item-element properties (in Properties section in menu) depending on its type - class, method, attribute or relationship (todo).
+     * Shows item-element properties (in Properties section in menu) depending on its type - class, method, attribute or relationship.
      * If nothing is selected, simply shows 'nothing selected'.
      *
-     * @param selected currently selected item in classTreeView
+     * @param selectedTreeItem currently selected item in classTreeView
      * @see #handleClassSelection
      */
-    public void handleProperties(TreeItem<String> selected) {
+    public void handleProperties(TreeItem<TreeViewDataHolder> selectedTreeItem) {
         try {
             propertiesView.setDataModel(this.dataModel);
             propertiesView.setClassTreeView(this.classTreeView);
-            String id = classTreeView.getSelectionModel().getSelectedItem().getValue();
-            ClassDiagram myclass = this.dataModel.getData().getClassByName(id);
-            if (myclass == null) { // currently not selected class
-                id = classTreeView.getSelectionModel().getSelectedItem().getParent().getValue();
-                myclass = this.dataModel.getData().getClassByName(id);
-                String currentOption = classTreeView.getSelectionModel().getSelectedItem().getValue();
-                String[] x = currentOption.split("[+\\-#~]", 2);
-                boolean isAM = false;
-                if (x.length > 1) {
-                    x = x[1].split("[(]", 2);
-                    isAM = true;
-                }
-                if (x.length > 1 && currentOption.matches("^[+\\-#~][A-z0-9]+\\(.*\\)[ ]?$")) {
-                    propertiesView.resetProperties();
-                    propertiesView.setGroupType(EPropertyType.METHOD);
-                    propertiesView.setID(currentOption.split("[+\\-#~]", 2)[1]);
-                    propertiesView.addPropertyLine("Method", currentOption.split("[+\\-#~]", 2)[1]);
-                    propertiesView.addPropertyLine("Return type", myclass.getMethod(currentOption.split("[+\\-#~]", 2)[1]).getType());
-                    propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
-                    propertiesView.addPropertyLine("Visibility", myclass.getMethod(currentOption.split("[+\\-#~]", 2)[1]).getVisibility().getVisiblityString());
-                } else if (isAM) {
-                    String attribName = x[0].split(":", 2)[0];
-                    propertiesView.resetProperties();
-                    propertiesView.setGroupType(EPropertyType.ATTRIBUTE);
-                    propertiesView.setID(x[0]);
-                    propertiesView.addPropertyLine("Attribute", attribName);
-                    propertiesView.addPropertyLine("Type", myclass.getAttribute(x[0]).getType());
-                    propertiesView.addPropertyLine("Class", String.valueOf(myclass.getName()));
-                    System.out.println(x[0]);
-                    propertiesView.addPropertyLine("Visibility", myclass.getAttribute(x[0]).getVisibility().getVisiblityString());
-                } else {
-                    String relType = "<empty>";
-                    String fromString = "<empty>";
-                    String toString = "<empty>";
-                    String fromDesc = null;
-                    String toDesc = null;
-                    String relName = null;
-                    Integer ID = 0;
-                    String splitString = currentOption.split("[<>]", 2)[1];
-                    if (currentOption.contains("><")) {
-                        fromString = String.valueOf(myclass.getName()).trim();
-                        toString = fromString;
-                    } else if (currentOption.contains(">")) {
-                        fromString = String.valueOf(myclass.getName()).trim();
-                        toString = splitString.trim();
-                    } else if (currentOption.contains("<")) {
-                        toString = String.valueOf(myclass.getName()).trim();
-                        fromString = splitString.trim();
-                    }
-
-                    for (Relationships y : this.dataModel.getData().getRelationships()) {
-                        if (
-                                toString.equals(this.dataModel.getData().getClassByID(y.getToClassID()).getName()) &&
-                                        fromString.equals(this.dataModel.getData().getClassByID(y.getFromClassID()).getName())
-                        ) {
-                            relType = y.getType().relationToString();
-                            fromDesc = y.getFromDesc();
-                            toDesc = y.getToDesc();
-                            ID = y.getID();
-                            relName = y.getName();
-                            break;
-                        }
-                    }
-
-                    if (fromDesc == null)
-                        fromDesc = "<empty>";
-                    if (toDesc == null)
-                        toDesc = "<empty>";
-                    if (relName == null)
-                        relName = "<unnamed>";
-
-                    propertiesView.resetProperties();
-                    propertiesView.setGroupType(EPropertyType.RELATIONSHIP);
-                    propertiesView.setID(ID);
-                    propertiesView.addPropertyLine("Relationship", relName);
-                    propertiesView.addPropertyLine("From", fromString);
-                    propertiesView.addPropertyLine("To", toString);
-                    propertiesView.addPropertyLine("Type", relType);
-                    propertiesView.addPropertyLine("FromDesc", fromDesc);
-                    propertiesView.addPropertyLine("ToDesc", toDesc);
-                }
-            } else {
+            TreeViewDataHolder selectedItem = selectedTreeItem.getValue();
+            if (selectedItem.getDataType() == EDataType.CLASS) {
+                ClassDiagram selectedClass = selectedItem.getClassDiagram();
                 propertiesView.resetProperties();
                 propertiesView.setGroupType(EPropertyType.CLASS);
-                propertiesView.setID(myclass.getID());
-                propertiesView.addPropertyLine("Class", myclass.getName());
-                propertiesView.addPropertyLine("Attributes", String.valueOf(myclass.getAttribs().size()));
-                propertiesView.addPropertyLine("Methods", String.valueOf(myclass.getMethods().size()));
+                propertiesView.setID(selectedClass.getID());
+                propertiesView.addPropertyLine("Class", selectedClass.getName());
+                propertiesView.addPropertyLine("Attributes", String.valueOf(selectedClass.getAttribs().size()));
+                propertiesView.addPropertyLine("Methods", String.valueOf(selectedClass.getMethods().size()));
+            } else if (selectedItem.getDataType() == EDataType.ATTRIBUTE) {
+                ClassDiagram selectedClass = selectedTreeItem.getParent().getValue().getClassDiagram();
+                propertiesView.resetProperties();
+                propertiesView.setGroupType(EPropertyType.ATTRIBUTE);
+                propertiesView.setID(selectedItem.getAttribute().getName());
+                propertiesView.addPropertyLine("Attribute", selectedItem.getAttribute().getName());
+                propertiesView.addPropertyLine("Type", selectedItem.getAttribute().getType());
+                propertiesView.addPropertyLine("Class", String.valueOf(selectedClass.getName()));
+                propertiesView.addPropertyLine("Visibility", selectedItem.getAttribute().getVisibility().getVisibilityString());
+            } else if (selectedItem.getDataType() == EDataType.METHOD) {
+                ClassDiagram selectedClass = selectedTreeItem.getParent().getValue().getClassDiagram();
+                propertiesView.resetProperties();
+                propertiesView.setGroupType(EPropertyType.METHOD);
+                propertiesView.setID(selectedItem.getMethod().getName());
+                propertiesView.addPropertyLine("Method", selectedItem.getMethod().getName());
+                propertiesView.addPropertyLine("Return type", selectedItem.getMethod().getType());
+                propertiesView.addPropertyLine("Class", String.valueOf(selectedClass.getName()));
+                propertiesView.addPropertyLine("Visibility", selectedItem.getMethod().getVisibility().getVisibilityString());
+            } else if (selectedItem.getDataType() == EDataType.RELATIONSHIP) {
+                String relType = selectedItem.getRelationship().getType().relationToString();
+                int fromClassID = selectedItem.getRelationship().getFromClassID();
+                int toClassID = selectedItem.getRelationship().getToClassID();
+                String fromString = this.dataModel.getData().getClassByID(fromClassID).getName();
+                String toString = this.dataModel.getData().getClassByID(toClassID).getName();
+                String fromDesc = selectedItem.getRelationship().getFromDesc();
+                String toDesc = selectedItem.getRelationship().getToDesc();
+                String relName = selectedItem.getRelationship().getName();
+                int ID = selectedItem.getRelationship().getID();
+
+                if (fromDesc == null)
+                    fromDesc = "<empty>";
+                if (toDesc == null)
+                    toDesc = "<empty>";
+                if (relName == null)
+                    relName = "<unnamed>";
+
+                propertiesView.resetProperties();
+                propertiesView.setGroupType(EPropertyType.RELATIONSHIP);
+                propertiesView.setID(ID);
+                propertiesView.addPropertyLine("Relationship", relName);
+                propertiesView.addPropertyLine("From", fromString);
+                propertiesView.addPropertyLine("To", toString);
+                propertiesView.addPropertyLine("Type", relType);
+                propertiesView.addPropertyLine("FromDesc", fromDesc);
+                propertiesView.addPropertyLine("ToDesc", toDesc);
+            } else {
+                propertiesView.resetProperties();
             }
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
@@ -646,9 +528,8 @@ public class ClassDiagramController extends MainController {
         }
     }
 
-    public void handleRemoveDiagram(ActionEvent actionEvent) {
+    public void handleRemoveDiagram() {
         try {
-            String id;
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Remove Class Diagram");
             alert.setContentText("This action will remove all classes and related sequence diagrams. Proceed?");
@@ -665,8 +546,6 @@ public class ClassDiagramController extends MainController {
                         this.showErrorMessage(e.getLocalizedMessage());
                         e.printStackTrace();
                     }
-                } else if (type.getButtonData() == ButtonBar.ButtonData.NO) {
-                    return;
                 }
             });
         } catch(Exception e){

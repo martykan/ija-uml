@@ -34,9 +34,10 @@ public enum EAttribVisibility {
 
     /**
      * Converts enum value to string.
+     *
      * @return visibility in string
      */
-    public String getVisiblityString() {
+    public String getVisibilityString() {
         switch (this) {
             case PUBLIC:
                 return "Public";
