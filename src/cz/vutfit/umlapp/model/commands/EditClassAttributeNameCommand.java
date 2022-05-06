@@ -5,8 +5,6 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.Attributes;
-import cz.vutfit.umlapp.model.uml.EAttribVisibility;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 public class EditClassAttributeNameCommand implements ICommand {

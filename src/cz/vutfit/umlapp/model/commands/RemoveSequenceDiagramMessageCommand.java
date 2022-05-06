@@ -24,7 +24,7 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
     }
 
     @Override
-    public void execute(UMLFileData file) throws Exception {
+    public void execute(UMLFileData file) {
         int msgID = file.getSequenceByID(this.sequenceID).getMessageByIndex(this.msgIndex).getID();
         this.content = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getContent();
         this.type = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getType();
@@ -48,7 +48,7 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
     }
 
     @Override
-    public void undo(UMLFileData file) throws Exception {
+    public void undo(UMLFileData file) {
         int newID = file.getSequenceByID(this.sequenceID).addMessage(content);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setContent(this.content);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setType(this.type);

@@ -43,11 +43,11 @@ public class DragClassCommand implements ICommand {
 
     /**
      * Undo command - move class back to original position
+     *
      * @param file
-     * @throws Exception
      */
     @Override
-    public void undo(UMLFileData file) throws Exception {
+    public void undo(UMLFileData file) {
         file.getClassByID(classId).positionX = oldPositionX;
         file.getClassByID(classId).positionY = oldPositionY;
     }

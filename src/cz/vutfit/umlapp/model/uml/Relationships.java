@@ -40,7 +40,7 @@ public class Relationships {
     /**
      * midpoints of the relationship line
      **/
-    public List<Point2D> lineMidpoints = new ArrayList<>();
+    public final List<Point2D> lineMidpoints = new ArrayList<>();
 
     /**
      * Constructor

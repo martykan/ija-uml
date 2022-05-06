@@ -5,18 +5,19 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.*;
+import cz.vutfit.umlapp.model.uml.ClassDiagram;
+import cz.vutfit.umlapp.model.uml.Relationships;
+import cz.vutfit.umlapp.model.uml.SequenceDiagram;
+import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 import java.util.ArrayList;
 
 public class FileResetCommand implements ICommand {
-    private final UMLFileData oldFile;
     private ArrayList<ClassDiagram> oldClasses;
     private ArrayList<SequenceDiagram> oldSequences;
     private ArrayList<Relationships> oldRelationships;
 
-    public FileResetCommand(UMLFileData file) {
-        this.oldFile = file;
+    public FileResetCommand() {
     }
 
     @Override

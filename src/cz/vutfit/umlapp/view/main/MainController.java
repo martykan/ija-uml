@@ -59,7 +59,7 @@ public class MainController implements IController {
      * Listens to changes in diagramTreeView.
      * Used for displaying properties of any element from diagramTreeView.
      */
-    ChangeListener<TreeItem<TreeViewDataHolder>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
+    final ChangeListener<TreeItem<TreeViewDataHolder>> handleDiagramSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             try {
                 if (newItem.getValue().getSequenceDiagram() == null) {

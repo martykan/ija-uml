@@ -30,15 +30,15 @@ public class RemoveClassRelationshipCommand implements ICommand {
 
     /**
      * Executing command - adding new relationship between two classes.
+     *
      * @param file
-     * @throws Exception
      */
     @Override
-    public void execute(UMLFileData file) throws Exception {
+    public void execute(UMLFileData file) {
         Relationships removal = file.getRelationByID(this.relationID);
         if (removal == null) {
             System.out.println("Error executing command RemoveClassRelationship - relation not found, ID: ".concat(String.valueOf(this.relationID)));
-            return; //todo exception probably?
+            return;
         }
         this.fromClassID = removal.getFromClassID();
         this.toClassID = removal.getToClassID();
@@ -54,8 +54,7 @@ public class RemoveClassRelationshipCommand implements ICommand {
      */
     @Override
     public void undo(UMLFileData file) throws Exception {
-        int newID = file.addRelation(this.fromClassID, this.toClassID, this.type);
-        this.relationID = newID;
+        this.relationID = file.addRelation(this.fromClassID, this.toClassID, this.type);
         file.getRelationByID(this.relationID).setFromDesc(this.fromDesc);
         file.getRelationByID(this.relationID).setToDesc(this.toDesc);
     }

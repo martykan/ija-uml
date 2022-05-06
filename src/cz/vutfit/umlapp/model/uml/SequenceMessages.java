@@ -8,7 +8,7 @@ package cz.vutfit.umlapp.model.uml;
 import javafx.util.Pair;
 
 public class SequenceMessages {
-    public int ID;
+    public final int ID;
     public String content;
 
     /**
@@ -32,8 +32,8 @@ public class SequenceMessages {
     public SequenceMessages(int ID, String content) {
         this.ID = ID;
         this.content = content;
-        this.fromObject = new Pair<String, String>(null, null);
-        this.toObject = new Pair<String, String>(null, null);
+        this.fromObject = new Pair<>(null, null);
+        this.toObject = new Pair<>(null, null);
         this.type = EMessageType.SYNC;
         checkTypeContent();
     }

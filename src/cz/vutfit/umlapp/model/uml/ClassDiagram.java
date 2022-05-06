@@ -6,7 +6,6 @@
 package cz.vutfit.umlapp.model.uml;
 
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateAttributeNameException;
-import cz.vutfit.umlapp.model.uml.exceptions.DuplicateLinkedSequenceDiagramIDException;
 import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ public class ClassDiagram {
     public String name;
     public ArrayList<Attributes> attribs;
     public ArrayList<Methods> methods;
-    public ArrayList<ClassDiagramSequences> seqdigs; /** (TODO) list of (information about) related sequence diagrams to this class **/
     public Double positionX = 5000.0; /** X-axis position in View **/
     public Double positionY = 5000.0; /** Y-axis position in View **/
 
@@ -36,7 +34,6 @@ public class ClassDiagram {
         this.name = name;
         this.attribs = new ArrayList<>();
         this.methods = new ArrayList<>();
-        this.seqdigs = new ArrayList<>();
     }
 
     /**
@@ -48,7 +45,6 @@ public class ClassDiagram {
         this.name = "Unnamed class";
         this.attribs = new ArrayList<>();
         this.methods = new ArrayList<>();
-        this.seqdigs = new ArrayList<>();
     }
 
     /** Getters **/
@@ -68,14 +64,13 @@ public class ClassDiagram {
         return this.methods;
     }
 
-    public ArrayList<ClassDiagramSequences> getSeqdigs() { return this.seqdigs; }
-
-    /** Setters **/
-    public void setAll(String name, ArrayList<Attributes> attribs, ArrayList<Methods> methods, ArrayList<ClassDiagramSequences> seqdigs) {
+    /**
+     * Setters
+     **/
+    public void setAll(String name, ArrayList<Attributes> attribs, ArrayList<Methods> methods) {
         this.name = name;
         this.attribs = attribs;
         this.methods = methods;
-        this.seqdigs = seqdigs;
     }
 
     public void setName(String name) { this.name = name; }
@@ -182,54 +177,6 @@ public class ClassDiagram {
         for (int i = 0; i < (this.methods).size(); i++) {
             if ((this.methods).get(i).getName().equals(name)) {
                 (this.methods).remove(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * TODO
-     * @param id ID of linked sequence diagram in seqdigs list
-     * @return linked sequence diagram data or null
-     */
-    public ClassDiagramSequences getLinkedSequence(int id) {
-        for (ClassDiagramSequences x : this.seqdigs) {
-            if (x.getID() == id)
-                return x;
-        }
-        return null;
-    }
-
-    /**
-     * TODO
-     * Adds linked sequence diagram info to list.
-     * @param id
-     * @throws DuplicateLinkedSequenceDiagramIDException if new linked diagram ID is same as any existing
-     */
-    public void addLinkedSequence(int id) throws DuplicateLinkedSequenceDiagramIDException {
-        ClassDiagramSequences x = new ClassDiagramSequences();
-        x.setID(id);
-
-        for (ClassDiagramSequences a : this.seqdigs) { // do not allow duplicates - same "id"'s
-            if (a.getID() == id) {
-                throw new DuplicateLinkedSequenceDiagramIDException();
-            }
-        }
-
-        (this.seqdigs).add(x);
-    }
-
-    /**
-     * TODO
-     * Removes linked sequence diagram from list
-     * @param id
-     * @return true if removed or false if not found by ID
-     */
-    public boolean removeLinkedSequence(int id) {
-        for (int i = 0; i < (this.seqdigs).size(); i++) {
-            if ((this.seqdigs).get(i).getID() == id) {
-                (this.seqdigs).remove(i);
                 return true;
             }
         }

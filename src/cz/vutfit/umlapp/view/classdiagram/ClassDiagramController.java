@@ -58,7 +58,7 @@ public class ClassDiagramController extends MainController {
      *
      * @see #handleProperties(TreeItem)
      */
-    ChangeListener<TreeItem<TreeViewDataHolder>> handleClassSelection = (observableValue, oldItem, newItem) -> {
+    final ChangeListener<TreeItem<TreeViewDataHolder>> handleClassSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.isSelectedClass = true;
             handleProperties(newItem);
@@ -540,7 +540,7 @@ public class ClassDiagramController extends MainController {
             alert.showAndWait().ifPresent(type -> {
                 if (type.getButtonData() == ButtonBar.ButtonData.YES) {
                     try {
-                        this.dataModel.executeCommand(new FileResetCommand(this.dataModel.getData()));
+                        this.dataModel.executeCommand(new FileResetCommand());
                         this.updateView();
                     } catch (Exception e) {
                         this.showErrorMessage(e.getLocalizedMessage());

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Class for draggable diagrams in MainView
  */
 public class DraggableUMLClassView extends VBox {
-    private ClassDiagram classDiagram;
+    private final ClassDiagram classDiagram;
 
     /**
      * Constructor - creates one new class in View

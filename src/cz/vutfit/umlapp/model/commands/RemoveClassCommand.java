@@ -33,7 +33,7 @@ public class RemoveClassCommand implements ICommand {
         ClassDiagram x = file.getClassByID(this.classId);
         String name = x.getName();
         this.removed = new ClassDiagram(this.classId);
-        this.removed.setAll(name, x.getAttribs(), x.getMethods(), x.getSeqdigs());
+        this.removed.setAll(name, x.getAttribs(), x.getMethods());
         file.removeClass(this.classId);
     }
 
@@ -49,7 +49,7 @@ public class RemoveClassCommand implements ICommand {
             } catch (DuplicateClassNameException e) {
                 System.out.println("DuplicateClassName EXCEPTION");
             }
-            file.getClassByID(this.classId).setAll(removed.getName(), this.removed.getAttribs(), this.removed.getMethods(), this.removed.getSeqdigs());
+            file.getClassByID(this.classId).setAll(removed.getName(), this.removed.getAttribs(), this.removed.getMethods());
         }
     }
 }

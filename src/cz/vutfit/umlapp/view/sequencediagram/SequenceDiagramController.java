@@ -65,7 +65,7 @@ public class SequenceDiagramController extends MainController {
     private final double spaceWidth = 210;
     private final double spaceHeight = 40;
 
-    ChangeListener<TreeItem<TreeViewDataHolder>> handleObjectSelection = (observableValue, oldItem, newItem) -> {
+    final ChangeListener<TreeItem<TreeViewDataHolder>> handleObjectSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedClass = newItem.getValue().getSequenceObject().getObjectClassName();
             this.messageTreeView.getSelectionModel().clearSelection();
@@ -83,7 +83,7 @@ public class SequenceDiagramController extends MainController {
         boxClassOptions.setVisible(this.selectedClass != null);
     };
 
-    ChangeListener<TreeItem<TreeViewDataHolder>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
+    final ChangeListener<TreeItem<TreeViewDataHolder>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedMessage = newItem.getValue().getSequenceMessage().getContent();
             this.classTreeView.getSelectionModel().clearSelection();
@@ -395,11 +395,6 @@ public class SequenceDiagramController extends MainController {
             classBox.getSelectionModel().selectFirst();
 
             TextField nameBox = new TextField();
-            // Reference shows it's possible to have empty name
-            /* BooleanBinding validName = Bindings.createBooleanBinding(() -> {
-                return nameBox.getText().equals("");
-            }, nameBox.textProperty());
-            dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);*/
 
             if (classBox.getItems().size() != 0) { // can add at least 1 class
                 grid.add(new Label("Objects in sequence diagrams must be from existing class instances from class diagram."), 0, 0);

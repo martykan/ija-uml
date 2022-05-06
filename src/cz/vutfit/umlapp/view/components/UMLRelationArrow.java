@@ -10,15 +10,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.VBox;
 
 public class UMLRelationArrow extends ArrowHead {
-    VBox node;
-    ERelationType type;
-    boolean isEnd;
+    final VBox node;
+    final ERelationType type;
 
     public UMLRelationArrow(VBox node, Point2D startPoint, ERelationType type, boolean isEnd) {
         super();
         this.node = node;
         this.type = type;
-        this.isEnd = isEnd;
 
         EArrowType arrowType;
         if (type == ERelationType.GENERALIZATION && !isEnd) {

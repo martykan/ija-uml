@@ -19,9 +19,10 @@ public class AddClassMethodCommand implements ICommand {
 
     /**
      * Constructor
-     * @param classId ID of class
-     * @param attrName new method name
-     * @param visibility new method visiblity
+     *
+     * @param classId    ID of class
+     * @param attrName   new method name
+     * @param visibility new method visibility
      * @see EAttribVisibility
      */
     public AddClassMethodCommand(Integer classId, String attrName, EAttribVisibility visibility, String type) {

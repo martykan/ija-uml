@@ -18,7 +18,7 @@ import java.util.Set;
  * Class for TreeViewItem used for working with TreeViews and its items
  */
 public class TreeViewItemModel {
-    public TreeView<TreeViewDataHolder> view;
+    public final TreeView<TreeViewDataHolder> view;
     /**
      * TreeView
      */
@@ -26,11 +26,11 @@ public class TreeViewItemModel {
     /**
      * Root of TreeView
      */
-    public EDataType itemType;
+    public final EDataType itemType;
     /**
      * Type of the TreeItem @see EDataType
      */
-    public DataModel dataModel;
+    public final DataModel dataModel;
     public SequenceDiagram selectedSequence;
 
     /**

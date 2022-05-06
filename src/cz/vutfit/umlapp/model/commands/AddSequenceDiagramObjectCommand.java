@@ -5,8 +5,6 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.ERelationType;
-import cz.vutfit.umlapp.model.uml.Relationships;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 public class AddSequenceDiagramObjectCommand implements ICommand {
@@ -26,7 +24,7 @@ public class AddSequenceDiagramObjectCommand implements ICommand {
     }
 
     @Override
-    public void undo(UMLFileData file) throws Exception {
+    public void undo(UMLFileData file) {
         file.getSequenceByID(this.sequenceID).removeObject(this.objectClassName, this.objectName);
     }
 }

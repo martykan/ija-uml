@@ -177,7 +177,6 @@ public class UMLFileData {
     }
 
     /**
-     * TODO
      * @param index index of array in sequenceDiagrams list
      * @return sequence diagram by index
      * @see #getClassByIndex(int)
@@ -208,7 +207,6 @@ public class UMLFileData {
     }
 
     /**
-     * TODO
      * Adds sequence diagram to list.
      *
      * @param name name of diagram

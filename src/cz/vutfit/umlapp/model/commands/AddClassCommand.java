@@ -6,7 +6,6 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.UMLFileData;
-import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
 
 /**
  * Class for adding new class command

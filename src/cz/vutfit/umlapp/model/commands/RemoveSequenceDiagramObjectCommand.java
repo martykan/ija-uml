@@ -26,7 +26,7 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     }
 
     @Override
-    public void execute(UMLFileData file) throws Exception {
+    public void execute(UMLFileData file) {
         ArrayList<Integer> removalIDs = new ArrayList<>();
         Pair<String, String> objectName = new Pair<>(this.className, this.objectName);
         for (SequenceMessages m : file.getSequenceByID(this.sequenceID).getMessages()) {

@@ -8,7 +8,7 @@ package cz.vutfit.umlapp.model.commands;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 
 public class AddSequenceDiagramCommand implements ICommand {
-    String diagramName;
+    final String diagramName;
     Integer diagramId;
 
     public AddSequenceDiagramCommand(String diagramName) {
@@ -16,12 +16,12 @@ public class AddSequenceDiagramCommand implements ICommand {
     }
 
     @Override
-    public void execute(UMLFileData file) throws Exception {
+    public void execute(UMLFileData file) {
         diagramId = file.addSequence(diagramName);
     }
 
     @Override
-    public void undo(UMLFileData file) throws Exception {
+    public void undo(UMLFileData file) {
         if (diagramId != null) {
             file.removeSequence(diagramId);
         }

@@ -6,7 +6,6 @@
 package cz.vutfit.umlapp.model.commands;
 
 import cz.vutfit.umlapp.model.uml.SequenceDiagram;
-import cz.vutfit.umlapp.model.uml.SequenceMessages;
 import cz.vutfit.umlapp.model.uml.SequenceObjects;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
 

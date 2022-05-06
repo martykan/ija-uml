@@ -15,10 +15,10 @@ import cz.vutfit.umlapp.model.uml.exceptions.DuplicateMethodNameException;
  * Class for remove method from class command
  */
 public class RemoveClassMethodCommand implements ICommand {
-    public ClassDiagram myClass;
-    public String id;
-    public EAttribVisibility visibility;
-    public String type;
+    public final ClassDiagram myClass;
+    public final String id;
+    public final EAttribVisibility visibility;
+    public final String type;
 
     /**
      * Constructor

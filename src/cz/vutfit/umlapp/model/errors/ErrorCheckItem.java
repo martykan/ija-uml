@@ -13,12 +13,12 @@ package cz.vutfit.umlapp.model.errors;
 import cz.vutfit.umlapp.model.EElementType;
 
 public class ErrorCheckItem {
-    public ECheckError errorType;
-    public String mainID;
-    public EElementType elementType;
-    public String elementID;
-    public EElementType subelementType;
-    public String subelementID;
+    public final ECheckError errorType;
+    public final String mainID;
+    public final EElementType elementType;
+    public final String elementID;
+    public final EElementType subelementType;
+    public final String subelementID;
 
     public ErrorCheckItem(ECheckError errorType, String mainID, EElementType elementType, String elementID, EElementType subelementType, String subelementID) {
         this.errorType = errorType;

@@ -9,10 +9,7 @@ import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.view.IController;
 import cz.vutfit.umlapp.view.ViewHandler;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -22,9 +19,6 @@ import java.io.File;
  * Class implementing Welcome screen after application launch
  */
 public class WelcomeController implements IController {
-    @FXML
-    public Label label; /** heading of window **/
-
     private DataModel dataModel;
     private ViewHandler viewHandler;
 
@@ -42,9 +36,8 @@ public class WelcomeController implements IController {
 
     /**
      * If user clicks on 'open existing file' button, this function is called
-     * @param actionEvent
      */
-    public void handleOpenFile(ActionEvent actionEvent) {
+    public void handleOpenFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));
@@ -61,9 +54,8 @@ public class WelcomeController implements IController {
 
     /**
      * After clicking on 'Create new file' button, this function is called
-     * @param actionEvent
      */
-    public void handleNewFile(ActionEvent actionEvent) {
+    public void handleNewFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IJA UML", "*.ijuml"));

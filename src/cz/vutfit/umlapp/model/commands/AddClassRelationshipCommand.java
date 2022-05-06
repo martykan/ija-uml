@@ -61,8 +61,7 @@ public class AddClassRelationshipCommand implements ICommand {
      */
     @Override
     public void execute(UMLFileData file) throws Exception {
-        int newID = file.addRelation(this.fromClassID, this.toClassID, this.type);
-        this.relationID = newID;
+        this.relationID = file.addRelation(this.fromClassID, this.toClassID, this.type);
         file.getRelationByID(this.relationID).setFromDesc(this.fromDesc);
         file.getRelationByID(this.relationID).setToDesc(this.toDesc);
         file.getRelationByID(this.relationID).setName(this.name);

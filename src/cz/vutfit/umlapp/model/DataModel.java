@@ -29,7 +29,7 @@ public class DataModel {
 
     private boolean savedFile = false;
     private ErrorCheckClass error;
-    public String currentFileDataVersion = "20220505-002";
+    public final String currentFileDataVersion = "20220505-002";
 
     /**
      * Execute the given command and save it to history
@@ -163,9 +163,6 @@ public class DataModel {
                 Objects.requireNonNull(x.getType().relationToString());
                 int fid = x.getFromClassID();
                 int tid = x.getToClassID();
-                // Objects.requireNonNull(x.getName());
-                // Objects.requireNonNull(x.getFromDesc());
-                // Objects.requireNonNull(x.getToDesc());
             }
             for (SequenceDiagram x : s) {
                 int id3 = x.getID();

@@ -5,13 +5,8 @@
 
 package cz.vutfit.umlapp.model.commands;
 
-import cz.vutfit.umlapp.model.uml.ClassDiagram;
-import cz.vutfit.umlapp.model.uml.Relationships;
 import cz.vutfit.umlapp.model.uml.SequenceDiagram;
 import cz.vutfit.umlapp.model.uml.UMLFileData;
-import cz.vutfit.umlapp.model.uml.exceptions.DuplicateClassNameException;
-
-import java.util.ArrayList;
 
 public class RemoveSequenceDiagramCommand implements ICommand {
     private final int seqID;

@@ -11,7 +11,6 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 
 /**
- * TODO
  * Class for one sequence diagram
  */
 public class SequenceDiagram {

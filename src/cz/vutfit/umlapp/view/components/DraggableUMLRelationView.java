@@ -23,10 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DraggableUMLRelationView extends AnchorPane {
 
-    DraggableUMLClassView node1;
-    DraggableUMLClassView node2;
-    AtomicReference<Double> totalZoom;
-    Relationships relationship;
+    final DraggableUMLClassView node1;
+    final DraggableUMLClassView node2;
+    final AtomicReference<Double> totalZoom;
+    final Relationships relationship;
 
     public DraggableUMLRelationView(DraggableUMLClassView node1, DraggableUMLClassView node2, AtomicReference<Double> totalZoom, Relationships relationship) {
         super();

@@ -19,9 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ErrorCheckClass {
-    public ArrayList<ErrorCheckItem> classErrors;
-    public ArrayList<ErrorCheckItem> sequenceErrors;
-    public DataModel dataModel;
+    public final ArrayList<ErrorCheckItem> classErrors;
+    public final ArrayList<ErrorCheckItem> sequenceErrors;
+    public final DataModel dataModel;
 
     public ErrorCheckClass(DataModel dataModel) {
         this.classErrors = new ArrayList<>();
@@ -120,8 +120,8 @@ public class ErrorCheckClass {
         ArrayList<SequenceMessages> allMessages = currentDiagram.getMessages();
         ArrayList<SequenceObjects> allObjects = currentDiagram.getObjects();
         ErrorCheckClass errorClass = this.dataModel.getErrorClass();
-        ErrorCheckItem error = null;
-        ECheckError errorType = null;
+        ErrorCheckItem error;
+        ECheckError errorType;
 
         // clear all errors
         errorClass.solveSequenceErrors();
