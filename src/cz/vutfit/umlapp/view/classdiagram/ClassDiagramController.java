@@ -162,7 +162,7 @@ public class ClassDiagramController extends MainController {
             classes.rootViewUpdate();
 
             // Handle inconsistencies
-            diagramCheck();
+            this.dataModel.getErrorClass().checkClassDiagram();
 
             this.initDragDrop();
 
@@ -673,11 +673,5 @@ public class ClassDiagramController extends MainController {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();
         }
-    }
-
-    // checks all inconsitencies of class diagram
-    // if there is inconsitency, sets check result to false!
-    public void diagramCheck() {
-        this.dataModel.getErrorClass().printClassErrors();
     }
 }

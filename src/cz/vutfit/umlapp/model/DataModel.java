@@ -8,6 +8,7 @@ package cz.vutfit.umlapp.model;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import cz.vutfit.umlapp.model.commands.ICommand;
+import cz.vutfit.umlapp.model.errors.ErrorCheckClass;
 import cz.vutfit.umlapp.model.uml.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -74,7 +75,7 @@ public class DataModel {
 
         this.commandHistory.clear();
         this.fileSaved();
-        this.error = new ErrorCheckClass();
+        this.error = new ErrorCheckClass(this);
     }
 
     /**
@@ -87,7 +88,7 @@ public class DataModel {
         this.data = new UMLFileData();
         this.commandHistory.clear();
         this.fileUnsaved();
-        this.error = new ErrorCheckClass();
+        this.error = new ErrorCheckClass(this);
         this.getData().dataVersion = this.currentFileDataVersion;
     }
 
@@ -198,7 +199,6 @@ public class DataModel {
             return false;
         }
     }
-
 
     public ErrorCheckClass getErrorClass() { return this.error; }
 }

@@ -1,19 +1,26 @@
 /*
+ * File: ErrorCheckItem.java
+ * Authors: Dominik Horký, Tomáš Martykán
+ */
+
+/*
  * File: ErrorCheckSequenceItem.java
  * Authors: Dominik Horký, Tomáš Martykán
  */
 
-package cz.vutfit.umlapp.model;
+package cz.vutfit.umlapp.model.errors;
 
-public class ErrorCheckSequenceItem {
-    public ESequenceCheckError errorType;
+import cz.vutfit.umlapp.model.EElementType;
+
+public class ErrorCheckItem {
+    public ECheckError errorType;
     public String mainID;
     public EElementType elementType;
     public String elementID;
     public EElementType subelementType;
     public String subelementID;
 
-    public ErrorCheckSequenceItem(ESequenceCheckError errorType, String mainID, EElementType elementType, String elementID, EElementType subelementType, String subelementID) {
+    public ErrorCheckItem(ECheckError errorType, String mainID, EElementType elementType, String elementID, EElementType subelementType, String subelementID) {
         this.errorType = errorType;
         this.mainID = mainID;
         this.elementType = elementType;
@@ -22,15 +29,15 @@ public class ErrorCheckSequenceItem {
         this.subelementID = subelementID;
     }
 
-    public ErrorCheckSequenceItem(ESequenceCheckError errorType, String mainID, EElementType elementType, String elementID) {
+    public ErrorCheckItem(ECheckError errorType, String mainID, EElementType elementType, String elementID) {
         this(errorType, mainID, elementType, elementID, null, null);
     }
 
-    public ErrorCheckSequenceItem(ESequenceCheckError errorType, String mainID, EElementType elementType, Integer elementID) {
+    public ErrorCheckItem(ECheckError errorType, String mainID, EElementType elementType, Integer elementID) {
         this(errorType, mainID, elementType, String.valueOf(elementID), null, null);
     }
 
-    public ESequenceCheckError getErrorType() {
+    public ECheckError getErrorType() {
         return errorType;
     }
 

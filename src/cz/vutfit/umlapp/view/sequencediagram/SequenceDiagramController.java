@@ -10,7 +10,8 @@
 
 package cz.vutfit.umlapp.view.sequencediagram;
 
-import cz.vutfit.umlapp.model.*;
+import cz.vutfit.umlapp.model.DataModel;
+import cz.vutfit.umlapp.model.ModelFactory;
 import cz.vutfit.umlapp.model.commands.*;
 import cz.vutfit.umlapp.model.uml.*;
 import cz.vutfit.umlapp.view.ViewHandler;
@@ -141,7 +142,7 @@ public class SequenceDiagramController extends MainController {
             messages.rootViewUpdate();
 
             // Handle inconsistencies
-            diagramCheck();
+            this.dataModel.getErrorClass().checkSequenceDiagram(this.selectedDiagram);
 
             this.initDiagram();
 
@@ -321,9 +322,6 @@ public class SequenceDiagramController extends MainController {
             anchorScrollPane.getChildren().add(label);
 
             currentY += spaceHeight;
-            if (sequenceMessage.type == EMessageType.NEW_OBJECT) {
-                currentY += spaceHeight;
-            }
         }
         anchorScrollPane.getChildren().addAll(nodesToAdd);
     }
@@ -793,112 +791,5 @@ public class SequenceDiagramController extends MainController {
             this.showErrorMessage("Unable to show properties menu", e.getLocalizedMessage());
             e.printStackTrace();
         }
-    }
-
-    // checks all inconsitencies of sequence diagram
-    // if there is inconsitency, sets check result to false!
-    public void diagramCheck() {
-        SequenceDiagram currentDiagram = this.dataModel.getData().getSequenceByName(this.selectedDiagram);
-        ArrayList<SequenceMessages> allMessages = currentDiagram.getMessages();
-        ArrayList<SequenceObjects> allObjects = currentDiagram.getObjects();
-        ErrorCheckClass errorClass = this.dataModel.getErrorClass();
-        ErrorCheckSequenceItem error = null;
-        ESequenceCheckError errorType = null;
-
-        // clear all errors
-        errorClass.solveSequenceErrors();
-
-        // Messages: type=return only opposite direction of other (last) messages
-        // + must be response to something (atleast 1 message was received)
-        int index = 0;
-        for (SequenceMessages msg : allMessages) {
-            if (msg.getType() == EMessageType.RETURN) {
-                boolean returnOk = false;
-                if (index != 0) {
-                    for (SequenceMessages msg2 : allMessages) {
-                        if (msg2.getReceiver().equals(msg.getSender()) && msg2.getSender().equals(msg.getReceiver()) && msg2.getType() != EMessageType.RETURN) {
-                            returnOk = true;
-                            break;
-                        }
-                    }
-                    if (!returnOk) {
-                        errorType = ESequenceCheckError.MSG_RET_DIRECTION;
-                        error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_MESSAGE, msg.getID());
-                        errorClass.addSequenceError(error);
-                    }
-                }
-            }
-            index++;
-        }
-
-        // Class instance not existing anymore (but exists in sequence diagram object) because:
-        //  1) user removed class from class diagram
-        //  2) file load failed
-        for (SequenceObjects obj : allObjects) {
-            String className = obj.getClassName();
-            if (this.dataModel.getData().getClassByName(className) == null) {
-                errorType = ESequenceCheckError.OBJ_CLASS_NONEXISTENT;
-                error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_OBJECT, obj.getObjectClassName());
-                errorClass.addSequenceError(error);
-            }
-        }
-
-        // Messages: method must exist on receiver
-        for (SequenceMessages message : allMessages) {
-            if (message.type == EMessageType.RETURN || message.type == EMessageType.NEW_OBJECT || message.type == EMessageType.RELEASE_OBJECT)
-                continue;
-            String className = message.getReceiver().getKey();
-            String methodName = message.content.split("\\(")[0];
-            ClassDiagram classDiagram = this.dataModel.getData().getClassByName(className);
-            if (classDiagram != null) {
-                if (classDiagram.getMethodByNameOnly(methodName) != null) continue;
-
-                // Search inherited methods
-                boolean found = false;
-                for (Relationships r : this.dataModel.getData().getRelationships()) {
-                    if (r.getToClassID() == classDiagram.getID() && r.getType() == ERelationType.GENERALIZATION) {
-                        for (Methods m : this.dataModel.getData().getClassByID(r.getFromClassID()).getMethods()) {
-                            if (m.getName().startsWith(methodName + "(")) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!found) {
-                    errorType = ESequenceCheckError.OBJ_METHOD_NONEXISTENT;
-                    error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_OBJECT, message.getSenderString());
-                    errorClass.addSequenceError(error);
-                    error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_MESSAGE, message.getID());
-                    errorClass.addSequenceError(error);
-                }
-            }
-        }
-
-        // Messages: message creating object must be first, destroying last
-        Set<String> objectsUsed = new HashSet<>();
-        Set<String> objectsDestroyed = new HashSet<>();
-        for (SequenceMessages message : allMessages) {
-            errorType = null;
-            if (objectsDestroyed.contains(message.getReceiverString())) {
-                errorType = ESequenceCheckError.MSG_DESTROY_OBJECT_INVALID;
-            } else if (message.getType() == EMessageType.NEW_OBJECT && objectsUsed.contains(message.getReceiverString())) {
-                errorType = ESequenceCheckError.MSG_NEW_OBJECT_INVALID;
-            } else if (message.getType() == EMessageType.RELEASE_OBJECT) {
-                objectsDestroyed.add(message.getReceiverString());
-            } else {
-                objectsUsed.add(message.getReceiverString());
-                objectsUsed.add(message.getSenderString());
-            }
-            if (errorType != null) {
-                error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_OBJECT, message.getReceiverString());
-                errorClass.addSequenceError(error);
-                error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_MESSAGE, message.getID());
-                errorClass.addSequenceError(error);
-            }
-        }
-
-        this.dataModel.getErrorClass().printSequenceErrors();
     }
 }
