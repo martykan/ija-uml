@@ -249,6 +249,8 @@ public class MainController implements IController {
             int minX = 10000, minY = 10000;
             int maxX = 0, maxY = 0;
             for (Node node : this.anchorScrollPane.getChildren()) {
+                if (node.getBoundsInParent().getWidth() == 10000 && node.getBoundsInParent().getHeight() == 10000)
+                    continue;
                 if (node.getBoundsInParent().getMinX() < minX)
                     minX = (int) node.getBoundsInParent().getMinX();
                 if (node.getBoundsInParent().getMinY() < minY)
