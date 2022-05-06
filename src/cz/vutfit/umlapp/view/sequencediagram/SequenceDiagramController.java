@@ -207,7 +207,7 @@ public class SequenceDiagramController extends MainController {
             }
             double endPos = 200 + diagram.getMessages().size() * spaceHeight;
             if (destroyedAt >= 0) {
-                endPos = 100 + destroyedAt * spaceHeight;
+                endPos = 100 + (destroyedAt + 1) * spaceHeight;
             }
             Line line = new Line();
             line.setStartX(10 + cardWidth / 2 + currentX);
@@ -876,19 +876,28 @@ public class SequenceDiagramController extends MainController {
             }
         }
 
-        // Messages: non return type can be only send from current object to another (?)
-        // (not response)
-        /*
-        int index = 0;
-        for (SequenceMessages msg : allMessages) {
-            if (msg.getType() != EMessageType.RETURN) { // TODO
-                errorType = ESequenceCheckError.MSG_NONRET_DIRECTION;
-                errorContent = errorClass.generateErrorContent(currentDiagram.getName(), EElementType.SEQ_MESSAGE, msg.getID());
-                error = new ErrorCheckSequenceItem(errorType, errorContent);
+        // Messages: message creating object must be first, destroying last
+        Set<String> objectsUsed = new HashSet<>();
+        Set<String> objectsDestroyed = new HashSet<>();
+        for (SequenceMessages message : allMessages) {
+            errorType = null;
+            if (objectsDestroyed.contains(message.getReceiverString())) {
+                errorType = ESequenceCheckError.MSG_DESTROY_OBJECT_INVALID;
+            } else if (message.getType() == EMessageType.NEW_OBJECT && objectsUsed.contains(message.getReceiverString())) {
+                errorType = ESequenceCheckError.MSG_NEW_OBJECT_INVALID;
+            } else if (message.getType() == EMessageType.RELEASE_OBJECT) {
+                objectsDestroyed.add(message.getReceiverString());
+            } else {
+                objectsUsed.add(message.getReceiverString());
+                objectsUsed.add(message.getSenderString());
+            }
+            if (errorType != null) {
+                error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_OBJECT, message.getReceiverString());
+                errorClass.addSequenceError(error);
+                error = new ErrorCheckSequenceItem(errorType, currentDiagram.getName(), EElementType.SEQ_MESSAGE, message.getID());
                 errorClass.addSequenceError(error);
             }
-            index++;
-        } */
+        }
 
         this.dataModel.getErrorClass().printSequenceErrors();
     }
