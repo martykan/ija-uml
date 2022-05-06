@@ -314,6 +314,10 @@ public class SequenceDiagramController extends MainController {
             label.setTranslateX(Math.min(fromObject.getTranslateX(), toObject.getTranslateX()) + cardWidth / 2);
             label.setTranslateY(currentY - 20);
             label.setPrefWidth(Math.abs(line.getStartX() - line.getEndX()));
+            int finalI = i;
+            label.setOnMouseClicked(event -> {
+                messageTreeView.getSelectionModel().clearAndSelect(finalI);
+            });
             anchorScrollPane.getChildren().add(label);
 
             currentY += spaceHeight;

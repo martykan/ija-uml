@@ -7,6 +7,8 @@ package cz.vutfit.umlapp.view.main;
 
 import cz.vutfit.umlapp.model.DataModel;
 import cz.vutfit.umlapp.model.uml.*;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
@@ -75,8 +77,7 @@ public class TreeViewItemModel {
                             if (relationString != null)
                                 item.getChildren().add(new TreeItem<>(relationString));
                         } catch (NullPointerException npe) {
-                            // Don't add item
-                            npe.printStackTrace();
+                            // Don't add invalid relation
                         }
                     }
                     this.root.getChildren().add(item);
@@ -123,7 +124,25 @@ public class TreeViewItemModel {
     }
 
     /**
+     * Getter function
+     *
+     * @param name
+     * @return returns item index if present in root or null
+     */
+    public int getTreeItemIndex(String name) {
+        ObservableList<TreeItem<String>> children = this.root.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            TreeItem<String> it = children.get(i);
+            if (it.getValue().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Adds new treeItem (child) to another treeItem (parent)
+     *
      * @param item
      * @param name
      */
@@ -157,8 +176,17 @@ public class TreeViewItemModel {
                 }
             });
         }
+        // Remember selection
+        int selectedIndex = this.view.getSelectionModel().getSelectedIndex();
 
         this.view.setShowRoot(false);
         this.view.setRoot(root);
+
+        // Restore selection, diagrams are handled in MainController
+        if (selectedIndex >= 0 && this.itemType != EDataType.DIAGRAM) {
+            Platform.runLater(() -> {
+                this.view.getSelectionModel().clearAndSelect(selectedIndex);
+            });
+        }
     }
 }

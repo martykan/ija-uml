@@ -99,14 +99,16 @@ public class MainController implements IController {
             diagrams.rootViewUpdate();
 
             // Highlight active diagram
-            this.diagramTreeView.getSelectionModel().selectedItemProperty().removeListener(handleDiagramSelection);
-            if (this.dataModel.getActiveDiagram() == null) {
-                this.diagramTreeView.getSelectionModel().selectFirst();
-            } else {
-                int selectedId = this.diagramTreeView.getRoot().getChildren().indexOf(diagrams.getTreeItem(this.dataModel.getActiveDiagram()));
-                this.diagramTreeView.getSelectionModel().clearAndSelect(selectedId);
-            }
-            this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
+            Platform.runLater(() -> {
+                this.diagramTreeView.getSelectionModel().selectedItemProperty().removeListener(handleDiagramSelection);
+                if (this.dataModel.getActiveDiagram() == null) {
+                    this.diagramTreeView.getSelectionModel().selectFirst();
+                } else {
+                    int index = diagrams.getTreeItemIndex(this.dataModel.getActiveDiagram());
+                    this.diagramTreeView.getSelectionModel().clearAndSelect(index);
+                }
+                this.diagramTreeView.getSelectionModel().selectedItemProperty().addListener(handleDiagramSelection);
+            });
         } catch (Exception e) {
             this.showErrorMessage(e.getLocalizedMessage());
             e.printStackTrace();

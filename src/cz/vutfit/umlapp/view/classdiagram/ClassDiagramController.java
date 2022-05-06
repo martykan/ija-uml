@@ -97,6 +97,7 @@ public class ClassDiagramController extends MainController {
         for (ClassDiagram classDiagram : this.dataModel.getData().getClasses()) {
             DraggableUMLClassView node = new DraggableUMLClassView(classDiagram, totalZoom);
             node.setOnMouseReleased(event -> {
+                // Save new position
                 if (node.getTranslateX() == classDiagram.positionX && node.getTranslateY() == classDiagram.positionY)
                     return;
                 try {
@@ -105,6 +106,22 @@ public class ClassDiagramController extends MainController {
                     this.showErrorMessage(e.getLocalizedMessage());
                     e.printStackTrace();
                 }
+            });
+            node.setOnMouseClicked(event -> {
+                // Select in treeview
+                int index = -1;
+                int i = 0;
+                for (TreeItem<String> treeItem : this.classTreeView.getRoot().getChildren()) {
+                    if (treeItem.getValue().equals(classDiagram.getName())) {
+                        index = i;
+                        treeItem.setExpanded(true);
+                    }
+                    if (treeItem.isExpanded()) {
+                        i += treeItem.getChildren().size();
+                    }
+                    i++;
+                }
+                this.classTreeView.getSelectionModel().select(index);
             });
             anchorScrollPane.getChildren().add(node);
             classNodes.put(classDiagram.getID(), node);
