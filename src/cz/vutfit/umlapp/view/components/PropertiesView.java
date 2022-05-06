@@ -624,14 +624,20 @@ public class PropertiesView extends VBox {
                     grid.setPadding(new Insets(20, 150, 10, 10));
 
                     ChoiceBox<String> contentBox = new ChoiceBox<>();
-                    String clName = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getReceiver().getKey();
+                    SequenceMessages message = this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID);
+                    String clName = message.getReceiver().getKey();
                     SequenceDiagramController.populateMethodsContentBox(this.dataModel, contentBox, clName);
+                    TextField textField = new TextField();
 
                     grid.add(new Label("New Content: "), 0, 0);
-                    grid.add(contentBox, 1, 0);
-                    TextField f = new TextField();
-                    grid.add(f, 1, 0);
-                    f.setVisible(false);
+                    if (message.type != EMessageType.RETURN) {
+                        grid.add(contentBox, 1, 0);
+                        grid.add(new Label("Attributes: "), 0, 1);
+                        grid.add(textField, 1, 1);
+                    } else {
+                        grid.add(textField, 1, 0);
+                    }
+
                     dialog.getDialogPane().setContent(grid);
 
                     BooleanBinding validName = Bindings.createBooleanBinding(() -> (
@@ -642,17 +648,15 @@ public class PropertiesView extends VBox {
                     dialog.setResultConverter(dialogButton -> {
                         if (dialogButton == createButtonType) {
                             String x = contentBox.getSelectionModel().getSelectedItem();
-                            if (f.isVisible())
-                                x = f.getText();
+                            if (message.type == EMessageType.RETURN) {
+                                x = textField.getText();
+                            } else {
+                                x = x.replaceFirst("\\((.*)\\)", "(" + textField.getText() + ")");
+                            }
                             return x;
                         }
                         return null;
                     });
-
-                    BooleanBinding fVisible = Bindings.createBooleanBinding(() -> (
-                            this.dataModel.getData().getSequenceByID(this.parentIntID).getMessageByID(this.intID).getType() == EMessageType.RETURN
-                    ));
-                    f.visibleProperty().bind(fVisible);
 
                     Optional<String> result = dialog.showAndWait();
                     result.ifPresent(newString -> {
@@ -679,11 +683,10 @@ public class PropertiesView extends VBox {
                     // Create the custom dialog.
                     Dialog<ArrayList<Pair<String, String>>> dialog = new Dialog<>();
                     dialog.setTitle("Message direction");
-                    dialog.setHeaderText("m of message.\nYou can change class-object, who sends and who receives this message.");
+                    dialog.setHeaderText("Change direction of message.\nYou can change class-object, who sends and who receives this message.");
 
                     GridPane grid = dialogSetupWithGrid(dialog);
                     grid.setPadding(new Insets(20, 150, 10, 10));
-
 
                     ChoiceBox<String> fromClassBox = new ChoiceBox<>();
                     ChoiceBox<String> toClassBox = new ChoiceBox<>();
@@ -700,37 +703,20 @@ public class PropertiesView extends VBox {
                     }
                     fromClassBox.getSelectionModel().selectFirst();
                     toClassBox.getSelectionModel().selectFirst();
-                    ChoiceBox<String> msgBox = new ChoiceBox<>();
-                    String selection = toClassBox.getSelectionModel().getSelectedItem();
-                    String classID = selection.split("\\[", 2)[1].split("]", 2)[0];
-                    SequenceDiagramController.populateMethodsContentBox(this.dataModel, msgBox, classID);
 
                     grid.add(new Label("Current participants: "), 0, 0);
                     grid.add(new Label(current), 1, 0);
-                    grid.add(new Label("New Content: "), 0, 1);
-                    grid.add(msgBox, 1, 1);
-                    grid.add(new Label("From: "), 0, 2);
-                    grid.add(fromClassBox, 1, 2);
-                    grid.add(new Label("To: "), 0, 3);
-                    grid.add(toClassBox, 1, 3);
+                    grid.add(new Label("From: "), 0, 1);
+                    grid.add(fromClassBox, 1, 1);
+                    grid.add(new Label("To: "), 0, 2);
+                    grid.add(toClassBox, 1, 2);
                     dialog.getDialogPane().setContent(grid);
-
-                    toClassBox.setOnAction(event -> {
-                        msgBox.getItems().clear();
-                        String selectionX = toClassBox.getSelectionModel().getSelectedItem();
-                        String classIDX = selectionX.split("\\[", 2)[1].split("]", 2)[0];
-                        SequenceDiagramController.populateMethodsContentBox(this.dataModel, msgBox, classIDX);
-
-                        BooleanBinding validName = Bindings.createBooleanBinding(() -> msgBox.getItems().get(0).equals("<no methods>"));
-                        dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validName);
-                    });
 
                     dialog.setResultConverter(dialogButton -> {
                         if (dialogButton == createButtonType) {
                             ArrayList<Pair<String, String>> x = new ArrayList<>();
                             x.add(fromClassID.get(fromClassBox.getSelectionModel().getSelectedIndex()));
                             x.add(toClassID.get(toClassBox.getSelectionModel().getSelectedIndex()));
-                            x.add(new Pair<>(msgBox.getSelectionModel().getSelectedItem(), ""));
                             return x;
                         }
                         return null;
@@ -741,7 +727,7 @@ public class PropertiesView extends VBox {
                         try {
                             Pair<String, String> newSender = data.get(0);
                             Pair<String, String> newReceiver = data.get(1);
-                            this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver, data.get(2).getKey()));
+                            this.dataModel.executeCommand(new EditSequenceDiagramMessageParticipantsCommand(this.parentIntID, this.intID, newSender, newReceiver));
                             this.updatedCallback.onUpdated();
                         } catch (Exception ex) {
                             this.showErrorMessage("Unable to set new participants for selected message", ex.getLocalizedMessage());

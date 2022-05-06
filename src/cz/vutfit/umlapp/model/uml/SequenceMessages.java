@@ -35,7 +35,6 @@ public class SequenceMessages {
         this.fromObject = new Pair<>(null, null);
         this.toObject = new Pair<>(null, null);
         this.type = EMessageType.SYNC;
-        checkTypeContent();
     }
 
     public int getID() {
@@ -72,7 +71,6 @@ public class SequenceMessages {
 
     public void setContent(String x) {
         this.content = x;
-        checkTypeContent();
     }
 
     public void setParticipants(Pair<String, String> objectFrom, Pair<String, String> objectTo) {
@@ -82,13 +80,5 @@ public class SequenceMessages {
 
     public void setType(EMessageType x) {
         this.type = x;
-        checkTypeContent();
-    }
-
-    public void checkTypeContent() {
-        if (this.type == EMessageType.NEW_OBJECT)
-            this.content = "<<create>> " + this.content;
-        else if (this.type == EMessageType.RELEASE_OBJECT)
-            this.content = "<<destroy>> " + this.content;
     }
 }

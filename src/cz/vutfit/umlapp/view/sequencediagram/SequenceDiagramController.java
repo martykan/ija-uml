@@ -387,7 +387,6 @@ public class SequenceDiagramController extends MainController {
             grid.setVgap(10);
             grid.setPadding(new Insets(20, 150, 10, 10));
 
-
             ChoiceBox<String> classBox = new ChoiceBox<>();
             for (ClassDiagram x : this.dataModel.getData().getClasses()) {
                 classBox.getItems().add(x.getName());
@@ -616,14 +615,19 @@ public class SequenceDiagramController extends MainController {
                 populateMethodsContentBox(this.dataModel, methodsContentBox, classIDX);
             });
             msgType.setOnAction(event -> {
-                boolean isReturnMessage = msgType.getSelectionModel().getSelectedItem().equals("Return message");
+                EMessageType messageType = EMessageType.fromString(msgType.getSelectionModel().getSelectedItem());
+                boolean isReturnMessage = messageType == EMessageType.RETURN || messageType == EMessageType.NEW_OBJECT || messageType == EMessageType.RELEASE_OBJECT;
                 returnMessageText.setVisible(isReturnMessage);
                 argumentsLabel.setVisible(!isReturnMessage);
                 arguments.setVisible(!isReturnMessage);
+                if (messageType == EMessageType.NEW_OBJECT) {
+                    returnMessageText.setText("<<create>>");
+                } else if (messageType == EMessageType.RELEASE_OBJECT) {
+                    returnMessageText.setText("<<destroy>>");
+                }
             });
 
             BooleanBinding validation = Bindings.createBooleanBinding(() -> {
-                System.out.println("Binding called");
                 if (returnMessageText.isVisible()) {
                     return returnMessageText.getText().equals("");
                 }
