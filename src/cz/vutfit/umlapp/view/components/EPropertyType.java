@@ -5,6 +5,9 @@
 
 package cz.vutfit.umlapp.view.components;
 
+/**
+ *  Type of properties in propetiesView (used for binding actions)
+ */
 public enum EPropertyType {
     CLASS,
 

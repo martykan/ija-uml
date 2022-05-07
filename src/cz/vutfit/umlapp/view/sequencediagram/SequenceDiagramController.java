@@ -65,6 +65,9 @@ public class SequenceDiagramController extends MainController {
     private final double spaceWidth = 210;
     private final double spaceHeight = 40;
 
+    /**
+     * Listens to currently selected item in treeView: objects
+     */
     final ChangeListener<TreeItem<TreeViewDataHolder>> handleObjectSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedClass = newItem.getValue().getSequenceObject().getObjectClassName();
@@ -83,6 +86,9 @@ public class SequenceDiagramController extends MainController {
         boxClassOptions.setVisible(this.selectedClass != null);
     };
 
+    /**
+     * Listens to currently selected item in treeView: messages
+     */
     final ChangeListener<TreeItem<TreeViewDataHolder>> handleMessageSelection = (observableValue, oldItem, newItem) -> {
         if (newItem != null) {
             this.selectedMessage = newItem.getValue().getSequenceMessage().getContent();
@@ -101,6 +107,9 @@ public class SequenceDiagramController extends MainController {
         boxMessageOptions.setVisible(this.selectedMessage != null);
     };
 
+    /**
+     * Initializes UI for Sequence Diagram
+     */
     @Override
     public void init(ModelFactory modelFactory, ViewHandler viewHandler) {
         super.init(modelFactory, viewHandler);
@@ -372,6 +381,9 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
+    /**
+     *  Add new Object - Class Instance
+     */
     public void handleAddClass() {
         try {
             // Create the custom dialog.
@@ -453,6 +465,9 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
+    /**
+     *  If no class in class diagram present when adding new object, shows this window
+     */
     public void addClassToClassDiagram() {
         try {
             TextInputDialog dialog = new TextInputDialog("");
@@ -740,6 +755,9 @@ public class SequenceDiagramController extends MainController {
         }
     }
 
+    /**
+     *  Handling and showing proper data & info depending on treeView selection
+     */
     public void handleProperties() {
         try {
             propertiesView.setDataModel(this.dataModel);

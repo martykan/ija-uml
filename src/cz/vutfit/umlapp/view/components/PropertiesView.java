@@ -82,6 +82,9 @@ public class PropertiesView extends VBox {
         this.groupType = EPropertyType.EMPTY;
     }
 
+    /**
+     *  Sets type of properties for setting bind actions
+     */
     public void setGroupType(EPropertyType type) {
         this.groupType = type;
     }
@@ -98,6 +101,10 @@ public class PropertiesView extends VBox {
         this.messagesTreeView = x;
     }
 
+    /**
+     * Sets identificator of current element, can be String or Int
+     * @param ID id
+     */
     public void setID(int ID) {
         this.intID = ID;
     }
@@ -106,8 +113,16 @@ public class PropertiesView extends VBox {
         this.stringID = ID;
     }
 
+    /**
+     * Sets identificator of parent element, can be only int
+     * @param ID id
+     */
     public void setParentID(int ID) { this.parentIntID = ID; }
 
+    /**
+     *  Calls bind function depending on which propertyType is set
+     *  Bind function then binds action when doubleclicking line in propertiesView (opens Window)
+     */
     private void bindPropertyActions(BorderPane line, Label prop, Label text) {
         switch (this.groupType) {
             case CLASS:
@@ -134,6 +149,7 @@ public class PropertiesView extends VBox {
                 break;
         }
     }
+
 
     private void bindClassActions(Label prop, Label text, BorderPane line) {
         if (prop.getText().equals("Class")) {

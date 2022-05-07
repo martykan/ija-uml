@@ -127,6 +127,9 @@ public class DataModel {
         this.activeDiagram = activeDiagram;
     }
 
+    /**
+     *  Checks that input file is in correct format by trying to invoke exception
+     */
     public boolean checkFile() {
         UMLFileData data = this.getData();
         ArrayList<ClassDiagram> c;

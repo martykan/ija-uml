@@ -71,6 +71,7 @@ public class WelcomeController implements IController {
     }
 
     /**
+     * Shows alert window witn error message
      * @param message
      */
     private void showErrorMessage(String message) {
