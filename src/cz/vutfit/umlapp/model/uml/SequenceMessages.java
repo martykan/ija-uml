@@ -8,7 +8,7 @@ package cz.vutfit.umlapp.model.uml;
 import javafx.util.Pair;
 
 public class SequenceMessages {
-    public final int ID;
+    public int ID;
     public String content;
 
     /**

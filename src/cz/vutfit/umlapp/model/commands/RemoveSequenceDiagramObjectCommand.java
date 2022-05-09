@@ -17,6 +17,7 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     private final String objectName;
     private final String className;
     private final ArrayList<SequenceMessages> removedMessages;
+    private int objIndex;
 
     public RemoveSequenceDiagramObjectCommand(int sequenceID, SequenceObjects sequenceObject) {
         this.sequenceID = sequenceID;
@@ -29,6 +30,7 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     public void execute(UMLFileData file) {
         ArrayList<Integer> removalIDs = new ArrayList<>();
         Pair<String, String> objectName = new Pair<>(this.className, this.objectName);
+        this.objIndex = file.getSequenceByID(this.sequenceID).getObjectIndex(this.className, this.objectName);
         for (SequenceMessages m : file.getSequenceByID(this.sequenceID).getMessages()) {
             if (m.getSender().equals(objectName) || m.getReceiver().equals(objectName)) {
                 removalIDs.add(m.getID());
@@ -47,7 +49,7 @@ public class RemoveSequenceDiagramObjectCommand implements ICommand {
     @Override
     public void undo(UMLFileData file) throws Exception {
         Pair<String, String> objectName = new Pair<>(this.className, this.objectName);
-        file.getSequenceByID(this.sequenceID).addObject(objectName);
+        file.getSequenceByID(this.sequenceID).addObjectToIndex(objectName, this.objIndex);
 
         for (SequenceMessages restore : this.removedMessages) {
             int newID = file.getSequenceByID(this.sequenceID).addMessage(restore.getContent());

@@ -75,6 +75,16 @@ public class SequenceDiagram {
         (this.objects).add(x);
     }
 
+    public void addObjectToIndex(Pair<String, String> classObjectName, int lastIndex) throws DuplicateObjectException {
+        SequenceObjects x = new SequenceObjects(classObjectName);
+        for (SequenceObjects a : this.objects) { // do not allow duplicates - same "name"'s
+            if (a.getClassName().equals(x.getClassName()) && a.getObjectName().equals(x.getObjectName())) {
+                throw new DuplicateObjectException();
+            }
+        }
+        (this.objects).add(lastIndex, x);
+    }
+
     // returns true if removed, false if not found
     public boolean removeObject(String className, String objectName) {
         for (int i = 0; i < (this.objects).size(); i++) {
@@ -115,6 +125,16 @@ public class SequenceDiagram {
         return null;
     }
 
+    public int getObjectIndex(String className, String objectName) {
+        int i = 0;
+        for (SequenceObjects x : this.objects) {
+            if (x.getClassName().equals(className) && x.getObjectName().equals(objectName))
+                return i;
+            i++;
+        }
+        return -1;
+    }
+
     public SequenceObjects getObjectByIndex(int index) {
         return this.getObjects().get(index);
     }
@@ -138,6 +158,27 @@ public class SequenceDiagram {
 
         SequenceMessages x = new SequenceMessages(id, content);
         (this.messages).add(x);
+        return id;
+    }
+
+    public int addMessageToIndex(String content, int lastIndex) {
+        int id = 0;
+        if (id != (this.messages).size()) {
+            int i = 0;
+            boolean found = false;
+            for (SequenceMessages c : this.messages) {
+                if (i != c.getID()) {
+                    id = i;
+                    found = true;
+                    break;
+                }
+                i++;
+            }
+            if (id == 0 && !found) id = (this.messages).size();
+        }
+        SequenceMessages x = new SequenceMessages(id, content);
+        (this.messages).add(lastIndex, x);
+
         return id;
     }
 

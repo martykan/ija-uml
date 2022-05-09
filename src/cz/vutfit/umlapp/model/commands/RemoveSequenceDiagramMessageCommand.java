@@ -13,6 +13,7 @@ import javafx.util.Pair;
 public class RemoveSequenceDiagramMessageCommand implements ICommand {
     private final int sequenceID;
     private final int msgIndex;
+    private int msgID;
     private String content;
     private EMessageType type;
     private Pair<String, String> senderName;
@@ -26,6 +27,7 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
     @Override
     public void execute(UMLFileData file) {
         int msgID = file.getSequenceByID(this.sequenceID).getMessageByIndex(this.msgIndex).getID();
+        this.msgID = msgID;
         this.content = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getContent();
         this.type = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getType();
         this.senderName = file.getSequenceByID(this.sequenceID).getMessageByID(msgID).getSender();
@@ -49,7 +51,7 @@ public class RemoveSequenceDiagramMessageCommand implements ICommand {
 
     @Override
     public void undo(UMLFileData file) {
-        int newID = file.getSequenceByID(this.sequenceID).addMessage(content);
+        int newID = file.getSequenceByID(this.sequenceID).addMessageToIndex(content, this.msgIndex);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setContent(this.content);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setType(this.type);
         file.getSequenceByID(this.sequenceID).getMessageByID(newID).setParticipants(this.senderName, this.receiverName);
