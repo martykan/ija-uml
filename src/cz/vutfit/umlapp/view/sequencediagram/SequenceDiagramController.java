@@ -646,7 +646,7 @@ public class SequenceDiagramController extends MainController {
                 if (returnMessageText.isVisible()) {
                     return returnMessageText.getText().equals("");
                 }
-                return methodsContentBox.getSelectionModel().getSelectedItem().equals("<no methods>");
+                return ( methodsContentBox.getSelectionModel().getSelectedItem() == null ? null : methodsContentBox.getSelectionModel().getSelectedItem().equals("<no methods>") );
             }, returnMessageText.visibleProperty(), returnMessageText.textProperty(), methodsContentBox.getSelectionModel().selectedItemProperty());
             dialog.getDialogPane().lookupButton(createButtonType).disableProperty().bind(validation);
 

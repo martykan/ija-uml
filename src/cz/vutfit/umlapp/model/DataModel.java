@@ -29,7 +29,7 @@ public class DataModel {
 
     private boolean savedFile = false;
     private ErrorCheckClass error;
-    public final String currentFileDataVersion = "20220505-002";
+    public final String currentFileDataVersion = "20220509-000";
 
     /**
      * Execute the given command and save it to history
