@@ -18,26 +18,32 @@ import java.util.Set;
  * Class for TreeViewItem used for working with TreeViews and its items
  */
 public class TreeViewItemModel {
-    public final TreeView<TreeViewDataHolder> view;
     /**
      * TreeView
      */
-    public TreeItem<TreeViewDataHolder> root;
-    /**
-     * Root of TreeView
-     */
-    public final EDataType itemType;
+    public final TreeView<TreeViewDataHolder> view;
     /**
      * Type of the TreeItem @see EDataType
      */
+    public final EDataType itemType;
+    /**
+     * Data model
+     */
     public final DataModel dataModel;
+    /**
+     * Root of TreeView
+     */
+    public TreeItem<TreeViewDataHolder> root;
+    /**
+     * Currently selected sequence diagram
+     */
     public SequenceDiagram selectedSequence;
 
     /**
      * Constructor
      *
-     * @param model
-     * @param view
+     * @param model    data model
+     * @param view     TreeView to use
      * @param itemType type of TreeItem
      * @see EDataType
      */
@@ -70,7 +76,11 @@ public class TreeViewItemModel {
                         classItem.getChildren().add(new TreeViewDataHolder(methods).getTreeItem());
                     }
                     for (Relationships relations : this.dataModel.getData().getRelationships()) {
-                        if (relations.getFromClassID() == classDiagram.getID() || relations.getToClassID() == classDiagram.getID()) {
+                        if (
+                                (relations.getFromClassID() == classDiagram.getID() || relations.getToClassID() == classDiagram.getID())
+                                        && dataModel.getData().getClassByID(relations.getFromClassID()) != null
+                                        && dataModel.getData().getClassByID(relations.getToClassID()) != null
+                        ) {
                             classItem.getChildren().add(new TreeViewDataHolder(relations, classDiagram).getTreeItem());
                         }
                     }
