@@ -1,1 +1,378 @@
-{"classDiagram":[{"id":0,"name":"Element","attribs":[{"name":"name","visibility":"PUBLIC","type":"String"}],"methods":[{"name":"Element(name:String)","visibility":"PUBLIC","type":"void"},{"name":"getName()","visibility":"PUBLIC","type":"String"},{"name":"rename(name:String)","visibility":"PUBLIC","type":"void"}],"seqdigs":[],"positionX":4920.0,"positionY":4660.0},{"id":1,"name":"UMLAttribute","attribs":[{"name":"type","visibility":"PUBLIC","type":"UMLClassifier"}],"methods":[{"name":"getType()","visibility":"PUBLIC","type":"UMLClassifier"}],"seqdigs":[],"positionX":4640.0,"positionY":4920.0},{"id":2,"name":"UMLClassifier","attribs":[],"methods":[{"name":"UMLClassifier(name:String)","visibility":"PUBLIC","type":"void"},{"name":"isUserDefined()","visibility":"PUBLIC","type":"boolean"}],"seqdigs":[],"positionX":4920.0,"positionY":4920.0},{"id":3,"name":"ClassDiagram","attribs":[{"name":"classes","visibility":"PUBLIC","type":"List\u003cUMLClassifier\u003e"}],"methods":[{"name":"createClass(name:String)","visibility":"PUBLIC","type":"UMLClass"},{"name":"classifierForName(name:String)","visibility":"PUBLIC","type":"UMLClassifier"}],"seqdigs":[],"positionX":5200.0,"positionY":4920.0},{"id":4,"name":"UMLClass","attribs":[{"name":"attributes","visibility":"PUBLIC","type":"List\u003cUMLAttributes\u003e"}],"methods":[{"name":"addAttribute(attr:UMLAttribute)","visibility":"PUBLIC","type":"boolean"},{"name":"getAttrPosition(attr:UMLAttribute)","visibility":"PUBLIC","type":"int"}],"seqdigs":[],"positionX":4920.0,"positionY":5080.0},{"id":5,"name":"Main","attribs":[],"methods":[],"seqdigs":[],"positionX":4640.0,"positionY":4540.0}],"sequenceDiagrams":[{"id":0,"name":"Sequence","objects":[{"className":"Main","objectName":"","active":true},{"className":"ClassDiagram","objectName":"","active":true},{"className":"UMLClass","objectName":"c1","active":true},{"className":"UMLAttribute","objectName":"a1","active":true}],"messages":[{"ID":0,"content":"createClass(\"c1\")","fromObject":{"key":"Main","value":""},"toObject":{"key":"ClassDiagram","value":""},"type":"ASYNC"},{"ID":1,"content":"\u003c\u003ccreate\u003e\u003e(\"c1\")","fromObject":{"key":"ClassDiagram","value":""},"toObject":{"key":"UMLClass","value":"c1"},"type":"NEW_OBJECT"},{"ID":2,"content":"c1","fromObject":{"key":"ClassDiagram","value":""},"toObject":{"key":"Main","value":""},"type":"RETURN"},{"ID":3,"content":"classifierForName(\"int\")","fromObject":{"key":"Main","value":""},"toObject":{"key":"ClassDiagram","value":""},"type":"SYNC"},{"ID":4,"content":"cInt","fromObject":{"key":"ClassDiagram","value":""},"toObject":{"key":"Main","value":""},"type":"RETURN"},{"ID":5,"content":"\u003c\u003ccreate\u003e\u003e(\"a1\", cInt)","fromObject":{"key":"Main","value":""},"toObject":{"key":"UMLAttribute","value":"a1"},"type":"NEW_OBJECT"},{"ID":6,"content":"addAttribute(a1)","fromObject":{"key":"Main","value":""},"toObject":{"key":"UMLClass","value":"c1"},"type":"ASYNC"},{"ID":7,"content":"true","fromObject":{"key":"UMLClass","value":"c1"},"toObject":{"key":"Main","value":""},"type":"RETURN"},{"ID":8,"content":"isAbstract()","fromObject":{"key":"Main","value":""},"toObject":{"key":"UMLAttribute","value":"a1"},"type":"ASYNC"},{"ID":9,"content":"false","fromObject":{"key":"UMLAttribute","value":"a1"},"toObject":{"key":"Main","value":""},"type":"RETURN"}]}],"relationships":[{"id":0,"fromId":0,"toId":1,"relationship":"GENERALIZATION","lineMidpoints":[{"x":5020.0,"y":4865.0,"hash":0},{"x":4740.0,"y":4865.0,"hash":0}]},{"id":1,"name":"","fromId":0,"toId":2,"relationship":"GENERALIZATION","lineMidpoints":[]},{"id":2,"fromId":0,"toId":3,"relationship":"GENERALIZATION","lineMidpoints":[{"x":5020.0,"y":4865.0,"hash":0},{"x":5300.0,"y":4865.0,"hash":0}]},{"id":3,"fromId":2,"toId":4,"relationship":"GENERALIZATION","lineMidpoints":[]},{"id":4,"fromId":2,"toId":1,"relationship":"ASSOCIATION","lineMidpoints":[]},{"id":5,"fromId":2,"toId":3,"relationship":"ASSOCIATION","lineMidpoints":[{"x":5200.0,"y":4975.0,"hash":0}]},{"id":6,"fromId":4,"toId":1,"relationship":"ASSOCIATION","lineMidpoints":[{"x":4740.0,"y":5145.0,"hash":0}]}],"dataVersion":"20220509-000"}
+{
+  "classDiagram": [
+    {
+      "id": 0,
+      "name": "Element",
+      "attribs": [
+        {
+          "name": "name",
+          "visibility": "PUBLIC",
+          "type": "String"
+        }
+      ],
+      "methods": [
+        {
+          "name": "Element(name:String)",
+          "visibility": "PUBLIC",
+          "type": "void"
+        },
+        {
+          "name": "getName()",
+          "visibility": "PUBLIC",
+          "type": "String"
+        },
+        {
+          "name": "rename(name:String)",
+          "visibility": "PUBLIC",
+          "type": "void"
+        }
+      ],
+      "positionX": 4920.0,
+      "positionY": 4660.0
+    },
+    {
+      "id": 1,
+      "name": "UMLAttribute",
+      "attribs": [
+        {
+          "name": "type",
+          "visibility": "PUBLIC",
+          "type": "UMLClassifier"
+        }
+      ],
+      "methods": [
+        {
+          "name": "getType()",
+          "visibility": "PUBLIC",
+          "type": "UMLClassifier"
+        }
+      ],
+      "positionX": 4640.0,
+      "positionY": 4920.0
+    },
+    {
+      "id": 2,
+      "name": "UMLClassifier",
+      "attribs": [],
+      "methods": [
+        {
+          "name": "UMLClassifier(name:String)",
+          "visibility": "PUBLIC",
+          "type": "void"
+        },
+        {
+          "name": "isUserDefined()",
+          "visibility": "PUBLIC",
+          "type": "boolean"
+        }
+      ],
+      "positionX": 4920.0,
+      "positionY": 4920.0
+    },
+    {
+      "id": 3,
+      "name": "ClassDiagram",
+      "attribs": [
+        {
+          "name": "classes",
+          "visibility": "PUBLIC",
+          "type": "List\u003cUMLClassifier\u003e"
+        }
+      ],
+      "methods": [
+        {
+          "name": "createClass(name:String)",
+          "visibility": "PUBLIC",
+          "type": "UMLClass"
+        },
+        {
+          "name": "classifierForName(name:String)",
+          "visibility": "PUBLIC",
+          "type": "UMLClassifier"
+        }
+      ],
+      "positionX": 5200.0,
+      "positionY": 4920.0
+    },
+    {
+      "id": 4,
+      "name": "UMLClass",
+      "attribs": [
+        {
+          "name": "attributes",
+          "visibility": "PUBLIC",
+          "type": "List\u003cUMLAttributes\u003e"
+        }
+      ],
+      "methods": [
+        {
+          "name": "addAttribute(attr:UMLAttribute)",
+          "visibility": "PUBLIC",
+          "type": "boolean"
+        },
+        {
+          "name": "getAttrPosition(attr:UMLAttribute)",
+          "visibility": "PUBLIC",
+          "type": "int"
+        }
+      ],
+      "positionX": 4920.0,
+      "positionY": 5080.0
+    },
+    {
+      "id": 5,
+      "name": "Main",
+      "attribs": [],
+      "methods": [],
+      "positionX": 4640.0,
+      "positionY": 4540.0
+    }
+  ],
+  "sequenceDiagrams": [
+    {
+      "id": 0,
+      "name": "Sequence",
+      "objects": [
+        {
+          "className": "Main",
+          "objectName": "",
+          "active": true
+        },
+        {
+          "className": "ClassDiagram",
+          "objectName": "",
+          "active": true
+        },
+        {
+          "className": "UMLClass",
+          "objectName": "c1",
+          "active": true
+        },
+        {
+          "className": "UMLAttribute",
+          "objectName": "a1",
+          "active": true
+        }
+      ],
+      "messages": [
+        {
+          "ID": 0,
+          "content": "createClass(\"c1\")",
+          "fromObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "toObject": {
+            "key": "ClassDiagram",
+            "value": ""
+          },
+          "type": "ASYNC"
+        },
+        {
+          "ID": 1,
+          "content": "\u003c\u003ccreate\u003e\u003e(\"c1\")",
+          "fromObject": {
+            "key": "ClassDiagram",
+            "value": ""
+          },
+          "toObject": {
+            "key": "UMLClass",
+            "value": "c1"
+          },
+          "type": "NEW_OBJECT"
+        },
+        {
+          "ID": 2,
+          "content": "c1",
+          "fromObject": {
+            "key": "ClassDiagram",
+            "value": ""
+          },
+          "toObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "type": "RETURN"
+        },
+        {
+          "ID": 3,
+          "content": "classifierForName(\"int\")",
+          "fromObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "toObject": {
+            "key": "ClassDiagram",
+            "value": ""
+          },
+          "type": "SYNC"
+        },
+        {
+          "ID": 4,
+          "content": "cInt",
+          "fromObject": {
+            "key": "ClassDiagram",
+            "value": ""
+          },
+          "toObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "type": "RETURN"
+        },
+        {
+          "ID": 5,
+          "content": "\u003c\u003ccreate\u003e\u003e(\"a1\", cInt)",
+          "fromObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "toObject": {
+            "key": "UMLAttribute",
+            "value": "a1"
+          },
+          "type": "NEW_OBJECT"
+        },
+        {
+          "ID": 6,
+          "content": "addAttribute(a1)",
+          "fromObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "toObject": {
+            "key": "UMLClass",
+            "value": "c1"
+          },
+          "type": "ASYNC"
+        },
+        {
+          "ID": 7,
+          "content": "true",
+          "fromObject": {
+            "key": "UMLClass",
+            "value": "c1"
+          },
+          "toObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "type": "RETURN"
+        },
+        {
+          "ID": 8,
+          "content": "isAbstract()",
+          "fromObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "toObject": {
+            "key": "UMLAttribute",
+            "value": "a1"
+          },
+          "type": "ASYNC"
+        },
+        {
+          "ID": 9,
+          "content": "false",
+          "fromObject": {
+            "key": "UMLAttribute",
+            "value": "a1"
+          },
+          "toObject": {
+            "key": "Main",
+            "value": ""
+          },
+          "type": "RETURN"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": 0,
+      "fromId": 0,
+      "toId": 1,
+      "relationship": "GENERALIZATION",
+      "lineMidpoints": [
+        {
+          "x": 5020.0,
+          "y": 4865.0,
+          "hash": 0
+        },
+        {
+          "x": 4740.0,
+          "y": 4865.0,
+          "hash": 0
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "",
+      "fromId": 0,
+      "toId": 2,
+      "relationship": "GENERALIZATION",
+      "lineMidpoints": []
+    },
+    {
+      "id": 2,
+      "fromId": 0,
+      "toId": 3,
+      "relationship": "GENERALIZATION",
+      "lineMidpoints": [
+        {
+          "x": 5020.0,
+          "y": 4865.0,
+          "hash": 0
+        },
+        {
+          "x": 5300.0,
+          "y": 4865.0,
+          "hash": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "fromId": 2,
+      "toId": 4,
+      "relationship": "GENERALIZATION",
+      "lineMidpoints": []
+    },
+    {
+      "id": 4,
+      "fromId": 2,
+      "toId": 1,
+      "relationship": "ASSOCIATION",
+      "lineMidpoints": []
+    },
+    {
+      "id": 5,
+      "fromId": 2,
+      "toId": 3,
+      "relationship": "ASSOCIATION",
+      "lineMidpoints": [
+        {
+          "x": 5200.0,
+          "y": 4975.0,
+          "hash": 0
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "fromId": 4,
+      "toId": 1,
+      "relationship": "ASSOCIATION",
+      "lineMidpoints": [
+        {
+          "x": 4740.0,
+          "y": 5145.0,
+          "hash": 0
+        }
+      ]
+    }
+  ],
+  "dataVersion": "20220509-000"
+}

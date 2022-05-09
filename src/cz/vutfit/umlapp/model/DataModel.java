@@ -6,6 +6,7 @@
 package cz.vutfit.umlapp.model;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import cz.vutfit.umlapp.model.commands.ICommand;
 import cz.vutfit.umlapp.model.errors.ErrorCheckClass;
@@ -99,7 +100,8 @@ public class DataModel {
      */
     public void saveFile() throws IOException {
         this.getData().dataVersion = this.currentFileDataVersion;
-        String serialized = new Gson().toJson(data);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String serialized = gson.toJson(data);
 
         var writer = new BufferedWriter(new FileWriter(file));
         writer.write(serialized);
