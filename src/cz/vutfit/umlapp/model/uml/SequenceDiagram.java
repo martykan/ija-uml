@@ -141,19 +141,9 @@ public class SequenceDiagram {
 
     /** Working with message list **/
     public int addMessage(String content) {
-        int id = 0;
-        if (id != (this.messages).size()) {
-            int i = 0;
-            boolean found = false;
-            for (SequenceMessages c : this.messages) {
-                if (i != c.getID()) {
-                    id = i;
-                    found = true;
-                    break;
-                }
-                i++;
-            }
-            if (id == 0 && !found) id = (this.messages).size();
+        int id = this.messages.size();
+        while(this.getMessageByID(id) != null) {
+            id++;
         }
 
         SequenceMessages x = new SequenceMessages(id, content);
@@ -162,19 +152,9 @@ public class SequenceDiagram {
     }
 
     public int addMessageToIndex(String content, int lastIndex) {
-        int id = 0;
-        if (id != (this.messages).size()) {
-            int i = 0;
-            boolean found = false;
-            for (SequenceMessages c : this.messages) {
-                if (i != c.getID()) {
-                    id = i;
-                    found = true;
-                    break;
-                }
-                i++;
-            }
-            if (id == 0 && !found) id = (this.messages).size();
+        int id = this.messages.size();
+        while(this.getMessageByID(id) != null) {
+            id++;
         }
         SequenceMessages x = new SequenceMessages(id, content);
         (this.messages).add(lastIndex, x);
